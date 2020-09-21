@@ -1,0 +1,16 @@
+{
+	"versions": [
+		"1.0.1-champagne", 
+		"1.1.1-cactus", 
+		"1.2.1-hagel", 
+		"1.3.2-cykeltur", 
+		"1.4.1-student", 
+		"1.5.1-midsommar", 
+		"1.6.2-hetta", 
+		"1.7.2-sommarregn", 
+		"1.8.1-semester", 
+		"1.9.0-master",
+		"1.10.0-537-master",
+		"1.10.0-543-master"
+	]
+}
