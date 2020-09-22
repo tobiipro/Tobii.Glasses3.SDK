@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
-using System.Windows;
+using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,8 +21,6 @@ namespace G3SDK
             CardStateTranslations["busy"] = CardState.Busy;
             CardStateTranslations["error"] = CardState.Error;
         }
-
-
 
         public static G3GazeData ParseGazeFromJson(string json)
         {
@@ -106,10 +104,10 @@ namespace G3SDK
             return new G3ImuData(TimeSpan.FromSeconds(timeStamp), accel, anglvel, magn);
         }
 
-        private static Vector3D ParseV3(JToken jToken)
+        private static Vector3 ParseV3(JToken jToken)
         {
             if (jToken == null)
-                return Vector3D.Invalid;
+                return Vector3Extensions.INVALID;
             return (jToken as JArray).Arr2Vector3();
         }
 
@@ -285,5 +283,4 @@ namespace G3SDK
             return ParseEnum(arg, Ipv4Method.unknown);
         }
     }
-
 }

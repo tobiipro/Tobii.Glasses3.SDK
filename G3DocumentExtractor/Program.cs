@@ -90,6 +90,7 @@ namespace G3DocumentExtractor
 
             var fileName = (await g3Api.System.Version).Replace('+', '-') + ".json";
             File.WriteAllText(fileName, json);
+            Console.WriteLine("Done... Press Enter");
             Console.ReadLine();
         }
 

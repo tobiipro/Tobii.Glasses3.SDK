@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Windows.Forms;
+using System.Numerics;
 using static System.Single;
 
 namespace G3SDK
@@ -55,8 +55,8 @@ namespace G3SDK
     public class G3Event
     {
         public TimeSpan TimeStamp { get; }
-        public string Tag{ get; }
-        public string Obj{ get; }
+        public string Tag { get; }
+        public string Obj { get; }
 
         public G3Event(TimeSpan timeStamp, string tag, string obj)
         {
@@ -69,18 +69,17 @@ namespace G3SDK
     public enum Direction
     {
         In,
-        Out 
+        Out
     }
-
 
     public class G3ImuData
     {
         public TimeSpan TimeStamp { get; }
-        public Vector3D Accelerometer { get; }
-        public Vector3D AngularVelocity { get; }
-        public Vector3D Magnetometer { get; }
+        public Vector3 Accelerometer { get; }
+        public Vector3 AngularVelocity { get; }
+        public Vector3 Magnetometer { get; }
 
-        public G3ImuData(TimeSpan timeStamp, Vector3D accelerometer, Vector3D angularVelocity, Vector3D magnetometer)
+        public G3ImuData(TimeSpan timeStamp, Vector3 accelerometer, Vector3 angularVelocity, Vector3 magnetometer)
         {
             TimeStamp = timeStamp;
             Accelerometer = accelerometer;
@@ -88,9 +87,10 @@ namespace G3SDK
             Magnetometer = magnetometer;
         }
     }
+
     public class G3GazeData
     {
-        public G3GazeData(TimeSpan timeStamp, Vector2D gaze2D, Vector3D gaze3D, EyeData leftEye, EyeData rightEye)
+        public G3GazeData(TimeSpan timeStamp, Vector2 gaze2D, Vector3 gaze3D, EyeData leftEye, EyeData rightEye)
         {
             TimeStamp = timeStamp;
             Gaze2D = gaze2D;
@@ -102,18 +102,18 @@ namespace G3SDK
         public TimeSpan TimeStamp { get; }
         public EyeData LeftEye { get; }
         public EyeData RightEye { get; }
-        public Vector2D Gaze2D { get; }
-        public Vector3D Gaze3D { get; }
+        public Vector2 Gaze2D { get; }
+        public Vector3 Gaze3D { get; }
         public class EyeData
         {
-            public EyeData(Vector3D gazeOrigin, Vector3D gazeDirection, float pupilDiameter)
+            public EyeData(Vector3 gazeOrigin, Vector3 gazeDirection, float pupilDiameter)
             {
                 GazeOrigin = gazeOrigin;
                 GazeDirection = gazeDirection;
                 PupilDiameter = pupilDiameter;
             }
-            public Vector3D GazeOrigin { get; }
-            public Vector3D GazeDirection { get; }
+            public Vector3 GazeOrigin { get; }
+            public Vector3 GazeDirection { get; }
             public float PupilDiameter { get; }
         }
     }
@@ -127,14 +127,10 @@ namespace G3SDK
 
         public static bool OffsetToZero(this List<G3SyncPortData> data)
         {
-            {
-                var start = data.First().TimeStamp;
-                for (int i = 0; i < data.Count; i++)
-                    data[i] = data[i].CloneWithTimestamp(data[i].TimeStamp - start);
-                return true;
-            }
-
-            return false;
+            var start = data.First().TimeStamp;
+            for (int i = 0; i < data.Count; i++)
+                data[i] = data[i].CloneWithTimestamp(data[i].TimeStamp - start);
+            return true;
         }
     }
 
@@ -162,7 +158,7 @@ namespace G3SDK
     [DebuggerDisplay("{TimeStamp} {Marker2D} {Marker3D}")]
     public class G3MarkerData
     {
-        public G3MarkerData(TimeSpan timeStamp, Vector2D marker2D, Vector3D marker3D)
+        public G3MarkerData(TimeSpan timeStamp, Vector2 marker2D, Vector3 marker3D)
         {
             TimeStamp = timeStamp;
             Marker2D = marker2D;
@@ -170,147 +166,47 @@ namespace G3SDK
         }
 
         public TimeSpan TimeStamp { get; }
-        public Vector2D Marker2D { get; }
-        public Vector3D Marker3D { get; }
-    }
-
-    public struct Vector2D
-    {
-        public Vector2D(float x, float y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public float X { get; }
-        public float Y { get; }
-        public bool IsValid => !IsNaN(X) && !IsNaN(Y);
-        public bool IsZero => Math.Abs(X) < Epsilon && Math.Abs(Y) < Epsilon;
-
-        public static Vector2D Invalid = new Vector2D(NaN, NaN);
-
-        public override string ToString()
-        {
-            return $"X={X} Y={Y}";
-        }
-
-        public float Dist(Vector2D other)
-        {
-            return (float)Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
-        }
-
-        public Vector2D Interpolate(Vector2D other, double factor)
-        {
-            return new Vector2D(
-                X.Interpolate(other.X, factor),
-                Y.Interpolate(other.Y, factor));
-        }
+        public Vector2 Marker2D { get; }
+        public Vector3 Marker3D { get; }
     }
 
     public static class FloatExtensions
     {
         public static float Interpolate(this float me, float other, double factor)
         {
-            return (float) (me + (other - me) * factor);
+            return (float)(me + (other - me) * factor);
         }
     }
-    public static class Vector2DExtensions
+
+    public static class Vector2Extensions
     {
-        public static Vector2D Average(this IEnumerable<Vector2D> points)
+        public static Vector2 INVALID = new Vector2(float.NaN, float.NaN);
+        public static Vector2 Average(this IEnumerable<Vector2> points)
         {
-            return new Vector2D(
+            return new Vector2(
                 points.Sum(p => p.X) / points.Count(),
                 points.Sum(p => p.Y) / points.Count()
             );
         }
-    }
-
-    public static class ArrayExtensions
-    {
-        public static Vector2D ToVector2D(this float[] arr)
+        public static bool IsValid(this Vector2 me) => !IsNaN(me.X) && !IsNaN(me.Y);
+        public static bool IsZero(this Vector2 me) => Math.Abs(me.X) < Epsilon && Math.Abs(me.Y) < Epsilon;
+        public static Vector2 Interpolate(this Vector2 me, Vector2 other, double factor)
         {
-            return arr == null ? Vector2D.Invalid : new Vector2D(arr[0], arr[1]);
-        }
-        public static Vector3D ToVector3D(this float[] arr)
-        {
-            return arr == null ? Vector3D.Invalid : new Vector3D(arr[0], arr[1], arr[2]);
+            return new Vector2(
+                me.X.Interpolate(other.X, factor),
+                me.Y.Interpolate(other.Y, factor));
         }
     }
 
-
-    public static class Vector3DExtensions
+    public static class Vector3Extensions
     {
-        public static Vector3D Average(this IEnumerable<Vector3D> points)
+        public static Vector3 INVALID = new Vector3(float.NaN, float.NaN, float.NaN);
+        public static bool IsValid(this Vector3 me) => !IsNaN(me.X) && !IsNaN(me.Y) && !IsNaN(me.Z);
+
+        public static double AngleInDegrees(this Vector3 me, Vector3 other)
         {
-            return new Vector3D(
-                points.Sum(p => p.X) / points.Count(),
-                points.Sum(p => p.Y) / points.Count(),
-                points.Sum(p => p.Z) / points.Count()
-            );
-        }
-    }
-    public struct Vector3D
-    {
-        public Vector3D(float x, float y, float z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-
-        public float X { get; }
-        public float Y { get; }
-        public float Z { get; }
-        public bool IsValid => !IsNaN(X) && !IsNaN(Y) && !IsNaN(Z);
-        public bool IsZero => Math.Abs(X) < Epsilon && Math.Abs(Y) < Epsilon && Math.Abs(Z) < Epsilon;
-
-        public override string ToString()
-        {
-            return $"X={X} Y={Y} Z={Z}";
-        }
-
-        public static Vector3D Invalid = new Vector3D(NaN, NaN, NaN);
-
-        public Vector3D Normalize()
-        {
-            var length = Length();
-            return new Vector3D(X / length, Y / length, Z / length);
-        }
-
-        public float Length()
-        {
-            var x = X;
-            var y = Y;
-            var z = Z;
-
-            // Computation of length can overflow/underflow easily because it 
-            // first computes squared length, so we first divide by
-            // the largest coefficient.
-            var maxCoordinate = Math.Max(Math.Abs(x), Math.Max(Math.Abs(y), Math.Abs(z)));
-
-            if (maxCoordinate.EqualByEpsilon(0.0f))
-            {
-                return 0;
-            }
-
-            x /= maxCoordinate;
-            y /= maxCoordinate;
-            z /= maxCoordinate;
-
-            return (float)Math.Sqrt((x * x) + (y * y) + (z * z)) * maxCoordinate;
-        }
-
-        public bool EqualsWithinEpsilon(Vector3D other, double epsilon)
-        {
-            return (Math.Abs(X - other.X) < epsilon)
-                   && (Math.Abs(Y - other.Y) < epsilon)
-                   && (Math.Abs(Z - other.Z) < epsilon);
-        }
-
-        public double AngleInDegrees(Vector3D other)
-        {
-            var normalized1 = this.Normalize();
-            var normalized2 = other.Normalize();
+            var normalized1 = Vector3.Normalize(me);
+            var normalized2 = Vector3.Normalize(other);
             return normalized1.AngleInDegreesToNormalized(normalized2);
         }
 
@@ -319,9 +215,9 @@ namespace G3SDK
         /// </summary>
         /// <param name="normalizedOther">The vector 2.</param>
         /// <returns>The angle between two points.</returns>
-        private double AngleInDegreesToNormalized(Vector3D normalizedOther)
+        private static double AngleInDegreesToNormalized(this Vector3 me, Vector3 normalizedOther)
         {
-            var ratio = DotProduct(normalizedOther);
+            var ratio = Vector3.Dot(me, normalizedOther);
 
             // The "straight forward" method of acos(u.v) has large precision
             // issues when the dot product is near +/-1.  This is due to the 
@@ -361,7 +257,7 @@ namespace G3SDK
             // The largest possible value of |u-v| occurs with perpendicular 
             // vectors and is sqrt(2)/2 which is well away from extreme slope
             // at +/-1. 
-            var length = Subtract(normalizedOther).Length();
+            var length = (me - normalizedOther).Length();
             var theta = 2.0 * Math.Asin(Math.Min(length / 2.0, 1.0));
             if (ratio < 0)
             {
@@ -370,33 +266,49 @@ namespace G3SDK
 
             return theta * (180.0 / Math.PI);
         }
-
-        public double DotProduct(Vector3D other)
+        public static Vector3 Average(this IEnumerable<Vector3> points)
         {
-            return (X * other.X) +
-                   (Y * other.Y) +
-                   (Z * other.Z);
+            return new Vector3(
+                points.Sum(p => p.X) / points.Count(),
+                points.Sum(p => p.Y) / points.Count(),
+                points.Sum(p => p.Z) / points.Count()
+            );
         }
 
-
-        public Vector3D Subtract(Vector3D other)
+        public static Vector3 Interpolate(this Vector3 me, Vector3 other, double factor)
         {
-            return new Vector3D(X - other.X, Y - other.Y, Z - other.Z);
+            return new Vector3(
+                me.X.Interpolate(other.X, factor),
+                me.Y.Interpolate(other.Y, factor),
+                me.Z.Interpolate(other.Z, factor));
         }
 
-        public Vector3D Average(Vector3D other)
+        public static Vector3 Average(this Vector3 me, Vector3 other)
         {
-            return new Vector3D(
-                (X + other.X) / 2,
-                (Y + other.Y) / 2,
-                (Z + other.Z) / 2);
+            return new Vector3(
+                (me.X + other.X) / 2,
+                (me.Y + other.Y) / 2,
+                (me.Z + other.Z) / 2);
         }
-        public Vector3D Interpolate(Vector3D other, double factor)
+
+        public static Vector3 Normalize(this Vector3 me)
         {
-            return new Vector3D(
-                X.Interpolate(other.X, factor),
-                Y.Interpolate(other.Y, factor),
-                Z.Interpolate(other.Z, factor));
+            return Vector3.Normalize(me);
+        }
+
+        public static bool IsZero(this Vector3 me) => Math.Abs(me.X) < Epsilon && Math.Abs(me.Y) < Epsilon && Math.Abs(me.Z) < Epsilon;
+
+    }
+
+    public static class ArrayExtensions
+    {
+        public static Vector2 ToVector2D(this float[] arr)
+        {
+            return arr == null ? Vector2Extensions.INVALID : new Vector2(arr[0], arr[1]);
+        }
+        public static Vector3 ToVector3D(this float[] arr)
+        {
+            return arr == null ? Vector3Extensions.INVALID : new Vector3(arr[0], arr[1], arr[2]);
         }
     }
 
@@ -404,7 +316,6 @@ namespace G3SDK
     {
         verbose, debug, info, warning, error
     }
-
 
     public class StorageState
     {
@@ -432,8 +343,8 @@ namespace G3SDK
         {
             return EqualByEpsilon(first, second, double.MinValue);
         }
-    } 
-    
+    }
+
     public static class FloatExtension
     {
         public static bool EqualByEpsilon(this float first, float second, float epsilon)
@@ -446,6 +357,4 @@ namespace G3SDK
             return EqualByEpsilon(first, second, MinValue);
         }
     }
-
-
 }

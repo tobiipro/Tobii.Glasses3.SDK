@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -392,22 +393,22 @@ namespace G3SDK
 
     public static class Utils
     {
-        public static Vector2D Arr2Vector2(this JArray arr)
+        public static Vector2 Arr2Vector2(this JArray arr)
         {
             if (arr == null || arr.Count == 0)
-                return Vector2D.Invalid;
+                return Vector2Extensions.INVALID;
             var x = Convert.ToSingle((arr[0] as JValue).Value);
             var y = Convert.ToSingle((arr[1] as JValue).Value);
-            return new Vector2D(x, y);
+            return new Vector2(x, y);
         }
-        public static Vector3D Arr2Vector3(this JArray arr)
+        public static Vector3 Arr2Vector3(this JArray arr)
         {
             if (arr == null || arr.Count == 0)
-                return Vector3D.Invalid;
+                return Vector3Extensions.INVALID;
             var x = Convert.ToSingle((arr[0] as JValue).Value);
             var y = Convert.ToSingle((arr[1] as JValue).Value);
             var z = Convert.ToSingle((arr[2] as JValue).Value);
-            return new Vector3D(x, y, z);
+            return new Vector3(x, y, z);
         }
 
     }

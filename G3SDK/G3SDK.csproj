@@ -2,22 +2,48 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyTitle>G3SDK</AssemblyTitle>
-    <Product>G3SDK</Product>
-    <Copyright>Copyright ©  2020</Copyright>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <LangVersion>8</LangVersion>
+    <Product>G3SDK.net</Product>
+    <Copyright>Copyright ©  2020-</Copyright>
+    <LangVersion>7.3</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>0.1.2.0</AssemblyVersion>
+    <FileVersion>0.1.2.0</FileVersion>
+    <Authors>Jonas Högström</Authors>
+    <Company>Tobii Pro AB</Company>
+    <PackageId>Tobii.Pro.G3.SDK.net</PackageId>
+    <Version>0.1.4.0</Version>
+    <PackageReleaseNotes>Initial release, only for internal use</PackageReleaseNotes>
+    <Description>.net wrapper for the Glasses 3 API.</Description>
+    <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/tobiipro/G3SDK.net</PackageProjectUrl>
+    <PackageTags>Tobii Pro Glasses 3, SDK</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <UserSecretsId>3b476473-242a-4270-a6ed-ccc20aad9e85</UserSecretsId>
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.*" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.*" />
+    <PackageReference Include="System.Net.Http" Version="4.*" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
+    <None Include="images\icon.png">
+      <Pack>True</Pack>
+      <PackagePath />
+    </None>
+    <None Include="License.txt">
+      <Pack>True</Pack>
+      <PackagePath />
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="tobii.pro.g3.sdk.net.nupkg" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
@@ -30,9 +56,11 @@
   <ItemGroup>
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="tobii-pro-sdk-license-agreement.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
