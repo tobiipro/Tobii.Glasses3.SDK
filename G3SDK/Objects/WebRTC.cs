@@ -52,16 +52,14 @@ namespace G3SDK
             private readonly RWProperty<bool> _iframeStream;
             private readonly RWProperty<string> _stunServer;
             private readonly RWProperty<string> _turnServer;
-            private readonly ROProperty<int> _gazeRate;
 
             public WebRTCSession(G3Api g3Api, string rootUrl, Guid guid): base(g3Api, $"{rootUrl}/{guid}")
             {
                 _keepAliveTimer = new Timer(SendKeepAliveTimerCallback);
-                Guid = guid;
                 _iframeStream = AddRWProperty_bool("iframe-stream");
                 _stunServer = AddRWProperty("stun-server");
                 _turnServer = AddRWProperty("turn-server");
-                _gazeRate = AddROProperty("gaze-rate", s => int.Parse(s));
+                Guid = guid;
                 Gaze = AddSignal("gaze", ParserHelpers.SignalToGaze);
                 Event = AddSignal("event", ParserHelpers.SignalToEvent);
                 Imu = AddSignal("imu", ParserHelpers.SignalToIMU);
@@ -83,8 +81,9 @@ namespace G3SDK
             {
                 return _stunServer.Set(value);
             }
-            public Task<int> GazeRate => _gazeRate.Value();
+
             public Task<string> TurnServer => _turnServer.Value();
+
             public Task<bool> SetTurnServer(string value)
             {
                 return _turnServer.Set(value);
@@ -142,12 +141,6 @@ namespace G3SDK
             {
                 return await G3Api.ExecuteCommandBool(Path, "send-event", LogLevel.info, tag, obj);
             }
-
-            public async Task<bool> Force50hz(bool value)
-            {
-                return await G3Api.ExecuteCommandBool(Path, "send-event", LogLevel.info, value);
-            }
-
         }
     }
 

@@ -92,7 +92,6 @@ namespace G3SDK
                     _wsConnectTask = connect.ContinueWith(OnConnect, _cancellationToken);
                 }
             }
-
             return _wsConnectTask;
         }
 
