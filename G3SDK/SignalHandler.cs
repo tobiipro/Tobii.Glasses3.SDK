@@ -91,6 +91,7 @@ namespace G3SDK
                     y[_requestId] = this;
                 }
             }
+
             public string SignalName { get; }
 
             public string SignalPath => $"{_path}:{SignalName}";

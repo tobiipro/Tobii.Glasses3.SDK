@@ -98,9 +98,9 @@ namespace G3SDK
 
         public static G3ImuData ParseImuData(JObject data, float timeStamp)
         {
-            var anglvel = ParseV3(data["anglvel"]);
-            var accel = ParseV3(data["accel"]);
-            var magn = ParseV3(data["magn"]);
+            var anglvel = ParseV3(data["gyroscope"]);
+            var accel = ParseV3(data["accelerometer"]);
+            var magn = ParseV3(data["magnetometer"]);
             return new G3ImuData(TimeSpan.FromSeconds(timeStamp), accel, anglvel, magn);
         }
 
