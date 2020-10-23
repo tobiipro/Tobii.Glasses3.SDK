@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -24,9 +25,9 @@ namespace G3SDK
     {
         private readonly G3Api _api;
 
-        internal readonly Dictionary<long, ISignal> _signalByRequestId = new Dictionary<long, ISignal>();
-        internal readonly Dictionary<long, ISignal> _signalBySignalId = new Dictionary<long, ISignal>();
-        internal readonly Dictionary<string, ISignal> _signalBySignalPath = new Dictionary<string, ISignal>();
+        internal readonly ConcurrentDictionary<long, ISignal> _signalByRequestId = new ConcurrentDictionary<long, ISignal>();
+        internal readonly ConcurrentDictionary<long, ISignal> _signalBySignalId = new ConcurrentDictionary<long, ISignal>();
+        internal readonly ConcurrentDictionary<string, ISignal> _signalBySignalPath = new ConcurrentDictionary<string, ISignal>();
 
         public SignalHandler(G3Api api)
         {
@@ -86,9 +87,7 @@ namespace G3SDK
                 lock (_lock)
                 {
                     _requestId = requestId;
-                    var x = _signalHandler;
-                    var y = x._signalByRequestId;
-                    y[_requestId] = this;
+                    _signalHandler.SetSignalByRequestId(_requestId, this);
                 }
             }
 
@@ -171,20 +170,26 @@ namespace G3SDK
             }
         }
 
+        private void SetSignalByRequestId<T>(long requestId, Signal<T> signal)
+        {
+            _signalByRequestId[requestId] = signal;
+        }
+
         private void StopSignal(string path, long signalId, long requestId)
         {
             SendToWebSocket(path, Method.POST, signalId);
-            _signalByRequestId.Remove(requestId);
-            _signalBySignalId.Remove(signalId);
+            _signalByRequestId.TryRemove(requestId, out var signal);
+            _signalBySignalId.TryRemove(signalId, out signal);
         }
 
         public bool HandleMessage(WebSockMsg msg, int size)
         {
-            if (msg.id.HasValue && _signalByRequestId.TryGetValue(msg.id.Value, out var signal))
+            if (msg.id.HasValue && _signalByRequestId.TryGetValue(msg.id.Value, out var signal) && msg.body != null)
             {
                 signal.HandleResponse(msg.body);
                 return true;
             }
+
             if (msg.signal.HasValue && _signalBySignalId.TryGetValue(msg.signal.Value, out signal))
             {
                 signal.HandleSignal(msg.body);

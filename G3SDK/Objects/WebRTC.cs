@@ -52,6 +52,7 @@ namespace G3SDK
             private readonly RWProperty<bool> _iframeStream;
             private readonly RWProperty<string> _stunServer;
             private readonly RWProperty<string> _turnServer;
+            private readonly ROProperty<int> _currentGazeFrequency;
 
             public WebRTCSession(G3Api g3Api, string rootUrl, Guid guid): base(g3Api, $"{rootUrl}/{guid}")
             {
@@ -59,6 +60,7 @@ namespace G3SDK
                 _iframeStream = AddRWProperty_bool("iframe-stream");
                 _stunServer = AddRWProperty("stun-server");
                 _turnServer = AddRWProperty("turn-server");
+                _currentGazeFrequency = AddROProperty("current-gaze-frequency", int.Parse);
                 Guid = guid;
                 Gaze = AddSignal("gaze", ParserHelpers.SignalToGaze);
                 Event = AddSignal("event", ParserHelpers.SignalToEvent);
@@ -88,6 +90,8 @@ namespace G3SDK
             {
                 return _turnServer.Set(value);
             }
+
+            public Task<int> CurrentGazeFrequency => _currentGazeFrequency.Value();
 
             public Guid Guid { get; }
 

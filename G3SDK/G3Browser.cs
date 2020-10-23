@@ -12,9 +12,10 @@ namespace G3SDK
             var res = new List<G3Api>();
             foreach (var host in results)
             {
-                var address = host.DisplayName + ".local";
-                address = host.IPAddress;
-                res.Add(new G3Api(address));
+                if (host.IPAddress != null)
+                {
+                    res.Add(new G3Api(host.IPAddress));
+                }
             }
 
             return res;

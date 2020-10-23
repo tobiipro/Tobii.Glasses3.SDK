@@ -45,6 +45,7 @@ namespace G3SDK
             Upgrade = new Upgrade(this);
             Network = new Network(this);
             Rudimentary = new Rudimentary(this);
+            Settings = new Settings(this);
         }
 
         private void ReconnectWebSock()
@@ -58,6 +59,8 @@ namespace G3SDK
             _ws.Options.SetBuffer(WSBUFFERSIZE, WSBUFFERSIZE);
             EnsureConnected();
         }
+
+        public Settings Settings { get; }
 
         public Rudimentary Rudimentary { get; }
 
@@ -98,7 +101,17 @@ namespace G3SDK
         public async Task Disconnect()
         {
             _receiveTokenSource.Cancel();
-            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Just closing...", CancellationToken.None);
+            await Task.Delay(20, CancellationToken.None);
+            if (_ws.State == WebSocketState.Open)
+            {
+                try
+                {
+                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Just closing...", CancellationToken.None);
+                }
+                catch
+                {
+                }
+            }
             _wsConnectTask = null;
         }
 
@@ -128,23 +141,28 @@ namespace G3SDK
                 {
                     rcvResult = await _ws.ReceiveAsync(rcvBuffer, _receiveTokenSource.Token);
                 }
+                catch (TaskCanceledException)
+                {
+                    Log(LogLevel.info, $"Websocket cancelled");
+                    break;
+                }
                 catch (WebSocketException e)
                 {
-                    Log(LogLevel.error, $"WebSocketException: {e.Message}");
+                    Log(LogLevel.error, $"WebSocketException, trying to reconnect: {e.Message}");
                     ReconnectWebSock();
                     await EnsureConnected();
                     buffers.Clear();
                     receivedBytes = 0;
-                    return;
+                    continue;
                 }
                 catch (SocketException e)
                 {
-                    Log(LogLevel.error, $"SocketException: {e.Message}");
+                    Log(LogLevel.error, $"SocketException, trying to reconnect: {e.Message}");
                     ReconnectWebSock();
                     await EnsureConnected();
                     buffers.Clear();
                     receivedBytes = 0;
-                    return;
+                    continue;
                 }
 
                 if (rcvResult.MessageType == WebSocketMessageType.Binary)

@@ -17,6 +17,7 @@ namespace G3SDK
         private readonly ROProperty<int> _validGazeSamples;
         private readonly ROProperty<int> _gazeSamples;
         private readonly ROProperty _timezone;
+        private readonly ROProperty<bool> _gazeOverlay;
 
         public Recording(G3Api g3api, string parentUrl, Guid uuid): base(g3api, $"{parentUrl}/{uuid}")
         {
@@ -28,6 +29,8 @@ namespace G3SDK
             _gazeSamples = AddROProperty("gaze-samples", int.Parse);
             _validGazeSamples = AddROProperty("valid-gaze-samples", int.Parse);
             _timezone = AddROProperty("timezone");
+            _gazeOverlay = AddROProperty("gaze-overlay", bool.Parse);
+
 
             _httpPath = AddROProperty("http-path");
             _rtspPath = AddROProperty("rtsp-path");
@@ -37,6 +40,7 @@ namespace G3SDK
         public Task<string> Folder => _folder.GetString();
         public Task<string> VisibleName => _visibleName.Value();
         public Task<string> TimeZone => _timezone.GetString();
+        public Task<bool> GazeOverlay => _gazeOverlay.Value();
 
         public Task<bool> SetVisibleName(string value)
         {

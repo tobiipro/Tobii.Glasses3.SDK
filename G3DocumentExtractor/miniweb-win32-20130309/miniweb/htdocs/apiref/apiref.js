@@ -1,7 +1,7 @@
 function addVersionsToCombo(versionSelect, versions)
 {
   for (var i = 0; i < versions.length; i++) {
-    var option = document.createElement('option');
+    var option = document.createElement("option");
     option.text = versions[i];
 //    $(option).prop('selected', true)
     versionSelect.append(option);
@@ -10,7 +10,7 @@ function addVersionsToCombo(versionSelect, versions)
 }
 
 function loadVersions(docVersion, compVersion, div) {
-  $.getJSON('doc-index.json', function(data) {
+  $.getJSON("doc-index.json", function(data, s, xhr) {
     addVersionsToCombo(docVersion, data.versions)
     addVersionsToCombo(compVersion, data.versions)
     var last = data.versions[data.versions.length-1];
@@ -23,8 +23,8 @@ function loadVersions(docVersion, compVersion, div) {
 
 function loadDocumentation(docVersion, compVersion, div) {
   $(div).empty();
-  $.getJSON(docVersion+'.json', function(docData) {
-    $.getJSON(compVersion+'.json', function(compData) {
+  $.getJSON(docVersion+".json", function(docData) {
+    $.getJSON(compVersion+".json", function(compData) {
       div.append(createTextDiv("header", "Documentation for Tobii Pro Glasses 3"));
       div.append(createTextDiv("header", "Firmware version " + docVersion));
       $.each(docData, function(key, value) {

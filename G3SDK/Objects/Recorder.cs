@@ -16,6 +16,9 @@ namespace G3SDK
         private readonly ROProperty<int> _gazeSamples;
         private readonly ROProperty<int> _validGazeSamples;
         private readonly ROProperty _timezone;
+        private readonly ROProperty<int> _currentGazeFrequency;
+        private readonly ROProperty<bool> _gazeOverlay;
+
 
         public Recorder(G3Api g3Api): base(g3Api, "recorder")
         {
@@ -29,6 +32,9 @@ namespace G3SDK
             _validGazeSamples = AddROProperty("valid-gaze-samples", int.Parse);
             _created = AddROProperty("created", ParserHelpers.ParseDateOptional);
             _remainingTime = AddROProperty("remaining-time", ParserHelpers.ParseTimeSpan);
+            _currentGazeFrequency = AddROProperty("current-gaze-frequency", int.Parse);
+            _gazeOverlay = AddROProperty("gaze-overlay", bool.Parse);
+
 
             Started = AddSignal("started", ConvertGuid);
             Stopped = AddSignal("stopped", ConvertString);
@@ -74,6 +80,9 @@ namespace G3SDK
 
         #region Properties
         public Task<string> Folder => _folder.Value();
+
+        public Task<bool> GazeOverlay => _gazeOverlay.Value();
+
         public Task<string> TimeZone => _timezone.GetString();
         
         public Task<bool> SetFolder(string value)
@@ -100,6 +109,9 @@ namespace G3SDK
         public Task<TimeSpan?> Duration => _duration.Value();
         public Task<TimeSpan> RemainingTime => _remainingTime.Value();
         public Task<DateTime?> Created => _created.Value();
+
+        public Task<int> CurrentGazeFrequency => _currentGazeFrequency.Value();
+
         #endregion
 
         public async Task<bool> MetaInsert(string key, string value)

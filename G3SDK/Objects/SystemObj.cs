@@ -59,5 +59,10 @@ namespace G3SDK
         {
             return G3Api.ExecuteCommandBool(Path, "set-timezone", LogLevel.info, tz);
         }
+
+        public Task<int[]> AvailableGazeFrequencies()
+        {
+            return G3Api.ExecuteCommand<int[]>(Path, "available-gaze-frequencies", LogLevel.info);
+        }
     }
 }

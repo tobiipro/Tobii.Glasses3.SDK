@@ -159,11 +159,15 @@ namespace G3SDK
             var version = await _api.System.Version;
             var tz = await _api.System.TimeZone;
             var time = await _api.System.Time;
+            var freqs = await _api.System.AvailableGazeFrequencies();
+
             Assert.That(ruSerial, Is.Not.Empty);
             Assert.That(huSerial, Is.Not.Empty);
             Assert.That(version, Is.Not.Empty);
             Assert.That(tz, Is.Not.Empty);
             Assert.That(time, Is.GreaterThan(new DateTime(2020, 01, 01)));
+            Assert.That(freqs, Is.Not.Empty);
+            Assert.That(freqs, Has.Member(50));
         }
 
         [Test]
@@ -172,6 +176,8 @@ namespace G3SDK
             await EnsureApi();
             var session = await _api.WebRTC.Create();
             await session.SetIframeStream(true);
+            // this test fails if no delay is added (FW 1.12.0 build 620)
+            //await Task.Delay(500);
             await _api.WebRTC.Delete(session);
         }
 
@@ -188,11 +194,14 @@ namespace G3SDK
             var gazeSamples = await _api.Recorder.GazeSamples;
             var validGazeSamples = await _api.Recorder.ValidGazeSamples;
             var remainingTime = await _api.Recorder.RemainingTime;
+            var currentGazeFreq = await _api.Recorder.CurrentGazeFrequency;
+
             Assert.That(gazeSamples, Is.GreaterThanOrEqualTo(-1));
             Assert.That(validGazeSamples, Is.GreaterThanOrEqualTo(-1));
             Assert.That(remainingTime.TotalSeconds, Is.Not.Negative);
             Assert.That(visibleName, Is.Not.Empty);
             Assert.That(timeZone, Is.Not.Empty);
+            Assert.That(currentGazeFreq, Is.EqualTo(0));
         }
 
         private class payload
@@ -224,14 +233,16 @@ namespace G3SDK
 
             Thread.Sleep(500);
 
+            Assert.That(eventCount, Is.EqualTo(1));
+
             var sample = await _api.Rudimentary.EventSample;
+            Assert.That(sample, Is.Not.Null, "no event-sample");
             Assert.That(sample.Tag, Is.EqualTo("tag1"));
             var sampleObj = JsonConvert.DeserializeObject<payload>(sample.Obj);
             Assert.That(sampleObj.num, Is.EqualTo(123));
             Assert.That(sampleObj.str, Is.EqualTo("abc"));
 
             Thread.Sleep(1000);
-            Assert.That(eventCount, Is.EqualTo(1));
             token.Dispose();
 
 
@@ -276,6 +287,7 @@ namespace G3SDK
 
             await _api.Calibrate.ValidateApi(warnings);
             await _api.Rudimentary.ValidateApi(warnings);
+            await _api.Settings.ValidateApi(warnings);
             foreach (var w in warnings)
                 Console.WriteLine(w);
             Assert.IsEmpty(warnings, $"Api warnings: " +
@@ -319,6 +331,93 @@ namespace G3SDK
             await _api.Recorder.Cancel();
             var inProgress = await _api.Recorder.RecordingInProgress();
             Assert.False(inProgress, "Failed to cancel recording");
+        }
+
+        [Test]
+        public async Task CanManipulateGazeFrequency()
+        {
+            await EnsureApi();
+            await EnsureSDCard();
+            var signals = new System.Collections.Generic.List<string>();
+
+            // verify gaze-frequency
+            var token = await _api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+
+            var res = await _api.Settings.SetGazeFrequency(GazeFrequency.Default);
+            Assert.True(res, "unable to set gaze-frequency to default");
+            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Default).After(200, 50));
+
+            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            signals.Clear();
+
+            res = await _api.Settings.SetGazeFrequency(GazeFrequency.Freq100hz);
+            Assert.True(res, "unable to set gaze-frequency to 100hz");
+            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq100hz).After(200, 50));
+            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            signals.Clear();
+
+            res = await _api.Settings.SetGazeFrequency(GazeFrequency.Freq50hz);
+            Assert.True(res, "unable to set gaze-frequency to 50hz");
+            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq50hz).After(200, 50));
+            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            signals.Clear();
+            token.Dispose();
+        }
+
+
+        [Test]
+        public async Task CanManupulateGazeOverlay()
+        {
+            await EnsureApi();
+            await EnsureSDCard();
+            var signals = new System.Collections.Generic.List<string>();
+
+            // verify gazeoverlay
+            var token = await _api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+
+            var res = await _api.Settings.SetGazeOverlay(GazeOverlay.Default);
+            Assert.True(res, "unable to set gaze-overlay, to default");
+
+            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Default).After(200, 50));
+
+            Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
+            signals.Clear();
+
+            res = await _api.Settings.SetGazeOverlay(GazeOverlay.On);
+            Assert.True(res, "unable to set gaze-overlay to on");
+
+            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.On).After(200, 50));
+            Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
+
+
+            await _api.Recorder.Start();
+            Assert.True (await _api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            var rec1 = await _api.Recorder.UUID;
+            await _api.Recorder.Stop();
+
+
+            signals.Clear();
+
+            res = await _api.Settings.SetGazeOverlay(GazeOverlay.Off);
+            Assert.True(res, "unable to set gaze-overlay to off");
+
+            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Off).After(200, 50));
+            Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
+
+            await _api.Recorder.Start();
+            Assert.False(await _api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            var rec2 = await _api.Recorder.UUID;
+            await _api.Recorder.Stop();
+
+            signals.Clear();
+
+            var recs = await _api.Recordings.Children();
+            Assert.True(await recs.First(r=>r.UUID == rec1).GazeOverlay);
+            Assert.False(await recs.First(r=>r.UUID == rec2).GazeOverlay);
+
+
+
+            token.Dispose();
         }
 
         [Test]
@@ -366,6 +465,9 @@ namespace G3SDK
             Assert.True(start, "Failed to start recording");
             Assert.That(() => startedCount, Is.EqualTo(1).After(1000), "start signal not received");
             Thread.Sleep(1000);
+
+            var currentGazeFrequency = await _api.Recorder.CurrentGazeFrequency;
+
             var duration1 = await _api.Recorder.Duration;
             var gazeSamples = await _api.Recorder.GazeSamples;
             var validGazeSamples = await _api.Recorder.ValidGazeSamples;
@@ -373,6 +475,8 @@ namespace G3SDK
             var duration2 = await _api.Recorder.Duration;
             var gazeSamples2 = await _api.Recorder.GazeSamples;
             var validGazeSamples2 = await _api.Recorder.ValidGazeSamples;
+
+            Assert.That(currentGazeFrequency, Is.GreaterThan(0));
             Assert.That(duration2, Is.GreaterThan(duration1), "unexpected duration after 1 s");
             Assert.That(gazeSamples2, Is.GreaterThan(gazeSamples), "unexpected gazesamples after 1 s");
             Assert.That(validGazeSamples2, Is.GreaterThanOrEqualTo(validGazeSamples), "unexpected validgazesamples after 1 s");

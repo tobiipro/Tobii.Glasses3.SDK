@@ -234,6 +234,9 @@ namespace G3SDK
         {
             if (Enum.TryParse(s.Replace("-", ""), true, out T res))
                 return res;
+            var v = JsonConvert.DeserializeObject<T>(s);
+            //if (v != null)
+            return v;
             return defaultValue;
         }
 
@@ -272,6 +275,10 @@ namespace G3SDK
         {
             return arg[0].Value<bool>();
         }
+        public static string SignalToString(List<JToken> arg)
+        {
+            return arg[0].Value<string>();
+        }
 
 
         public static Ipv6Method Ipv6MethodParser(string arg)
@@ -281,6 +288,15 @@ namespace G3SDK
         public static Ipv4Method Ipv4MethodParser(string arg)
         {
             return ParseEnum(arg, Ipv4Method.unknown);
+        }
+
+        public static GazeFrequency ConvertGazeFrequencyFromString(string s)
+        {
+            if (s == "100hz")
+                return GazeFrequency.Freq100hz;
+            if (s == "50hz")
+                return GazeFrequency.Freq50hz;
+            return GazeFrequency.Default;
         }
     }
 }
