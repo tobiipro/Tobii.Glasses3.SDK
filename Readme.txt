@@ -16,6 +16,6 @@ To build a new package:
 
 To push a new package to github:
 
-> dotnet nuget push "G3SDK/bin/Release/Tobii.Pro.G3.SDK.net.0.1.2.nupkg" --source "github"
+> dotnet nuget push "G3SDK\bin\Release\Tobii.Pro.G3.SDK.net.0.1.2.nupkg" --source "github"
 
 
