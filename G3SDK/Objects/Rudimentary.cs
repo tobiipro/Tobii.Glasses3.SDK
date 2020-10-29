@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace G3SDK
@@ -30,8 +30,6 @@ namespace G3SDK
             _sceneScale = AddRWProperty("scene-scale", int.Parse);
             _sceneQuality = AddRWProperty("scene-quality", int.Parse);
         }
-
-
 
         public Task<G3GazeData> GazeSample => _gazeSample.Value();
         public Task<G3ImuData> ImuSample => _imuSample.Value();
@@ -63,7 +61,7 @@ namespace G3SDK
 
         public IG3Observable<G3GazeData> Gaze { get; }
 
-        public IG3Observable<G3Event> Event{ get; }
+        public IG3Observable<G3Event> Event { get; }
 
         public IG3Observable<G3ImuData> Imu { get; set; }
 
