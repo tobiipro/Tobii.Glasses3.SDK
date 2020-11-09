@@ -23,6 +23,7 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Build release
       run: dotnet build --configuration Release
+    - name: Sign release binaries
       uses: DanaBear/code-sign-action@v4
       with:
         certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE }}'
