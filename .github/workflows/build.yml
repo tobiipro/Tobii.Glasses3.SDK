@@ -23,10 +23,14 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Build release
       run: dotnet build --configuration Release
-    - name: Extract certificate
-      run: echo $TOBIICODESIGNCERTIFICATE > codesigncertificate.pfx
-    - name: Sign binary
-      run: signtool sign /p $CODESIGNPASSWORD /f codesigncertificate.pfx G3SDK/bin/Debug/net472/G3SDK.dll
+      uses: DanaBear/code-sign-action@v4
+      with:
+        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE }}'
+        password: '${{ secrets.CODESIGNPASSWORD }}'
+        certificatesha1: '4e59a4c4d80616561740f68c71ba08978e84db78'
+        certificatename: 'Tobii AB'
+        folder: 'G3SDK/bin/Release'
+        recursive: true
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
       with:
@@ -35,6 +39,6 @@ jobs:
     - name: Upload signed dll
       uses: actions/upload-artifact@v2
       with:
-        name: installer
-        path: G3SDK/bin/debug/debug/*.dll
+        name: binaries
+        path: G3SDK/bin/Release/*.dll
 
