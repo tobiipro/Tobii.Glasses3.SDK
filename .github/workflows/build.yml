@@ -23,6 +23,8 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Build release
       run: dotnet build --configuration Release
+    - name: Remove nuget package
+      run: del G3SDK/bin/Release/*.nupkg
     - name: Sign release binaries
       uses: DanaBear/code-sign-action@v4
       with:
@@ -31,6 +33,8 @@ jobs:
         folder: 'G3SDK/bin/Release'
         certificatesha1: '4E59A4C4D80616561740F68C71BA08978E84DB78'
         recursive: true
+    - name: Build release
+      run: dotnet pack --configuration Release
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
       with:
