@@ -14,8 +14,12 @@ To build a new package:
 
 > dotnet build --configuration release
 
+Make sure the nupkg-file was correctly built: 
+
+> dir G3SDK\bin\Release\*.nupkg
+
 To push a new package to github:
 
-> dotnet nuget push "G3SDK\bin\Release\Tobii.Pro.G3.SDK.net.0.1.2.nupkg" --source "github"
+> dotnet nuget push "G3SDK\bin\Release\Tobii.Pro.G3.SDK.net.0.x.y.nupkg" --source "github"
 
 

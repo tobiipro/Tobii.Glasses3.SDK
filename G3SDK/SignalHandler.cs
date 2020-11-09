@@ -127,18 +127,18 @@ namespace G3SDK
                     _observer = observer;
                 }
 
-                public void Dispose()
+                public async void Dispose()
                 {
-                    _signal.Unsubscribe(_observer);
+                    await _signal.Unsubscribe(_observer);
                 }
             }
 
-            private void Unsubscribe(IObserver<T> observer)
+            private async Task Unsubscribe(IObserver<T> observer)
             {
                 _subscribers.Remove(observer);
                 if (!_subscribers.Any())
                 {
-                    _signalHandler.StopSignal(SignalPath, _signalId, _requestId);
+                    await _signalHandler.StopSignal(SignalPath, _signalId, _requestId);
                     lock (_lock)
                     {
                         _requestId = -1;
@@ -165,7 +165,7 @@ namespace G3SDK
                     list.Add(x);
 
                 var v = _bodyTranslator(list);
-                foreach (var o in _subscribers)
+                foreach (var o in _subscribers.ToArray())
                     o.OnNext(v);
             }
         }
@@ -175,9 +175,9 @@ namespace G3SDK
             _signalByRequestId[requestId] = signal;
         }
 
-        private void StopSignal(string path, long signalId, long requestId)
+        private async Task StopSignal(string path, long signalId, long requestId)
         {
-            SendToWebSocket(path, Method.POST, signalId);
+            await SendToWebSocket(path, Method.POST, signalId);
             _signalByRequestId.TryRemove(requestId, out var signal);
             _signalBySignalId.TryRemove(signalId, out signal);
         }

@@ -33,7 +33,7 @@ namespace G3SDK
             Changed = AddSignal("changed", ParserHelpers.SignalToString);
         }
 
-        public IG3Observable<string> Changed { get; set; }
+        public IG3Observable<string> Changed { get; }
 
         public Task<GazeOverlay> GazeOverlay => _gazeOverlay.Value();
 

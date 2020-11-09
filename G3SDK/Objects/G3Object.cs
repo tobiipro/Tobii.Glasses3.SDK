@@ -167,6 +167,46 @@ namespace G3SDK
         }
     }
 
+    public class G3Version
+    {
+        private readonly string _versionString;
+
+        public G3Version(string versionString)
+        {
+            _versionString = versionString;
+            _version = new List<int>();
+            foreach (var p in versionString.Split(new[] { '.', '+' }))
+            {
+                if (int.TryParse(p, out var pValue))
+                    _version.Add(pValue);
+            }
+        }
+
+        public bool LessThan(G3Version other)
+        {
+            return !GreaterOrEqualTo(other);
+        }
+
+        public bool GreaterOrEqualTo(G3Version other)
+        {
+            for (var i = 0; i < other._version.Count; i++)
+            {
+                if (_version[i] < other._version[i])
+                    return false;
+
+                if (_version[i] > other._version[i])
+                    return true;
+            }
+
+            return true;
+        }
+
+
+        public static G3Version v1_12 = new G3Version("1.12");
+        public static G3Version Flytt = new G3Version("1.11+Flytt");
+        private List<int> _version;
+    }
+
     public class G3ObjectDescription
     {
         public Dictionary<string, G3PropertyDescription> properties { get; set; }

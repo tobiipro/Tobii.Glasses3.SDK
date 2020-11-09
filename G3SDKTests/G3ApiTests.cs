@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
@@ -10,51 +11,59 @@ using NUnit.Framework;
 
 namespace G3SDK
 {
-    [TestFixture]
-    class G3ApiTests
+
+    class G3TestBase
     {
-        private G3Api _api;
+        protected G3Version FwVersion { get; private set; }
+        protected G3Api G3Api { get; private set; }
+        protected async Task EnsureApi()
+        {
+            if (G3Api != null)
+                return;
+            var browser = new G3Browser();
+            var devices = await browser.ProbeForDevices();
+            Assert.IsNotEmpty(devices, "no G3 device found");
+            G3Api = devices.First();
+            FwVersion = new G3Version(await G3Api.System.Version);
+
+            var inProgress = await G3Api.Recorder.RecordingInProgress();
+            if (inProgress)
+            {
+                await G3Api.Recorder.Cancel();
+                inProgress = await G3Api.Recorder.RecordingInProgress();
+                Assert.False(inProgress, "Recording is still in progress, can't start test");
+            }
+        }
 
         [SetUp]
         public void Setup()
         {
-            _api = null;
+            G3Api = null;
         }
 
         [TearDown]
         public async Task TearDown()
         {
-            if (_api != null && await _api.Recorder.RecordingInProgress())
-                await _api.Recorder.Cancel();
+            if (G3Api != null && await G3Api.Recorder.RecordingInProgress())
+                await G3Api.Recorder.Cancel();
         }
+    }
 
-        private async Task EnsureApi()
-        {
-            if (_api != null)
-                return;
-            var browser = new G3Browser();
-            var devices = await browser.ProbeForDevices();
-            Assert.IsNotEmpty(devices, "no G3 device found");
-            _api = devices.First();
-            var inProgress = await _api.Recorder.RecordingInProgress();
-            if (inProgress)
-            {
-                await _api.Recorder.Cancel();
-                inProgress = await _api.Recorder.RecordingInProgress();
-                Assert.False(inProgress, "Recording is still in progress, can't start test");
-            }
+    [TestFixture]
+    class G3ApiTests: G3TestBase
+    {
 
-        }
+
 
         [Test]
         public async Task StoragePropertiesCanBeRead()
         {
             await EnsureApi();
-            var sdCardState = await _api.System.Storage.CardState;
-            var free = await _api.System.Storage.Free;
-            var size = await _api.System.Storage.Size;
-            var remainingTime = await _api.System.Storage.RemainingTime;
-            var spaceState = await _api.System.Storage.SpaceState;
+            var sdCardState = await G3Api.System.Storage.CardState;
+            var free = await G3Api.System.Storage.Free;
+            var size = await G3Api.System.Storage.Size;
+            var remainingTime = await G3Api.System.Storage.RemainingTime;
+            var spaceState = await G3Api.System.Storage.SpaceState;
             if ((sdCardState & CardState.Available) != 0)
             {
                 Assert.That(remainingTime.TotalSeconds, Is.Positive, "remainingTime");
@@ -67,10 +76,10 @@ namespace G3SDK
         public async Task UpgradePropertiesCanBeRead()
         {
             await EnsureApi();
-            var running = await _api.Upgrade.InProgress;
+            var running = await G3Api.Upgrade.InProgress;
 
-            VerifySignal(_api.Upgrade.Completed, "upgrade.completed");
-            VerifySignal(_api.Upgrade.Progress, "upgrade.progress");
+            VerifySignal(G3Api.Upgrade.Completed, "upgrade.completed");
+            VerifySignal(G3Api.Upgrade.Progress, "upgrade.progress");
         }
 
         private void VerifySignal<T>(IG3Observable<T> signal, string signalName)
@@ -86,8 +95,8 @@ namespace G3SDK
         {
             await EnsureApi();
 
-            VerifySignal(_api.Recordings.ScanStart, "recordings.scanstart");
-            VerifySignal(_api.Recordings.ScanDone, "recordings.scandone");
+            VerifySignal(G3Api.Recordings.ScanStart, "recordings.scanstart");
+            VerifySignal(G3Api.Recordings.ScanDone, "recordings.scandone");
         }
 
         [Test]
@@ -96,20 +105,20 @@ namespace G3SDK
         {
             await EnsureApi();
             var gazeCounter = 0;
-            await _api.Rudimentary.Gaze.SubscribeAsync(g =>
+            await G3Api.Rudimentary.Gaze.SubscribeAsync(g =>
             {
                 gazeCounter++;
             });
             while (gazeCounter == 0)
             {
-                await _api.Rudimentary.Keepalive();
+                await G3Api.Rudimentary.Keepalive();
                 Task.Delay(500);
             }
             var counter = 0;
 
             while (counter < 500)
             {
-                await _api.Rudimentary.Keepalive();
+                await G3Api.Rudimentary.Keepalive();
                 await Task.Delay(1000);
                 Assert.That(gazeCounter, Is.GreaterThan(0));
                 Console.WriteLine($"Counter: {counter} Gaze: {gazeCounter}");
@@ -123,19 +132,19 @@ namespace G3SDK
         {
             await EnsureApi();
 
-            var ntpEnabled = await _api.System.NtpIsEnabled;
+            var ntpEnabled = await G3Api.System.NtpIsEnabled;
             if (!ntpEnabled)
             {
-                await _api.System.UseNtp(true);
-                ntpEnabled = await _api.System.NtpIsEnabled;
+                await G3Api.System.UseNtp(true);
+                ntpEnabled = await G3Api.System.NtpIsEnabled;
                 Assert.That(ntpEnabled, Is.EqualTo(true), "ntp was not enabled");
             }
 
-            var ntpSynced = await _api.System.NtpIsSynchronized;
+            var ntpSynced = await G3Api.System.NtpIsSynchronized;
 
             var before = DateTime.Now;
 
-            var time = await _api.System.Time;
+            var time = await G3Api.System.Time;
             var after = DateTime.Now;
             var localTime = time.ToLocalTime();
             Console.WriteLine($"Ntp synced.: {ntpSynced}");
@@ -154,12 +163,12 @@ namespace G3SDK
         public async Task SystemPropertiesCanBeRead()
         {
             await EnsureApi();
-            var ruSerial = await _api.System.RecordingUnitSerial;
-            var huSerial = await _api.System.HeadUnitSerial;
-            var version = await _api.System.Version;
-            var tz = await _api.System.TimeZone;
-            var time = await _api.System.Time;
-            var freqs = await _api.System.AvailableGazeFrequencies();
+            var ruSerial = await G3Api.System.RecordingUnitSerial;
+            var huSerial = await G3Api.System.HeadUnitSerial;
+            var version = await G3Api.System.Version;
+            var tz = await G3Api.System.TimeZone;
+            var time = await G3Api.System.Time;
+            var freqs = await G3Api.System.AvailableGazeFrequencies();
 
             Assert.That(ruSerial, Is.Not.Empty);
             Assert.That(huSerial, Is.Not.Empty);
@@ -174,27 +183,27 @@ namespace G3SDK
         public async Task WebRtcObjectsCanBeInteractedWith()
         {
             await EnsureApi();
-            var session = await _api.WebRTC.Create();
+            var session = await G3Api.WebRTC.Create();
             await session.SetIframeStream(true);
             // this test fails if no delay is added (FW 1.12.0 build 620)
-            //await Task.Delay(500);
-            await _api.WebRTC.Delete(session);
+            await Task.Delay(500);
+            await G3Api.WebRTC.Delete(session);
         }
 
         [Test]
         public async Task RecorderPropertiesCanBeRead()
         {
             await EnsureApi();
-            var folder = await _api.Recorder.Folder;
-            var visibleName = await _api.Recorder.VisibleName;
-            var duration = await _api.Recorder.Duration;
-            var created = await _api.Recorder.Created;
-            var uuid = await _api.Recorder.UUID;
-            var timeZone = await _api.Recorder.TimeZone;
-            var gazeSamples = await _api.Recorder.GazeSamples;
-            var validGazeSamples = await _api.Recorder.ValidGazeSamples;
-            var remainingTime = await _api.Recorder.RemainingTime;
-            var currentGazeFreq = await _api.Recorder.CurrentGazeFrequency;
+            var folder = await G3Api.Recorder.Folder;
+            var visibleName = await G3Api.Recorder.VisibleName;
+            var duration = await G3Api.Recorder.Duration;
+            var created = await G3Api.Recorder.Created;
+            var uuid = await G3Api.Recorder.UUID;
+            var timeZone = await G3Api.Recorder.TimeZone;
+            var gazeSamples = await G3Api.Recorder.GazeSamples;
+            var validGazeSamples = await G3Api.Recorder.ValidGazeSamples;
+            var remainingTime = await G3Api.Recorder.RemainingTime;
+            var currentGazeFreq = await G3Api.Recorder.CurrentGazeFrequency;
 
             Assert.That(gazeSamples, Is.GreaterThanOrEqualTo(-1));
             Assert.That(validGazeSamples, Is.GreaterThanOrEqualTo(-1));
@@ -216,9 +225,9 @@ namespace G3SDK
             await EnsureApi();
             //            await _api.Recorder.Start();
 
-            await _api.Rudimentary.Keepalive();
+            await G3Api.Rudimentary.Keepalive();
             var eventCount = 0;
-            var token = _api.Rudimentary.Event.Subscribe(e =>
+            var token = G3Api.Rudimentary.Event.Subscribe(e =>
             {
                 Assert.That(e.Tag, Is.EqualTo("tag1"));
                 var obj = JsonConvert.DeserializeObject<payload>(e.Obj);
@@ -228,14 +237,14 @@ namespace G3SDK
                 eventCount++;
             });
 
-            var res = await _api.Rudimentary.SendEvent("tag1", new payload() { num = 123, str = "abc" });
+            var res = await G3Api.Rudimentary.SendEvent("tag1", new payload() { num = 123, str = "abc" });
             Assert.True(res, "send-event failed");
 
             Thread.Sleep(500);
 
             Assert.That(eventCount, Is.EqualTo(1));
 
-            var sample = await _api.Rudimentary.EventSample;
+            var sample = await G3Api.Rudimentary.EventSample;
             Assert.That(sample, Is.Not.Null, "no event-sample");
             Assert.That(sample.Tag, Is.EqualTo("tag1"));
             var sampleObj = JsonConvert.DeserializeObject<payload>(sample.Obj);
@@ -254,40 +263,40 @@ namespace G3SDK
         {
             await EnsureApi();
             var warnings = new System.Collections.Generic.List<string>();
-            await _api.System.ValidateApi(warnings);
-            await _api.System.Storage.ValidateApi(warnings);
-            await _api.System.Battery.ValidateApi(warnings);
+            await G3Api.System.ValidateApi(warnings);
+            await G3Api.System.Storage.ValidateApi(warnings);
+            await G3Api.System.Battery.ValidateApi(warnings);
 
-            await _api.WebRTC.ValidateApi(warnings);
+            await G3Api.WebRTC.ValidateApi(warnings);
 
-            var session = await _api.WebRTC.Create();
+            var session = await G3Api.WebRTC.Create();
             await session.ValidateApi(warnings);
             Thread.Sleep(1000);
-            await _api.WebRTC.Delete(session);
+            await G3Api.WebRTC.Delete(session);
 
 
-            await _api.Recorder.ValidateApi(warnings);
-            await _api.Recordings.ValidateApi(warnings);
-            var recordings = await _api.Recordings.Children();
+            await G3Api.Recorder.ValidateApi(warnings);
+            await G3Api.Recordings.ValidateApi(warnings);
+            var recordings = await G3Api.Recordings.Children();
             if (recordings.Any())
                 await recordings.First().ValidateApi(warnings);
 
-            await _api.Upgrade.ValidateApi(warnings);
+            await G3Api.Upgrade.ValidateApi(warnings);
 
-            await _api.Network.ValidateApi(warnings);
-            await _api.Network.Wifi.ValidateApi(warnings);
-            var wifiConfigs = await _api.Network.Wifi.Configurations.Children();
+            await G3Api.Network.ValidateApi(warnings);
+            await G3Api.Network.Wifi.ValidateApi(warnings);
+            var wifiConfigs = await G3Api.Network.Wifi.Configurations.Children();
             if (wifiConfigs.Any())
                 await wifiConfigs.First().ValidateApi(warnings);
 
-            await _api.Network.Ethernet.ValidateApi(warnings);
-            var ethernetConfigs = await _api.Network.Ethernet.Configurations.Children();
+            await G3Api.Network.Ethernet.ValidateApi(warnings);
+            var ethernetConfigs = await G3Api.Network.Ethernet.Configurations.Children();
             if (ethernetConfigs.Any())
                 await ethernetConfigs.First().ValidateApi(warnings);
 
-            await _api.Calibrate.ValidateApi(warnings);
-            await _api.Rudimentary.ValidateApi(warnings);
-            await _api.Settings.ValidateApi(warnings);
+            await G3Api.Calibrate.ValidateApi(warnings);
+            await G3Api.Rudimentary.ValidateApi(warnings);
+            await G3Api.Settings.ValidateApi(warnings);
             foreach (var w in warnings)
                 Console.WriteLine(w);
             Assert.IsEmpty(warnings, $"Api warnings: " +
@@ -301,10 +310,10 @@ namespace G3SDK
         public async Task BatteryPropertiesCanBeRead()
         {
             await EnsureApi();
-            var remainingTime = await _api.System.Battery.RemainingTime;
-            var charging = await _api.System.Battery.Charging;
-            var level = await _api.System.Battery.Level;
-            var state = await _api.System.Battery.State;
+            var remainingTime = await G3Api.System.Battery.RemainingTime;
+            var charging = await G3Api.System.Battery.Charging;
+            var level = await G3Api.System.Battery.Level;
+            var state = await G3Api.System.Battery.State;
             Assert.That(remainingTime.TotalSeconds, Is.Positive, "remainingTime");
             Assert.That(level, Is.Positive, "level");
         }
@@ -315,21 +324,21 @@ namespace G3SDK
             await EnsureApi();
             await EnsureSDCard();
             var uniqueString = Guid.NewGuid().ToString();
-            var res = await _api.Recorder.Start();
+            var res = await G3Api.Recorder.Start();
             Assert.True(res, "Failed to start recording");
-            res = await _api.Recorder.MetaInsert("testKey", uniqueString);
+            res = await G3Api.Recorder.MetaInsert("testKey", uniqueString);
             Assert.True(res, "Failed to create metadata");
-            var keys = await _api.Recorder.MetaKeys();
+            var keys = await G3Api.Recorder.MetaKeys();
             Assert.That(keys, Has.Member("testKey"));
-            var value = await _api.Recorder.MetaLookupString("testKey");
+            var value = await G3Api.Recorder.MetaLookupString("testKey");
             Assert.That(value, Is.EqualTo(uniqueString), "Failed to read meta info");
-            res = await _api.Recorder.MetaInsert("testKey", new byte[] { });
+            res = await G3Api.Recorder.MetaInsert("testKey", new byte[] { });
             Assert.True(res, "Failed to delete metadata");
-            keys = await _api.Recorder.MetaKeys();
+            keys = await G3Api.Recorder.MetaKeys();
             Assert.That(keys, Has.No.Member("testKey"), "Failed to remove key");
 
-            await _api.Recorder.Cancel();
-            var inProgress = await _api.Recorder.RecordingInProgress();
+            await G3Api.Recorder.Cancel();
+            var inProgress = await G3Api.Recorder.RecordingInProgress();
             Assert.False(inProgress, "Failed to cancel recording");
         }
 
@@ -338,84 +347,97 @@ namespace G3SDK
         {
             await EnsureApi();
             await EnsureSDCard();
-            var signals = new System.Collections.Generic.List<string>();
+            var signals = new List<string>();
 
             // verify gaze-frequency
-            var token = await _api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+            IDisposable settingsChangedToken = null;
+            if (FwVersion.GreaterOrEqualTo(G3Version.v1_12))
+                settingsChangedToken = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
 
-            var res = await _api.Settings.SetGazeFrequency(GazeFrequency.Default);
+            var res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Default);
             Assert.True(res, "unable to set gaze-frequency to default");
-            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Default).After(200, 50));
-
-            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Default).After(200, 50));
+            if (settingsChangedToken != null)
+                Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
-            res = await _api.Settings.SetGazeFrequency(GazeFrequency.Freq100hz);
+            res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Freq100hz);
             Assert.True(res, "unable to set gaze-frequency to 100hz");
-            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq100hz).After(200, 50));
-            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq100hz).After(200, 50));
+            if (settingsChangedToken != null)
+                Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
-            res = await _api.Settings.SetGazeFrequency(GazeFrequency.Freq50hz);
+            res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Freq50hz);
             Assert.True(res, "unable to set gaze-frequency to 50hz");
-            Assert.That(await _api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq50hz).After(200, 50));
-            Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq50hz).After(200, 50));
+            if (settingsChangedToken != null)
+                Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
-            token.Dispose();
+            if (settingsChangedToken != null)
+                settingsChangedToken.Dispose();
         }
 
+        // private bool FirmwareVersionAtLeast(string version)
+        // {
+        //     var exp = version.Split('.').Select(int.Parse).ToList();
+        //     for (var i = 0; i < exp.Count; i++)
+        //         if (_fw[i] < exp[i])
+        //             return false;
+        //     return true;
+        // }
 
         [Test]
         public async Task CanManupulateGazeOverlay()
         {
             await EnsureApi();
+            if (FwVersion.LessThan(G3Version.v1_12))
+                return;
             await EnsureSDCard();
             var signals = new System.Collections.Generic.List<string>();
 
             // verify gazeoverlay
-            var token = await _api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+            var token = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
 
-            var res = await _api.Settings.SetGazeOverlay(GazeOverlay.Default);
+            var res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.Default);
             Assert.True(res, "unable to set gaze-overlay, to default");
 
-            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Default).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Default).After(200, 50));
 
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
             signals.Clear();
 
-            res = await _api.Settings.SetGazeOverlay(GazeOverlay.On);
+            res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.On);
             Assert.True(res, "unable to set gaze-overlay to on");
 
-            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.On).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.On).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
 
 
-            await _api.Recorder.Start();
-            Assert.True (await _api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
-            var rec1 = await _api.Recorder.UUID;
-            await _api.Recorder.Stop();
+            await G3Api.Recorder.Start();
+            Assert.True(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            var rec1 = await G3Api.Recorder.UUID;
+            await G3Api.Recorder.Stop();
 
 
             signals.Clear();
 
-            res = await _api.Settings.SetGazeOverlay(GazeOverlay.Off);
+            res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.Off);
             Assert.True(res, "unable to set gaze-overlay to off");
 
-            Assert.That(await _api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Off).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Off).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
 
-            await _api.Recorder.Start();
-            Assert.False(await _api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
-            var rec2 = await _api.Recorder.UUID;
-            await _api.Recorder.Stop();
+            await G3Api.Recorder.Start();
+            Assert.False(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            var rec2 = await G3Api.Recorder.UUID;
+            await G3Api.Recorder.Stop();
 
             signals.Clear();
 
-            var recs = await _api.Recordings.Children();
-            Assert.True(await recs.First(r=>r.UUID == rec1).GazeOverlay);
-            Assert.False(await recs.First(r=>r.UUID == rec2).GazeOverlay);
-
-
+            var recs = await G3Api.Recordings.Children();
+            Assert.True(await recs.First(r => r.UUID == rec1).GazeOverlay);
+            Assert.False(await recs.First(r => r.UUID == rec2).GazeOverlay);
 
             token.Dispose();
         }
@@ -424,12 +446,12 @@ namespace G3SDK
         public async Task CheckRoundtripTimesForPropertyAccess()
         {
             await EnsureApi();
-            _api.LogLevel = LogLevel.error;
+            G3Api.LogLevel = LogLevel.error;
             for (int i = 0; i < 40; i++)
             {
                 var sw = new Stopwatch();
                 sw.Start();
-                var serial = await _api.System.RecordingUnitSerial;
+                var serial = await G3Api.System.RecordingUnitSerial;
                 sw.Stop();
                 Console.WriteLine("read serial: " + sw.ElapsedMilliseconds);
             }
@@ -440,9 +462,9 @@ namespace G3SDK
         {
             await EnsureApi();
             await EnsureSDCard();
-            var d = await _api.Recorder.Duration;
+            var d = await G3Api.Recorder.Duration;
             if (d.HasValue)
-                await _api.Recorder.Cancel();
+                await G3Api.Recorder.Cancel();
 
             var stoppedCount = 0;
             var startedCount = 0;
@@ -452,50 +474,50 @@ namespace G3SDK
             var sw = new Stopwatch();
             var tokens = new System.Collections.Generic.List<IDisposable>
             {
-                await _api.Recordings.ChildAdded.SubscribeAsync(s => addedCount++),
-                await _api.Recordings.ChildRemoved.SubscribeAsync(s => removedCount++),
-                await _api.Recordings.Deleted.SubscribeAsync(s => deletedCount++),
-                await _api.Recorder.Started.SubscribeAsync(s => startedCount++),
-                await _api.Recorder.Stopped.SubscribeAsync(s => stoppedCount++)
+                await G3Api.Recordings.ChildAdded.SubscribeAsync(s => addedCount++),
+                await G3Api.Recordings.ChildRemoved.SubscribeAsync(s => removedCount++),
+                await G3Api.Recordings.Deleted.SubscribeAsync(s => deletedCount++),
+                await G3Api.Recorder.Started.SubscribeAsync(s => startedCount++),
+                await G3Api.Recorder.Stopped.SubscribeAsync(s => stoppedCount++)
             };
 
 
-            var start = await _api.Recorder.Start();
+            var start = await G3Api.Recorder.Start();
 
             Assert.True(start, "Failed to start recording");
             Assert.That(() => startedCount, Is.EqualTo(1).After(1000), "start signal not received");
             Thread.Sleep(1000);
 
-            var currentGazeFrequency = await _api.Recorder.CurrentGazeFrequency;
+            var currentGazeFrequency = await G3Api.Recorder.CurrentGazeFrequency;
 
-            var duration1 = await _api.Recorder.Duration;
-            var gazeSamples = await _api.Recorder.GazeSamples;
-            var validGazeSamples = await _api.Recorder.ValidGazeSamples;
+            var duration1 = await G3Api.Recorder.Duration;
+            var gazeSamples = await G3Api.Recorder.GazeSamples;
+            var validGazeSamples = await G3Api.Recorder.ValidGazeSamples;
             Thread.Sleep(1000);
-            var duration2 = await _api.Recorder.Duration;
-            var gazeSamples2 = await _api.Recorder.GazeSamples;
-            var validGazeSamples2 = await _api.Recorder.ValidGazeSamples;
+            var duration2 = await G3Api.Recorder.Duration;
+            var gazeSamples2 = await G3Api.Recorder.GazeSamples;
+            var validGazeSamples2 = await G3Api.Recorder.ValidGazeSamples;
 
             Assert.That(currentGazeFrequency, Is.GreaterThan(0));
             Assert.That(duration2, Is.GreaterThan(duration1), "unexpected duration after 1 s");
             Assert.That(gazeSamples2, Is.GreaterThan(gazeSamples), "unexpected gazesamples after 1 s");
             Assert.That(validGazeSamples2, Is.GreaterThanOrEqualTo(validGazeSamples), "unexpected validgazesamples after 1 s");
 
-            var recGuid = await _api.Recorder.UUID;
-            var folder = await _api.Recorder.Folder;
-            var visibleName = await _api.Recorder.VisibleName;
+            var recGuid = await G3Api.Recorder.UUID;
+            var folder = await G3Api.Recorder.Folder;
+            var visibleName = await G3Api.Recorder.VisibleName;
             // var res = await _api.Recorder.SetVisibleName("MyRecording");
             // Assert.True(res, "failed to set new name");
             // var visibleName2 = await _api.Recorder.VisibleName;
             // Assert.That(visibleName2, Is.EqualTo("MyRecording"), "failed to change name of recording");
 
-            var stop = await _api.Recorder.Stop();
+            var stop = await G3Api.Recorder.Stop();
             Assert.True(stop, "Failed to stop recording");
 
             Assert.That(() => stoppedCount, Is.EqualTo(1).After(1000), "stopped signal not received");
             Assert.That(() => addedCount, Is.EqualTo(1).After(1000), "recording added signal not received");
 
-            var recordings = await _api.Recordings.Children();
+            var recordings = await G3Api.Recordings.Children();
             var rec = recordings.FirstOrDefault(r => r.UUID == recGuid);
             Assert.NotNull(rec, "recording not found after stop");
             var recFolder = await rec.Folder;
@@ -511,7 +533,7 @@ namespace G3SDK
             recFolder = await rec.Folder;
             Assert.That(recFolder, Is.EqualTo(newFoldername), "unsuccessful move of recording");
 
-            var delete = await _api.Recordings.Delete(recGuid);
+            var delete = await G3Api.Recordings.Delete(recGuid);
             Assert.True(delete, "failed to delete recording");
             Assert.That(() => removedCount, Is.EqualTo(1).After(1000), "recording removed signal not received");
             Assert.That(() => deletedCount, Is.EqualTo(1).After(1000), "recording deleted signal not received");
@@ -525,30 +547,30 @@ namespace G3SDK
         {
             await EnsureApi();
             await EnsureSDCard();
-            var d = await _api.Recorder.Duration;
+            var d = await G3Api.Recorder.Duration;
             if (d.HasValue)
-                await _api.Recorder.Cancel();
+                await G3Api.Recorder.Cancel();
 
-            var start = await _api.Recorder.Start();
+            var start = await G3Api.Recorder.Start();
             Assert.True(start, "Failed to start recording");
             Thread.Sleep(1000);
-            await _api.Recorder.Cancel();
+            await G3Api.Recorder.Cancel();
 
-            Assert.False(await _api.Recorder.RecordingInProgress(), "failed to cancel");
-            start = await _api.Recorder.Start();
+            Assert.False(await G3Api.Recorder.RecordingInProgress(), "failed to cancel");
+            start = await G3Api.Recorder.Start();
             Assert.True(start, "Failed to start recording 2");
             Thread.Sleep(1000);
-            await _api.Recorder.Cancel();
+            await G3Api.Recorder.Cancel();
 
-            Assert.False(await _api.Recorder.RecordingInProgress(), "failed to cancel 2");
+            Assert.False(await G3Api.Recorder.RecordingInProgress(), "failed to cancel 2");
 
         }
 
         private async Task EnsureSDCard()
         {
-            var state = await _api.System.Storage.CardState;
+            var state = await G3Api.System.Storage.CardState;
             Assert.That(state, Is.EqualTo(CardState.Available), "SD card not in state 'available'");
-            var space = await _api.System.Storage.Free;
+            var space = await G3Api.System.Storage.Free;
             Assert.That(space, Is.GreaterThan(10 * 1024 * 1024), "Too little space left on SD card");
         }
 
@@ -558,17 +580,17 @@ namespace G3SDK
             await EnsureApi();
             var gazeCounter = 0;
 
-            var subscription = _api.Rudimentary.Gaze.Subscribe(g =>
+            var subscription = G3Api.Rudimentary.Gaze.Subscribe(g =>
             {
                 gazeCounter++;
             });
             Assert.That(subscription, Is.Not.Null);
-            await _api.Rudimentary.Keepalive();
+            await G3Api.Rudimentary.Keepalive();
             Assert.That(() => gazeCounter, Is.GreaterThan(10).After(1000), "No gaze data coming");
 
             subscription.Dispose();
             gazeCounter = 0;
-            await _api.Rudimentary.Keepalive();
+            await G3Api.Rudimentary.Keepalive();
             Assert.That(() => gazeCounter, Is.LessThan(10).After(1000), "GazeData keeps coming even after unsubscribe");
         }
 
@@ -576,11 +598,11 @@ namespace G3SDK
         public async Task SubscribeToCalibMarkersGivesAtleast10SamplesIn2Seconds()
         {
             await EnsureApi();
-            var emitMarkers = await _api.Calibrate.EmitMarkers();
+            var emitMarkers = await G3Api.Calibrate.EmitMarkers();
             Assert.That(emitMarkers, Is.True);
             var markers = new ConcurrentBag<G3MarkerData>();
 
-            var subscription = _api.Calibrate.Marker.Subscribe(Observer.Create<G3MarkerData>(g => markers.Add(g)));
+            var subscription = G3Api.Calibrate.Marker.Subscribe(Observer.Create<G3MarkerData>(g => markers.Add(g)));
             Assert.That(subscription, Is.Not.Null);
             Assert.That(() => markers.Count, Is.GreaterThanOrEqualTo(10).After(2000).PollEvery(100), "No marker data coming");
 
@@ -594,39 +616,39 @@ namespace G3SDK
         public async Task CanDoStuffWithWifi()
         {
             await EnsureApi();
-            if (!await _api.Network.WifiHwEnabled)
+            if (!await G3Api.Network.WifiHwEnabled)
                 return;
-            if (!await _api.Network.WifiEnable)
+            if (!await G3Api.Network.WifiEnable)
             {
-                Assert.True(await _api.Network.SetWifiEnable(true), "unable to enable wifi");
+                Assert.True(await G3Api.Network.SetWifiEnable(true), "unable to enable wifi");
                 Thread.Sleep(2000);
-                Assert.That(await _api.Network.WifiEnable, "wifi not Enabled");
+                Assert.That(await G3Api.Network.WifiEnable, "wifi not Enabled");
             }
-            _api.Network.Wifi.Connected.Subscribe(n => Console.WriteLine("Connected"));
-            _api.Network.Wifi.StateChange.Subscribe(n => Console.WriteLine($"ConnectionState: {n}"));
-            Assert.True(await _api.Network.SetWifiEnable(false), "unable to disable wifi");
-            Assert.False(await _api.Network.WifiEnable, "wifi not disabled");
-            Assert.True(await _api.Network.SetWifiEnable(true), "unable to enable wifi");
+            G3Api.Network.Wifi.Connected.Subscribe(n => Console.WriteLine("Connected"));
+            G3Api.Network.Wifi.StateChange.Subscribe(n => Console.WriteLine($"ConnectionState: {n}"));
+            Assert.True(await G3Api.Network.SetWifiEnable(false), "unable to disable wifi");
+            Assert.False(await G3Api.Network.WifiEnable, "wifi not disabled");
+            Assert.True(await G3Api.Network.SetWifiEnable(true), "unable to enable wifi");
             Thread.Sleep(2000);
-            Assert.True(await _api.Network.WifiEnable, "wifi not enabled");
+            Assert.True(await G3Api.Network.WifiEnable, "wifi not enabled");
 
-            var config = await _api.Network.Wifi.ActiveConfiguration;
-            var activeNetwork = await _api.Network.Wifi.ConnectedNetwork;
-            var autoConnect = await _api.Network.Wifi.AutoConnect;
+            var config = await G3Api.Network.Wifi.ActiveConfiguration;
+            var activeNetwork = await G3Api.Network.Wifi.ConnectedNetwork;
+            var autoConnect = await G3Api.Network.Wifi.AutoConnect;
 
-            var ipv4Address = await _api.Network.Wifi.Ipv4Address;
-            var ipv4Gateway = await _api.Network.Wifi.Ipv4Gateway;
-            var ipv4NameServers = await _api.Network.Wifi.Ipv4NameServers;
-            var ipv6Address = await _api.Network.Wifi.Ipv6Address;
-            var ipv6Gateway = await _api.Network.Wifi.Ipv6Gateway;
-            var ipv6NameServers = await _api.Network.Wifi.Ipv6NameServers;
+            var ipv4Address = await G3Api.Network.Wifi.Ipv4Address;
+            var ipv4Gateway = await G3Api.Network.Wifi.Ipv4Gateway;
+            var ipv4NameServers = await G3Api.Network.Wifi.Ipv4NameServers;
+            var ipv6Address = await G3Api.Network.Wifi.Ipv6Address;
+            var ipv6Gateway = await G3Api.Network.Wifi.Ipv6Gateway;
+            var ipv6NameServers = await G3Api.Network.Wifi.Ipv6NameServers;
 
 
-            var mac = await _api.Network.Wifi.MacAddress;
-            var speed = await _api.Network.Wifi.Speed;
-            var state = await _api.Network.Wifi.State;
-            var stateReason = await _api.Network.Wifi.StateReason;
-            var networktype = await _api.Network.Wifi.Type;
+            var mac = await G3Api.Network.Wifi.MacAddress;
+            var speed = await G3Api.Network.Wifi.Speed;
+            var state = await G3Api.Network.Wifi.State;
+            var stateReason = await G3Api.Network.Wifi.StateReason;
+            var networktype = await G3Api.Network.Wifi.Type;
             Assert.That(networktype, Is.EqualTo(NetworkType.Wifi), "unexpected network type");
             Assert.That(speed, Is.GreaterThanOrEqualTo(0), "unexpected network speed");
             Assert.That(ipv4Address, Is.Not.Empty, "ip4 address was emtpy");
