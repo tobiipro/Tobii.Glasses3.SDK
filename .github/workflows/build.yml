@@ -26,7 +26,7 @@ jobs:
     - name: Sign release binaries
       uses: DanaBear/code-sign-action@v4
       with:
-        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE }}'
+        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_BASE64 }}'
         password: '${{ secrets.CODESIGNPASSWORD }}'
         folder: 'G3SDK/bin/Release'
         recursive: true
