@@ -28,8 +28,6 @@ jobs:
       with:
         certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE }}'
         password: '${{ secrets.CODESIGNPASSWORD }}'
-        certificatesha1: '4e59a4c4d80616561740f68c71ba08978e84db78'
-        certificatename: 'Tobii AB'
         folder: 'G3SDK/bin/Release'
         recursive: true
     - name: Upload nuget package
