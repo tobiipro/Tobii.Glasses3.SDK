@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace G3SDK
 {
-    class G3TestBase
+    public class G3TestBase
     {
         protected G3Version FwVersion { get; private set; }
         protected G3Api G3Api { get; private set; }
