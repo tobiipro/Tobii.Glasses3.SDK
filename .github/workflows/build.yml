@@ -23,10 +23,18 @@ jobs:
       run: dotnet build --configuration Debug
     - name: Build release
       run: dotnet build --configuration Release
-
+    - name: Extract certificate
+      run: echo $TOBIICODESIGNCERTIFICATE > codesigncertificate.pfx
+    - name: Sign binary
+      run: signtool sign /p $CODESIGNPASSWORD /f codesigncertificate.pfx G3SDK/bin/Debug/net472/G3SDK.dll
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
       with:
         name: installer
         path: G3SDK/bin/Release/Tobii.Pro.G3.SDK.net.*.nupkg
+    - name: Upload signed dll
+      uses: actions/upload-artifact@v2
+      with:
+        name: installer
+        path: G3SDK/bin/debug/debug/*.dll
 
