@@ -29,6 +29,7 @@ jobs:
         certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_BASE64 }}'
         password: '${{ secrets.CODESIGNPASSWORD }}'
         folder: 'G3SDK/bin/Release'
+        certificatesha1: '4E59A4C4D80616561740F68C71BA08978E84DB78'
         recursive: true
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
