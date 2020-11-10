@@ -28,10 +28,10 @@ jobs:
     - name: Sign release binaries
       uses: DanaBear/code-sign-action@v4
       with:
-        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_BASE64 }}'
+        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}'
         password: '${{ secrets.CODESIGNPASSWORD }}'
         folder: 'G3SDK/bin/Release'
-        certificatesha1: '4E59A4C4D80616561740F68C71BA08978E84DB78'
+        certificatesha1: '${{ secrets.TOBIICODESIGNCERTIFICATE_SHA1 }}'
         recursive: true
     - name: Build release
       run: dotnet pack --configuration Release
