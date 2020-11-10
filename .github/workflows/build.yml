@@ -1,0 +1,48 @@
+name: Build G3SDK
+
+on:
+  push:
+    branches: [ master, f/** ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.401
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build debug
+      run: dotnet build --configuration Debug
+    - name: Build release
+      run: dotnet build --configuration Release
+    - name: Remove nuget package
+      run: del G3SDK/bin/Release/*.nupkg
+    - name: Sign release binaries
+      uses: DanaBear/code-sign-action@v4
+      with:
+        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}'
+        password: '${{ secrets.CODESIGNPASSWORD }}'
+        folder: 'G3SDK/bin/Release'
+        certificatesha1: '${{ secrets.TOBIICODESIGNCERTIFICATE_SHA1 }}'
+        recursive: true
+    - name: Build release
+      run: dotnet pack --configuration Release
+    - name: Upload nuget package
+      uses: actions/upload-artifact@v2
+      with:
+        name: installer
+        path: G3SDK/bin/Release/Tobii.Pro.G3.SDK.net.*.nupkg
+    - name: Upload signed dll
+      uses: actions/upload-artifact@v2
+      with:
+        name: binaries
+        path: G3SDK/bin/Release/*.dll
+
