@@ -169,16 +169,17 @@ namespace G3SDK
 
     public class G3Version
     {
+        private readonly List<int> _versionParts;
         private readonly string _versionString;
 
         public G3Version(string versionString)
         {
             _versionString = versionString;
-            _version = new List<int>();
+            _versionParts = new List<int>();
             foreach (var p in versionString.Split(new[] { '.', '+' }))
             {
                 if (int.TryParse(p, out var pValue))
-                    _version.Add(pValue);
+                    _versionParts.Add(pValue);
             }
         }
 
@@ -189,22 +190,21 @@ namespace G3SDK
 
         public bool GreaterOrEqualTo(G3Version other)
         {
-            for (var i = 0; i < other._version.Count; i++)
+            for (var i = 0; i < other._versionParts.Count; i++)
             {
-                if (_version[i] < other._version[i])
+                if (_versionParts[i] < other._versionParts[i])
                     return false;
 
-                if (_version[i] > other._version[i])
+                if (_versionParts[i] > other._versionParts[i])
                     return true;
             }
 
             return true;
         }
 
-
         public static G3Version v1_12 = new G3Version("1.12");
-        public static G3Version Flytt = new G3Version("1.11+Flytt");
-        private List<int> _version;
+        public static G3Version v1_11_Flytt = new G3Version("1.11+flytt");
+        public static G3Version v1_7_SommarRegn = new G3Version("1.7+sommarregn");
     }
 
     public class G3ObjectDescription

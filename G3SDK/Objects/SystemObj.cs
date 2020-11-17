@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace G3SDK
@@ -35,8 +36,14 @@ namespace G3SDK
             Battery = new Battery(g3Api, Path);
             Storage = new Storage(g3Api, Path);
         }
+
         #region Properties
         public Task<string> Version => _version.Value();
+        public async Task<G3Version> G3Version()
+        {
+            return new G3Version(await Version);
+        }
+
         public Task<string> RecordingUnitSerial => _recordingUnitSerial.GetString();
         public Task<string> HeadUnitSerial => _headUnitSerial.GetString();
         public Task<string> TimeZone => _timezone.GetString();

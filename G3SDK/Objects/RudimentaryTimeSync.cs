@@ -5,7 +5,17 @@ using Newtonsoft.Json;
 
 namespace G3SDK
 {
-    public class RudimentaryTimeSync
+    public interface IRudimentaryTimeSync
+    {
+        bool Initialized { get; }
+        long ConvertToSystemTime(TimeSpan valueTimeStamp);
+        void RemoveRef();
+        long GetSystemTime();
+        void AddRef();
+        event EventHandler<TimeSyncEventArgs> OnTimeSync;
+    }
+
+    public class RudimentaryTimeSync: IRudimentaryTimeSync
     {
         private readonly Rudimentary _streamProvider;
         private readonly Timer _timer;
@@ -36,7 +46,7 @@ namespace G3SDK
             return _stopwatch.ElapsedTicks / 10;
         }
 
-        public async void Start()
+        private async void Start()
         {
             _eventSubscriber = await _streamProvider.Event.SubscribeAsync(ev => HandleEvent(ev));
             _timer.Enabled = true;
@@ -89,7 +99,7 @@ namespace G3SDK
             }
         }
 
-        public void Stop()
+        private void Stop()
         {
             _eventSubscriber.Dispose();
             _eventSubscriber = null;
