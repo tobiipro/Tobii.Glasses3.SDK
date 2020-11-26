@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFrameworks>net5.0;net472</TargetFrameworks>
     <AssemblyTitle>G3SDK</AssemblyTitle>
     <Product>G3SDK.net</Product>
     <Copyright>Copyright ©  2020-</Copyright>
