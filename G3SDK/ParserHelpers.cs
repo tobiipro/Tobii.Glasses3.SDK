@@ -289,14 +289,5 @@ namespace G3SDK
         {
             return ParseEnum(arg, Ipv4Method.unknown);
         }
-
-        public static GazeFrequency ConvertGazeFrequencyFromString(string s)
-        {
-            if (s == "100hz")
-                return GazeFrequency.Freq100hz;
-            if (s == "50hz")
-                return GazeFrequency.Freq50hz;
-            return GazeFrequency.Default;
-        }
     }
 }

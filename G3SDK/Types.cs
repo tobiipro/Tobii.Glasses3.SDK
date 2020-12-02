@@ -358,25 +358,4 @@ namespace G3SDK
             return EqualByEpsilon(first, second, MinValue);
         }
     }
-
-    public enum GazeOverlay
-    {
-        [EnumMember(Value = "default")]
-        Default,
-        [EnumMember(Value = "on")]
-        On,
-        [EnumMember(Value = "off")]
-        Off
-    }
-
-    public enum GazeFrequency
-    {
-        [EnumMember(Value = "default")]
-        Default,
-        [EnumMember(Value = "50hz")]
-        Freq50hz,
-        [EnumMember(Value = "100hz")]
-        Freq100hz
-    }
-
 }

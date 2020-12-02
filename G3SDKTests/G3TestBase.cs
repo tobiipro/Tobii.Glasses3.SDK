@@ -22,8 +22,7 @@ namespace G3SDK
             if (inProgress)
             {
                 await G3Api.Recorder.Cancel();
-                inProgress = await G3Api.Recorder.RecordingInProgress();
-                Assert.False(inProgress, "Recording is still in progress, can't start test");
+                Assert.That(await G3Api.Recorder.RecordingInProgress(), Is.False.After(200, 50), "Recording is still in progress, can't start test");
             }
         }
 

@@ -221,7 +221,7 @@ namespace G3SDK
         public async Task ValidateAPI()
         {
             await EnsureApi();
-            var warnings = new System.Collections.Generic.List<string>();
+            var warnings = new List<string>();
             await G3Api.System.ValidateApi(warnings);
             await G3Api.System.Storage.ValidateApi(warnings);
             await G3Api.System.Battery.ValidateApi(warnings);
@@ -305,31 +305,32 @@ namespace G3SDK
         public async Task CanManipulateGazeFrequency()
         {
             await EnsureApi();
+            if (FwVersion.LessThan(G3Version.v1_12))
+                Assert.Ignore("Test only supports v1.12+ ");
             await EnsureSDCard();
             var signals = new List<string>();
 
             // verify gaze-frequency
-            IDisposable settingsChangedToken = null;
-            if (FwVersion.GreaterOrEqualTo(G3Version.v1_12))
-                settingsChangedToken = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
 
-            var res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Default);
-            Assert.True(res, "unable to set gaze-frequency to default");
-            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Default).After(200, 50));
+            var settingsChangedToken = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+
+            var res = await G3Api.Settings.SetGazeFrequency(50);
+            Assert.True(res, "unable to set gaze-frequency to 50");
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(50).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
-            res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Freq100hz);
+            res = await G3Api.Settings.SetGazeFrequency(100);
             Assert.True(res, "unable to set gaze-frequency to 100hz");
-            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq100hz).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(100).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
-            res = await G3Api.Settings.SetGazeFrequency(GazeFrequency.Freq50hz);
+            res = await G3Api.Settings.SetGazeFrequency(50);
             Assert.True(res, "unable to set gaze-frequency to 50hz");
-            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(GazeFrequency.Freq50hz).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(50).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
@@ -337,63 +338,54 @@ namespace G3SDK
                 settingsChangedToken.Dispose();
         }
 
-        // private bool FirmwareVersionAtLeast(string version)
-        // {
-        //     var exp = version.Split('.').Select(int.Parse).ToList();
-        //     for (var i = 0; i < exp.Count; i++)
-        //         if (_fw[i] < exp[i])
-        //             return false;
-        //     return true;
-        // }
-
         [Test]
         public async Task CanManupulateGazeOverlay()
         {
             await EnsureApi();
             if (FwVersion.LessThan(G3Version.v1_12))
-                return;
+                Assert.Ignore("Test only supports v1.12+");
             await EnsureSDCard();
-            var signals = new System.Collections.Generic.List<string>();
+            var signals = new List<string>();
 
-            // verify gazeoverlay
+            // verify gaze overlay notifications
             var token = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
 
-            var res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.Default);
-            Assert.True(res, "unable to set gaze-overlay, to default");
+            // make sure it is false;
+            var res = await G3Api.Settings.SetGazeOverlay(false);
+            Assert.True(res, "unable to set gaze-overlay, to false");
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(false).After(200, 50));
+            signals.Clear();
 
-            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Default).After(200, 50));
-
+            // try to set it to true
+            res = await G3Api.Settings.SetGazeOverlay(true);
+            Assert.True(res, "unable to set gaze-overlay, to true");
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(true).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
             signals.Clear();
 
-            res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.On);
-            Assert.True(res, "unable to set gaze-overlay to on");
-
-            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.On).After(200, 50));
-            Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
-
-
+            // make recording with gaze overlay
             await G3Api.Recorder.Start();
             Assert.True(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            await Task.Delay(1000);
             var rec1 = await G3Api.Recorder.UUID;
             await G3Api.Recorder.Stop();
 
-
-            signals.Clear();
-
-            res = await G3Api.Settings.SetGazeOverlay(GazeOverlay.Off);
+            // try to set it to false
+            res = await G3Api.Settings.SetGazeOverlay(false);
             Assert.True(res, "unable to set gaze-overlay to off");
-
-            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(GazeOverlay.Off).After(200, 50));
+            Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(false).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
 
+            // make recording without gaze overlay
             await G3Api.Recorder.Start();
             Assert.False(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            await Task.Delay(1000);
             var rec2 = await G3Api.Recorder.UUID;
             await G3Api.Recorder.Stop();
 
             signals.Clear();
 
+            // check recordings
             var recs = await G3Api.Recordings.Children();
             Assert.True(await recs.First(r => r.UUID == rec1).GazeOverlay);
             Assert.False(await recs.First(r => r.UUID == rec2).GazeOverlay);
