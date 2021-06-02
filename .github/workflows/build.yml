@@ -2,17 +2,25 @@ name: Build G3SDK
 
 on:
   push:
-    branches: [ master, f/** ]
+    branches: [ main, f/** ]
+    tags:        
+      - v*
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Application Version
+      id: version
+      uses: paulhatch/semantic-version@v4.0.2
+      with:        
+        format: "${major}.${minor}.${patch}.${increment}"
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -20,9 +28,9 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Build debug
-      run: dotnet build --configuration Debug
+      run: dotnet build --configuration Debug /p:Version=${{steps.version.outputs.version}} /p:FileVersion=${{steps.version.outputs.version}} /p:AssemblyVersion=${{steps.version.outputs.version}}
     - name: Build release
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release /p:Version=${{steps.version.outputs.version}} /p:FileVersion=${{steps.version.outputs.version}} /p:AssemblyVersion=${{steps.version.outputs.version}}
     - name: Remove nuget package
       run: del source/bin/Release/*.nupkg
     - name: Sign release binaries
@@ -32,25 +40,27 @@ jobs:
         sign_args: '/v /p ${{ secrets.CODESIGNPASSWORD }} /tr http://timestamp.digicert.com /sha1 ${{ secrets.TOBIICODESIGNCERTIFICATE_SHA1 }}'
         folder: 'source/bin/Release'
         recursive: true
+
     - name: Build nuget package
-      run: dotnet pack --configuration Release
+      run: dotnet pack --configuration Release /p:Version=${{steps.version.outputs.version}} 
+
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
       with:
-        name: Tobii.Glasses3.SDK
+        name: Tobii.Glasses3.SDK_${{steps.version.outputs.version}}
         path: source/bin/Release/Tobii.Glasses3.SDK.*.nupkg
-    - name: Upload signed SDK dlls, .netfw
+    - name: Upload signed SDK dlls, .net4
       uses: actions/upload-artifact@v2
       with:
-        name: Tobii.Glasses3.SDK-binaries
+        name: Tobii.Glasses3.SDK.net4-binaries_${{steps.version.outputs.version}}
         path: source/bin/Release/net472/*.dll
     - name: Upload signed SDK dlls .net5
       uses: actions/upload-artifact@v2
       with:
-        name: Tobii.Glasses3.SDK-binaries
+        name: Tobii.Glasses3.SDK.net5-binaries_${{steps.version.outputs.version}}
         path: source/bin/Release/net5.0/*.dll
     - name: Upload LSLConnector
       uses: actions/upload-artifact@v2
       with:
-        name: G3LSLConnector
+        name: G3LSLConnector_${{steps.version.outputs.version}}
         path: examples/G3LSLConnector/bin/Release/net48/*.*

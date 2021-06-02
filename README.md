@@ -7,7 +7,7 @@ it comes to developing software for the Glasses3 API.
 
 ## Installation 
 
-The easiest way to get started is to use the NuGet package for G3SDK.net
+The easiest way to get started is to use the NuGet package for the Glasses3 SDK
 
 You can install using NuGet like this:
 
@@ -35,19 +35,34 @@ if (await g3.Calibrate.Run())
 {
     await g3.Recorder.Start();
     await Task.Delay(TimeSpan.FromSeconds(10));
-    g3.Recorder.Stop();
+    await g3.Recorder.Stop();
 }
 ```
+
+## Documentation
+
+There is a [Glasses 3 Developers Guide](https://www.tobiipro.com/product-listing/tobii-pro-glasses3-api/#ResourcesSpecifications) available for download from the Tobii website. Even though the SDK handles most of the communication with the glasses, it is still recommended to read the developers guide to get a better overview of how the API works.
+For more information on individual methods in the SDK, please refer to the API documentation in the WebUI on your glasses (http://<serialnumber>.local).
+
 ## Limitations
 
 The SDK does not support streaming data via WebRTC or RTSP on its own, you will need exteral libraries for that. 
 [RtspClientSharp](https://github.com/BogdanovKirill/RtspClientSharp) is a good start if you want to use video streaming over RTSP.
 
 ## Samples
+### Glasses Demo
+Simple demo that shows a couple of commands with the Glasses SDK
+
 ### LSL Connector for Glasses 3
 This is a complete sample that will expose Glasses3 data streams to as Lab Streaming Layer data streams. To run the sample, just build and start it. It will automatically locate any available Glasses 3 device and register a stream outlet for the gaze stream from the unit.
 
 ### Document extractor for Glasses 3
 This example shows how to access metadata for the API including the documentation that is used to build the API browser in the WebUI for Glasses 3. It will extract the documentation and save it as a json-file. There is also a very simple viewer for such json-files that can show two json-files side by side and highlight the changes. 
-Start the webserver in examples\G3DocumentExtractor\miniweb\miniweb.exe and point your web browser to http://localhost:8000
-included in the repo is the json files for the firmware versions that have been publicly released.
+
+Start the webserver in examples\G3DocumentExtractor\miniweb\miniweb.exe and point your web browser to http://localhost:8000 included in the repo is the json files for the firmware versions that have been publicly released.
+
+### G3 To Screen Mapper
+This is a rather advanced demo that shows how to receive and display RTSP video using OpenCV. it also performs some image processing of the video to find and position a computer screen in the video and map the gaze data to the coordinate system of this screen.
+
+To do this, the screen is decorated with ArUco markers along the edges. The application uses OpenCV to receive live video frames from the camera of the glasses, each frame is searched for existing ArUco markers (again using OpenCV). If enough markers are found, the position of the screen in the video frame is determined, and then gaze data is transformed from frame to the screen. The original video frame is warped to a new image using the same transform so that the screen is mapped to the center of image. Both the warped image and the original video frame is displayed in a window.
+

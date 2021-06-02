@@ -1,0 +1,38 @@
+﻿<Window x:Class="G3ToScreenMapper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="1502">
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Image Grid.Column="0" x:Name ="_img" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="UniformToFill" Grid.ColumnSpan="2"/>
+        <Canvas Grid.Column="0" x:Name="_markerCanvas" HorizontalAlignment="Left" VerticalAlignment="Top"  ></Canvas>
+        <Canvas Grid.Column="0" x:Name="_gazeCanvas" HorizontalAlignment="Left" VerticalAlignment="Top"  >
+            <Ellipse x:Name="_gazeMarker" Width="25" Height="25" Fill="Red"></Ellipse>
+            <Ellipse x:Name="_gazeMarker2" Width="3" Height="3" Fill="Black"></Ellipse>
+        </Canvas>
+
+
+        <Image Grid.Column="1" x:Name="_warpedImage" VerticalAlignment="Top"></Image>
+        <Canvas Grid.Column="1" x:Name="_warpedCanvas" VerticalAlignment="Top">
+            <Ellipse x:Name="_warpedGazeMarker" Width="25" Height="25" Fill="Red"></Ellipse>
+            <Ellipse x:Name="_warpedGazeMarker2" Width="3" Height="3" Fill="Black"></Ellipse>
+
+        </Canvas>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" >
+            <Button  x:Name="_btnCalibrate" IsEnabled="False" Content="Calibrate" Height="30" Width="75" Click="Button_Click_1" />
+        </StackPanel>
+
+    </Grid>
+</Window>

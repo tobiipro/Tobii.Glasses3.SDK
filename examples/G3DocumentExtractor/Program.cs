@@ -78,6 +78,7 @@ namespace G3DocumentExtractor
                         single[k] = true;
                     }
                 }
+                // replace known values/types with human readable names
                 var objectName = Regex.Replace(p, @"[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}", "<UUID>");
                 objectName = Regex.Replace(objectName, @"TG03B-[0-9]{12}", "<SerialNumber>");
                 Console.WriteLine(objectName + (skip?" skip":""));
@@ -89,6 +90,8 @@ namespace G3DocumentExtractor
             }
             
             var json = JsonConvert.SerializeObject(doc, Formatting.Indented, settings);
+
+            // replace known numeric constants with human readable names
             json = json.Replace("1.7976931348623157E+308", "\"Double.Max\"");
             json = json.Replace("9223372036854776000", "\"Int64.Max\"");
             
@@ -111,7 +114,7 @@ namespace G3DocumentExtractor
 
     public class OrderedContractResolver : DefaultContractResolver
     {
-        protected override System.Collections.Generic.IList<JsonProperty> CreateProperties(System.Type type, MemberSerialization memberSerialization)
+        protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
             return base.CreateProperties(type, memberSerialization).OrderBy(p => p.PropertyName, StringComparer.Ordinal).ToList();
         }

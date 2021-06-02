@@ -182,7 +182,7 @@ namespace G3SDK
             _signalBySignalId.TryRemove(signalId, out signal);
         }
 
-        public bool HandleMessage(WebSockMsg msg, int size)
+        public bool HandleMessage(WebSockMsg msg)
         {
             if (msg.id.HasValue && _signalByRequestId.TryGetValue(msg.id.Value, out var signal) && msg.body != null)
             {

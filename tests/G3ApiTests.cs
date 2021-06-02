@@ -237,7 +237,6 @@ namespace G3SDK
             Thread.Sleep(1000);
         }
 
-
         [Test]
         public async Task ValidateAPI()
         {
@@ -253,7 +252,6 @@ namespace G3SDK
             await session.ValidateApi(warnings);
             Thread.Sleep(1000);
             await G3Api.WebRTC.Delete(session);
-
 
             await G3Api.Recorder.ValidateApi(warnings);
             await G3Api.Recordings.ValidateApi(warnings);
@@ -283,7 +281,6 @@ namespace G3SDK
                                      Environment.NewLine + "=====" +
                                      Environment.NewLine + string.Join(Environment.NewLine, warnings) +
                                      Environment.NewLine + "=====");
-
         }
 
         [Test]
@@ -447,7 +444,7 @@ namespace G3SDK
             var addedCount = 0;
             var removedCount = 0;
             var sw = new Stopwatch();
-            var tokens = new System.Collections.Generic.List<IDisposable>
+            var tokens = new List<IDisposable>
             {
                 await G3Api.Recordings.ChildAdded.SubscribeAsync(s => addedCount++),
                 await G3Api.Recordings.ChildRemoved.SubscribeAsync(s => removedCount++),
@@ -455,7 +452,6 @@ namespace G3SDK
                 await G3Api.Recorder.Started.SubscribeAsync(s => startedCount++),
                 await G3Api.Recorder.Stopped.SubscribeAsync(s => stoppedCount++)
             };
-
 
             var start = await G3Api.Recorder.Start();
 
@@ -538,7 +534,6 @@ namespace G3SDK
             await G3Api.Recorder.Cancel();
 
             Assert.False(await G3Api.Recorder.RecordingInProgress(), "failed to cancel 2");
-
         }
 
         private async Task EnsureSDCard()
@@ -655,7 +650,6 @@ namespace G3SDK
             Assert.That(mac, Is.Not.Empty, "unexpected mac address");
             Assert.That(state, Is.Not.EqualTo(ConnectionState.Unknown), "unexpected connection state");
             Assert.That(config, Is.Not.Null, "unexpected null wifi config guid");
-
         }
     }
 }
