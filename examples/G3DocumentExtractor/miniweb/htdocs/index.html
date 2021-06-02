@@ -1,0 +1,24 @@
+<html>
+<head>
+  <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+  <script src="apiref.js"></script>
+  <script src="jquery-3.5.1.min.js"></script>
+</head>
+
+<script>
+function init() {
+  loadVersions($('#docVersion'), $('#compVersion'), $('#doc'));
+}
+
+function updateDoc() {
+  loadDocumentation($('#docVersion').val(), $('#compVersion').val(), $('#doc'));
+}
+</script>
+
+<body onload="init()">
+  <select id="compVersion"></select>
+  <select id="docVersion"></select>
+  <button onclick="updateDoc()">Load</button>
+  <div class="doc" id="doc"></div>
+</body>
+</html>

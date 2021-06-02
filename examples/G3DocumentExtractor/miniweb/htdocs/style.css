@@ -1,0 +1,97 @@
+.doc {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.object {
+  padding-bottom: 10px;
+  font-size: xx-large;
+}
+
+.objectHeader {
+    float:left;
+    padding-right: 30px;
+}
+
+.objectName {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.header {
+    padding-bottom: 10px;
+    font-size: 30px;
+}
+
+.actions, 
+.properties, 
+.signals {
+    font-size: large;
+    padding-left: 30px;
+}
+  
+.property {
+    padding-bottom: 10px;
+    padding-left: 30px;
+    font-size: medium;
+}
+
+.propertySignature {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    float:left;
+    padding-right: 20px;
+}
+
+ .propertyMode {
+     padding-left: 20px;
+ }
+
+.propertyRange {
+    padding-left: 30px;
+}
+
+.action {
+    font-size: medium;
+    padding-left: 30px;
+    padding-bottom: 10px;
+}
+
+
+.propertyRangeHeader {
+    font-weight: bold;
+    float: left;
+}
+
+.signalSignature,
+.actionSignature {
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+
+}
+
+.docHeader,
+.propertyRangeHeader {
+    font-weight: bold;
+}
+
+.description {
+    padding-left: 30px;
+}
+
+.signal {
+    font-size: medium;
+    padding-bottom: 10px;
+    padding-left: 30px;
+}
+
+.new {
+    border-width: 2;
+    border-color: green;
+    border-style: solid;    
+}
+
+.modified {
+    border-width: 2;
+    border-color: aqua;
+
+    border-style: dashed;    
+}

@@ -1,0 +1,56 @@
+name: Build G3SDK
+
+on:
+  push:
+    branches: [ master, f/** ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build debug
+      run: dotnet build --configuration Debug
+    - name: Build release
+      run: dotnet build --configuration Release
+    - name: Remove nuget package
+      run: del source/bin/Release/*.nupkg
+    - name: Sign release binaries
+      uses: jonashogstrom/code-sign-action@v2.0.9
+      with:
+        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}'
+        sign_args: '/v /p ${{ secrets.CODESIGNPASSWORD }} /tr http://timestamp.digicert.com /sha1 ${{ secrets.TOBIICODESIGNCERTIFICATE_SHA1 }}'
+        folder: 'source/bin/Release'
+        recursive: true
+    - name: Build nuget package
+      run: dotnet pack --configuration Release
+    - name: Upload nuget package
+      uses: actions/upload-artifact@v2
+      with:
+        name: Tobii.Glasses3.SDK
+        path: source/bin/Release/Tobii.Glasses3.SDK.*.nupkg
+    - name: Upload signed SDK dlls, .netfw
+      uses: actions/upload-artifact@v2
+      with:
+        name: Tobii.Glasses3.SDK-binaries
+        path: source/bin/Release/net472/*.dll
+    - name: Upload signed SDK dlls .net5
+      uses: actions/upload-artifact@v2
+      with:
+        name: Tobii.Glasses3.SDK-binaries
+        path: source/bin/Release/net5.0/*.dll
+    - name: Upload LSLConnector
+      uses: actions/upload-artifact@v2
+      with:
+        name: G3LSLConnector
+        path: examples/G3LSLConnector/bin/Release/net48/*.*

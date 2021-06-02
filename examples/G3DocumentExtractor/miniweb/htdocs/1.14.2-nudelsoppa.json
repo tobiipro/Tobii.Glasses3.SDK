@@ -1,0 +1,1983 @@
+{
+  "/": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "remote-host": {
+        "return": "string",
+        "args": [],
+        "help": "Look up the remote (requesting) host or address.\n\nArguments:\nReturn:\nThe host or address of the caller."
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "webrtc",
+      "recordings",
+      "calibrate",
+      "rudimentary",
+      "recorder",
+      "upgrade",
+      "network",
+      "neighborhood",
+      "system",
+      "settings"
+    ]
+  },
+  "/calibrate": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "emit-markers": {
+        "return": "boolean",
+        "args": [],
+        "help": "Emit markers for 3 seconds.\n\nReturn:\ntrue if emission of markers was started."
+      },
+      "run": {
+        "return": "boolean",
+        "args": [],
+        "help": "Perform a personal calibration.\n\nReturn:\ntrue if calibration succeeded, false otherwise."
+      }
+    },
+    "signals": {
+      "marker": {
+        "args": [
+          "real",
+          "array",
+          "array"
+        ],
+        "help": "Send out calibration markers when found.\n\nArguments:\ntimestamp: The calibration marker timestamp.\nposition3D: The 3D position of the marker.\nposition2D: The normalized 2D position of the marker."
+      }
+    },
+    "children": []
+  },
+  "/neighborhood": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "wifi",
+      "ethernet"
+    ]
+  },
+  "/neighborhood/ethernet": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "TG03B-080200004381"
+    ]
+  },
+  "/neighborhood/ethernet/<SerialNumber>": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "domain": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The domain registered for this host."
+      },
+      "ipv4": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Host is registered with IPv4."
+      },
+      "ipv6": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Host is registered with IPv6."
+      },
+      "port": {
+        "type": "int",
+        "range": [
+          0,
+          65535
+        ],
+        "mode": "r",
+        "help": "The port registered for this host."
+      },
+      "hostname": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The hostname registered for this host."
+      }
+    },
+    "actions": {},
+    "signals": {},
+    "children": []
+  },
+  "/neighborhood/wifi": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "TG03B-080200004381"
+    ]
+  },
+  "/neighborhood/wifi/<SerialNumber>": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "domain": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The domain registered for this host."
+      },
+      "ipv4": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Host is registered with IPv4."
+      },
+      "ipv6": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Host is registered with IPv6."
+      },
+      "port": {
+        "type": "int",
+        "range": [
+          0,
+          65535
+        ],
+        "mode": "r",
+        "help": "The port registered for this host."
+      },
+      "hostname": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The hostname registered for this host."
+      }
+    },
+    "actions": {},
+    "signals": {},
+    "children": []
+  },
+  "/network": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "wifi-enable": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Enable or disable Wi-Fi networking."
+      },
+      "wifi-hw-enabled": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "Check the state of the Wi-Fi hardware."
+      }
+    },
+    "actions": {
+      "reset": {
+        "return": null,
+        "args": [],
+        "help": "Reset the whole network setup.\n"
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "wifi",
+      "ethernet"
+    ]
+  },
+  "/network/ethernet": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "state": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "disconnected",
+          "config",
+          "auth",
+          "ip-config",
+          "connected",
+          "disconnecting",
+          "failed"
+        ],
+        "mode": "r",
+        "help": "The current state of the device."
+      },
+      "state-reason": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "none",
+          "config-fail",
+          "auth-fail",
+          "dhcp-fail",
+          "config-ip-fail",
+          "connection-removed",
+          "user-request",
+          "carrier",
+          "access-point-fail"
+        ],
+        "mode": "r",
+        "help": "The reason for the current state of the device."
+      },
+      "type": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "ethernet",
+          "wifi"
+        ],
+        "mode": "r",
+        "help": "The network device type."
+      },
+      "mac-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The network device MAC address."
+      },
+      "speed": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "The current network speed (kbit/s)."
+      },
+      "auto-connect": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "If automatic activation should be performed."
+      },
+      "active-configuration": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The UUID of the active configuration, null if not active."
+      },
+      "connected-network": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the current network."
+      },
+      "ipv4-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 Address."
+      },
+      "ipv4-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 Gateway."
+      },
+      "ipv4-name-servers": {
+        "type": "array",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 name servers."
+      },
+      "ipv6-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 Address."
+      },
+      "ipv6-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 gateway."
+      },
+      "ipv6-name-servers": {
+        "type": "array",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 name servers."
+      }
+    },
+    "actions": {
+      "create-config": {
+        "return": "string",
+        "args": [
+          "string"
+        ],
+        "help": "Create a configuration for this device.\n\nArguments:\nname: The name of the configuration.\nReturn:\nThe UUID of the new configuration, null on error."
+      },
+      "connect": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Connect device using specific configuration.\n\nArguments:\nuuid: UUID of the configuration to use.\nReturn:\ntrue on success, false otherwise."
+      },
+      "disconnect": {
+        "return": null,
+        "args": [],
+        "help": "Disconnect device.\n"
+      }
+    },
+    "signals": {
+      "connected": {
+        "args": [],
+        "help": "Emitted when the active connection changes (connection, disconnection).\n"
+      },
+      "state-change": {
+        "args": [
+          "enum",
+          "enum"
+        ],
+        "help": "Emitted when the network device state is changed.\n\nArguments:\nstate: The new state of the device.\nreason: The reason for the new state change."
+      },
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "configurations"
+    ]
+  },
+  "/network/ethernet/configurations": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "find-by-id": {
+        "return": "array",
+        "args": [
+          "string"
+        ],
+        "help": "Find configurations with a matching id.\n\nArguments:\nid: The name of the id to search for.\nReturn:\nArray of configuration UUIDs with matching id."
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "728bcffc-3b0c-461c-b94e-09cdc955b24a",
+      "62b4dc13-f3bc-44b0-bf8a-1859327abc05",
+      "b09f1232-9333-4664-9a91-cf5623e964b5"
+    ]
+  },
+  "/network/ethernet/configurations/<UUID>": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "default": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "If the configuration is a default, read-only, configuration."
+      },
+      "id": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The network connection name."
+      },
+      "autoconnect": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Autoconnect to this configuration."
+      },
+      "ipv4-method": {
+        "type": "enum",
+        "range": [
+          "manual",
+          "dhcp",
+          "link-local",
+          "disable"
+        ],
+        "mode": "rw",
+        "help": "IPv4 connection method."
+      },
+      "ipv4-address": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 address."
+      },
+      "ipv4-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 gateway."
+      },
+      "ipv4-name-servers": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 DNS"
+      },
+      "ipv6-method": {
+        "type": "enum",
+        "range": [
+          "manual",
+          "automatic",
+          "dhcp",
+          "link-local",
+          "ignore"
+        ],
+        "mode": "rw",
+        "help": "IPv6 connection method."
+      },
+      "ipv6-address": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 address."
+      },
+      "ipv6-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 gateway."
+      },
+      "ipv6-name-servers": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 DNS."
+      },
+      "dhcp-server-enable": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Enable dhcp server."
+      },
+      "dhcp-server-range-low": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The start of the leased ip range (NULL to auto-select)."
+      },
+      "dhcp-server-range-high": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The end of the leased ip range (NULL to auto-select)."
+      },
+      "dhcp-server-lease-time": {
+        "type": "int",
+        "range": [
+          0,
+          2147483647
+        ],
+        "mode": "rw",
+        "help": "The time, in hours, for a dhcp lease (0 to auto-select)."
+      }
+    },
+    "actions": {
+      "save": {
+        "return": "boolean",
+        "args": [],
+        "help": "Save any changed settings in the configuration.\n\nReturn:\ntrue if the changes were saved, false otherwise."
+      },
+      "restore": {
+        "return": null,
+        "args": [],
+        "help": "Restore to current configuration.\n"
+      },
+      "delete": {
+        "return": null,
+        "args": [],
+        "help": "Delete configuration.\n"
+      }
+    },
+    "signals": {},
+    "children": []
+  },
+  "/network/wifi": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "state": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "disconnected",
+          "config",
+          "auth",
+          "ip-config",
+          "connected",
+          "disconnecting",
+          "failed"
+        ],
+        "mode": "r",
+        "help": "The current state of the device."
+      },
+      "state-reason": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "none",
+          "config-fail",
+          "auth-fail",
+          "dhcp-fail",
+          "config-ip-fail",
+          "connection-removed",
+          "user-request",
+          "carrier",
+          "access-point-fail"
+        ],
+        "mode": "r",
+        "help": "The reason for the current state of the device."
+      },
+      "type": {
+        "type": "enum",
+        "range": [
+          "unknown",
+          "ethernet",
+          "wifi"
+        ],
+        "mode": "r",
+        "help": "The network device type."
+      },
+      "mac-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The network device MAC address."
+      },
+      "speed": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "The current network speed (kbit/s)."
+      },
+      "auto-connect": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "If automatic activation should be performed."
+      },
+      "active-configuration": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The UUID of the active configuration, null if not active."
+      },
+      "connected-network": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the current network."
+      },
+      "ipv4-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 Address."
+      },
+      "ipv4-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 Gateway."
+      },
+      "ipv4-name-servers": {
+        "type": "array",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv4 name servers."
+      },
+      "ipv6-address": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 Address."
+      },
+      "ipv6-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 gateway."
+      },
+      "ipv6-name-servers": {
+        "type": "array",
+        "range": [],
+        "mode": "r",
+        "help": "The current IPv6 name servers."
+      }
+    },
+    "actions": {
+      "connect-network": {
+        "return": "boolean",
+        "args": [
+          "string",
+          "string"
+        ],
+        "help": "Connect to a Network, creating a new configuration if needed.\nTo reuse the pre-shared key, or to connect to an open network, supply NULL as the PSK argument.\n\nArguments:\nuuid: The UUID of the access point to connect to.\npsk: Pre-shared key to use for connection.\nReturn:\ntrue if the connection succeeded, false otherwise."
+      },
+      "scan": {
+        "return": "boolean",
+        "args": [],
+        "help": "Start a scan for Wi-Fi access points.\n\nReturn:\ntrue if scan was started, false otherwise."
+      },
+      "create-config": {
+        "return": "string",
+        "args": [
+          "string"
+        ],
+        "help": "Create a configuration for this device.\n\nArguments:\nname: The name of the configuration.\nReturn:\nThe UUID of the new configuration, null on error."
+      },
+      "connect": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Connect device using specific configuration.\n\nArguments:\nuuid: UUID of the configuration to use.\nReturn:\ntrue on success, false otherwise."
+      },
+      "disconnect": {
+        "return": null,
+        "args": [],
+        "help": "Disconnect device.\n"
+      }
+    },
+    "signals": {
+      "connected": {
+        "args": [],
+        "help": "Emitted when the active connection changes (connection, disconnection).\n"
+      },
+      "state-change": {
+        "args": [
+          "enum",
+          "enum"
+        ],
+        "help": "Emitted when the network device state is changed.\n\nArguments:\nstate: The new state of the device.\nreason: The reason for the new state change."
+      },
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "networks",
+      "configurations"
+    ]
+  },
+  "/network/wifi/configurations": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "find-by-id": {
+        "return": "array",
+        "args": [
+          "string"
+        ],
+        "help": "Find configurations with a matching id.\n\nArguments:\nid: The name of the id to search for.\nReturn:\nArray of configuration UUIDs with matching id."
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "728bcffc-3b0c-461c-b94e-09cdc955b24a",
+      "4176e65f-7642-4eb5-999c-a52f2ea76998"
+    ]
+  },
+  "/network/wifi/configurations/<UUID>": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "default": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "If the configuration is a default, read-only, configuration."
+      },
+      "id": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The network connection name."
+      },
+      "autoconnect": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Autoconnect to this configuration."
+      },
+      "ipv4-method": {
+        "type": "enum",
+        "range": [
+          "manual",
+          "dhcp",
+          "link-local",
+          "disable"
+        ],
+        "mode": "rw",
+        "help": "IPv4 connection method."
+      },
+      "ipv4-address": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 address."
+      },
+      "ipv4-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 gateway."
+      },
+      "ipv4-name-servers": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv4 DNS"
+      },
+      "ipv6-method": {
+        "type": "enum",
+        "range": [
+          "manual",
+          "automatic",
+          "dhcp",
+          "link-local",
+          "ignore"
+        ],
+        "mode": "rw",
+        "help": "IPv6 connection method."
+      },
+      "ipv6-address": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 address."
+      },
+      "ipv6-gateway": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 gateway."
+      },
+      "ipv6-name-servers": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "IPv6 DNS."
+      },
+      "dhcp-server-enable": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Enable dhcp server."
+      },
+      "dhcp-server-range-low": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The start of the leased ip range (NULL to auto-select)."
+      },
+      "dhcp-server-range-high": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The end of the leased ip range (NULL to auto-select)."
+      },
+      "dhcp-server-lease-time": {
+        "type": "int",
+        "range": [
+          0,
+          2147483647
+        ],
+        "mode": "rw",
+        "help": "The time, in hours, for a dhcp lease (0 to auto-select)."
+      },
+      "access-point": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "If the network should act as an access point."
+      },
+      "ssid": {
+        "type": "bytes",
+        "range": [],
+        "mode": "rw",
+        "help": "The SSID of the configured network."
+      },
+      "ssid-name": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The SSID of the configured network as a string.\nWi-Fi SSIDs are byte arrays, they are _not_ strings, so may contain embedded NULLs and other unprintable characters. This property only be used for debugging and display only."
+      },
+      "security": {
+        "type": "enum",
+        "range": [
+          "open",
+          "wpa-psk",
+          "unknown"
+        ],
+        "mode": "rw",
+        "help": "Configuration security."
+      },
+      "psk": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "Pre-Shared-Key of the network."
+      },
+      "channel": {
+        "type": "int",
+        "range": [
+          1,
+          11
+        ],
+        "mode": "rw",
+        "help": "Wifi channel to use"
+      }
+    },
+    "actions": {
+      "save": {
+        "return": "boolean",
+        "args": [],
+        "help": "Save any changed settings in the configuration.\n\nReturn:\ntrue if the changes were saved, false otherwise."
+      },
+      "restore": {
+        "return": null,
+        "args": [],
+        "help": "Restore to current configuration.\n"
+      },
+      "delete": {
+        "return": null,
+        "args": [],
+        "help": "Delete configuration.\n"
+      }
+    },
+    "signals": {},
+    "children": []
+  },
+  "/network/wifi/networks": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "find-by-ssid": {
+        "return": "array",
+        "args": [
+          "bytes"
+        ],
+        "help": "Find networks with a matching SSID.\nFilter the list of networks by ssid.\n\nArguments:\nssid: Base64 encoded SSID to search for.\nReturn:\nArray of UUIDs with matching SSID"
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "044acda8-b0b7-42e5-a008-f518b4dad59f"
+    ]
+  },
+  "/network/wifi/networks/<UUID>": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "ssid": {
+        "type": "bytes",
+        "range": [],
+        "mode": "r",
+        "help": "The SSID of the access point."
+      },
+      "ssid-name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Parsed name of the SSID as a string."
+      },
+      "wifi-mode": {
+        "type": "enum",
+        "range": [
+          "infrastructure",
+          "access-point",
+          "unknown"
+        ],
+        "mode": "r",
+        "help": "Network Wi-Fi mode."
+      },
+      "max-bitrate": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "Max speed of the access point in kbit/s."
+      },
+      "strength": {
+        "type": "int",
+        "range": [
+          0,
+          100
+        ],
+        "mode": "r",
+        "help": "The current strength in percent of the access point."
+      },
+      "security": {
+        "type": "enum",
+        "range": [
+          "open",
+          "wpa-psk",
+          "unknown"
+        ],
+        "mode": "r",
+        "help": "The access point security mode."
+      }
+    },
+    "actions": {},
+    "signals": {},
+    "children": []
+  },
+  "/recorder": {
+    "properties": {
+      "current-gaze-frequency": {
+        "type": "int",
+        "range": [
+          0,
+          100
+        ],
+        "mode": "r",
+        "help": "Get the current gaze frequency."
+      },
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "visible-name": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The visible name of a new or ongoing recording."
+      },
+      "duration": {
+        "type": "real",
+        "range": [
+          -1.0,
+          "Double.Max"
+        ],
+        "mode": "r",
+        "help": "The current duration of an ongoing recording."
+      },
+      "created": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The creation time of the recording."
+      },
+      "timezone": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The timezone at recording creation."
+      },
+      "folder": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "The name of the folder that holds the recording."
+      },
+      "gaze-samples": {
+        "type": "int",
+        "range": [
+          -1,
+          9223372036854775807
+        ],
+        "mode": "r",
+        "help": "The total number of gaze samples in the recording (-1 if not found)."
+      },
+      "valid-gaze-samples": {
+        "type": "int",
+        "range": [
+          -1,
+          9223372036854775807
+        ],
+        "mode": "r",
+        "help": "The number of valid gaze samples in the recording (-1 if not found)."
+      },
+      "gaze-overlay": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "If the recording was started with Gaze Overlay."
+      },
+      "uuid": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "Get the UUID of an ongoing recording (null if not ongoing)."
+      },
+      "remaining-time": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "The approximate number of seconds left for a recording."
+      }
+    },
+    "actions": {
+      "start": {
+        "return": "boolean",
+        "args": [],
+        "help": "Create and start a new recording.\nIf action returns false, action-error is set.\n\nArguments:\nReturn:\ntrue if recording could be started, false otherwise."
+      },
+      "stop": {
+        "return": "boolean",
+        "args": [],
+        "help": "Stop and save an ongoing recording.\n\nReturn:\ntrue if stopping succeeded, false otherwise."
+      },
+      "cancel": {
+        "return": null,
+        "args": [],
+        "help": "Cancel and delete an ongoing recording.\n"
+      },
+      "snapshot": {
+        "return": "boolean",
+        "args": [],
+        "help": "Store a snapshot JPEG image of the current scene.\n\nReturn:\ntrue if snapshot was started, false otherwise"
+      },
+      "send-event": {
+        "return": "boolean",
+        "args": [
+          "string",
+          "object"
+        ],
+        "help": "Send event to recording.\nRecording must be running to send events.\n\nArguments:\ntag: Tag name of the event.\nobject: Object data for the event.\nReturn:\ntrue if event was sent, otherwise false"
+      },
+      "meta-insert": {
+        "return": "boolean",
+        "args": [
+          "string",
+          "bytes"
+        ],
+        "help": "Insert a key-value pair into the meta data.\n\nArguments:\nkey: Name of meta object.\nmeta: Value base64 meta data, supply null to remove key.\nReturn:\ntrue if the key-value pair was inserted, false otherwise."
+      },
+      "meta-lookup": {
+        "return": "bytes",
+        "args": [
+          "string"
+        ],
+        "help": "Get the meta data associated with the specific key.\n\nArguments:\nkey: The name of meta object.\nReturn:\nBase64 meta data, null if not found."
+      },
+      "meta-keys": {
+        "return": "array",
+        "args": [],
+        "help": "Get an array of available meta data keys.\n\nReturn:\nArray of meta data keys."
+      }
+    },
+    "signals": {
+      "started": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal emitted when a recording is started.\n\nArguments:\nuuid: The UUID that is associated with the started recording."
+      },
+      "stopped": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal emitted when a recording is completed.\n\nArguments:\nfolder: The folder the recording was stored in, null on cancel or error."
+      }
+    },
+    "children": []
+  },
+  "/recordings": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "delete": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Delete recording by UUID.\nThis only marks the recording for deletion and removes it from the list of recordings, the recording is deleted when the last viewer has closed the connection to the recording (see deleted signal).\n\nArguments:\nuuid: The UUID of the recording to delete.\nReturn:\ntrue if recording was marked for deletion, false otherwise."
+      }
+    },
+    "signals": {
+      "scan-done": {
+        "args": [],
+        "help": "Emitted at the end of a complete scan of the SD card.\nSee scan-start.\n"
+      },
+      "scan-start": {
+        "args": [],
+        "help": "Emitted at start of a complete scan of the SD card.\nThis usually happens after the card has been inserted or during startup.\n"
+      },
+      "deleted": {
+        "args": [
+          "string"
+        ],
+        "help": "Emitted when a recording has been deleted.\nRecordings are deleted when it has been marked for deletion by the delete action and the last viewer has closed the recording.\n\nArguments:\nuuid: The UUID of the recording that was deleted."
+      },
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": []
+  },
+  "/rudimentary": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "scene-scale": {
+        "type": "int",
+        "range": [
+          1,
+          32
+        ],
+        "mode": "rw",
+        "help": "The scale factor for scene camera images."
+      },
+      "scene-quality": {
+        "type": "int",
+        "range": [
+          15,
+          100
+        ],
+        "mode": "rw",
+        "help": "The JPEG quality for scene camera images."
+      },
+      "gaze-sample": {
+        "type": "object",
+        "range": [],
+        "mode": "r",
+        "help": "Get the latest gaze sample."
+      },
+      "sync-port-sample": {
+        "type": "object",
+        "range": [],
+        "mode": "r",
+        "help": "Get the latest sync port sample."
+      },
+      "imu-sample": {
+        "type": "object",
+        "range": [],
+        "mode": "r",
+        "help": "Get the latest IMU sample."
+      },
+      "event-sample": {
+        "type": "object",
+        "range": [],
+        "mode": "r",
+        "help": "Get the latest event sample."
+      }
+    },
+    "actions": {
+      "keepalive": {
+        "return": "boolean",
+        "args": [],
+        "help": "Start and keep Rudimentary streams alive.\nEnsure signal emission for 6 seconds.\n\nReturn:\ntrue if signal emission will take place, false otherwise."
+      },
+      "send-event": {
+        "return": "boolean",
+        "args": [
+          "string",
+          "object"
+        ],
+        "help": "Send a event.\nNote; Streams must be started with keep alive signal to be able to send events.\n\nArguments:\ntag: Tag for the event.\nobject: Object data for the event.\nReturn:\ntrue on success, false otherwise."
+      },
+      "calibrate": {
+        "return": "boolean",
+        "args": [],
+        "help": "Perform a personal calibration.\n\nReturn:\ntrue if the calibration succeeded, false otherwise."
+      }
+    },
+    "signals": {
+      "event": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits event objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The supplied object."
+      },
+      "scene": {
+        "args": [
+          "real",
+          "bytes"
+        ],
+        "help": "Emits down-scaled JPEG images from the scene camera.\nThis is a heavy task by the recording unit and will greatly reduce battery time and processing time for gaze data. Use only if absolutely needed.\n\nArguments:\ntimestamp: The timestamp in seconds.\nimage: Base64 encoded JPEG image."
+      },
+      "gaze": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits gaze objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The supplied object."
+      },
+      "sync-port": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits sync port objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The supplied object."
+      },
+      "imu": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits IMU sample objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The supplied object."
+      }
+    },
+    "children": []
+  },
+  "/settings": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "gaze-frequency": {
+        "type": "int",
+        "range": [
+          50,
+          100
+        ],
+        "mode": "rw",
+        "help": "Selected gaze frequency for the Recording Unit."
+      },
+      "gaze-overlay": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "Select to draw gaze marker on the scene-camera video."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "changed": {
+        "args": [
+          "string"
+        ],
+        "help": "Emitted after a settings property is changed.\n\nArguments:\nproperty: The name of the property that was changed."
+      }
+    },
+    "children": []
+  },
+  "/system": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "version": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The current version of the recording unit firmware."
+      },
+      "recording-unit-serial": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The serial number of the recording unit (null if not detected)."
+      },
+      "head-unit-serial": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The serial number of the head unit."
+      },
+      "time": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The system time of the recording unit in ISO 8601 format."
+      },
+      "timezone": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The time zone of the recording unit."
+      },
+      "ntp-is-enabled": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "true if NTP is enabled, false otherwise."
+      },
+      "ntp-is-synchronized": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "true if the system clock is synchronized by NTP, false otherwise."
+      }
+    },
+    "actions": {
+      "set-time": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Set the system time of the recording unit.\n\nArguments:\ntime: An ISO 8601 formatted time string.\nReturn:\ntrue if the system time was set, false otherwise."
+      },
+      "set-timezone": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Set the system timezone of the recording unit.\n\nArguments:\ntimezone: A valid ISO 8601 timezone string.\nReturn:\ntrue if the timezone was set, false otherwise."
+      },
+      "use-ntp": {
+        "return": "boolean",
+        "args": [
+          "boolean"
+        ],
+        "help": "Set NTP synchronization usage.\n\nArguments:\nuse: true to switch NTP on, otherwise false.\nReturn:\ntrue if the NTP state was set, false otherwise."
+      },
+      "available-gaze-frequencies": {
+        "return": "array",
+        "args": [],
+        "help": "Read the available gaze frequencies from the Head Unit.\n\nReturn:\nInteger array of available gaze frequencies"
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "battery",
+      "storage"
+    ]
+  },
+  "/system/battery": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "level": {
+        "type": "real",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "mode": "r",
+        "help": "The remaining battery level."
+      },
+      "remaining-time": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "The remaining battery time in seconds."
+      },
+      "charging": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "The battery charging state."
+      },
+      "state": {
+        "type": "enum",
+        "range": [
+          "full",
+          "good",
+          "low",
+          "verylow",
+          "unknown"
+        ],
+        "mode": "r",
+        "help": "The state of the battery."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "state-changed": {
+        "args": [
+          "enum",
+          "boolean"
+        ],
+        "help": "Signal emitted when the battery state has changed.\n\nArguments:\nstate: The new battery state.\ncharging: true if the charger is connected, false otherwise."
+      }
+    },
+    "children": []
+  },
+  "/system/storage": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "free": {
+        "type": "int",
+        "range": [
+          0,
+          9223372036854775807
+        ],
+        "mode": "r",
+        "help": "The available free space in bytes of the inserted SD card."
+      },
+      "size": {
+        "type": "int",
+        "range": [
+          0,
+          9223372036854775807
+        ],
+        "mode": "r",
+        "help": "The size in bytes of the inserted SD card."
+      },
+      "remaining-time": {
+        "type": "int",
+        "range": [
+          0,
+          4294967295
+        ],
+        "mode": "r",
+        "help": "The approximate number of seconds until there is no space left on the SD card if the recording unit is recording."
+      },
+      "space-state": {
+        "type": "enum",
+        "range": [
+          "good",
+          "low",
+          "verylow",
+          "unknown"
+        ],
+        "mode": "r",
+        "help": "Recording availability on the inserted SD card."
+      },
+      "card-state": {
+        "type": "enum",
+        "range": [
+          "not-inserted",
+          "not-available",
+          "read-only",
+          "available",
+          "failure"
+        ],
+        "mode": "r",
+        "help": "The detected partition of the inserted SD card."
+      },
+      "busy": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "If true the recording unit is utilizing the SD card.\nUser may only remove the SD card when this property is false."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "state-changed": {
+        "args": [
+          "enum",
+          "enum"
+        ],
+        "help": "Signal emitted after card or space state has changed.\n\nArguments:\nspace-state: The new space state.\ncard-state: The new state of the SD card."
+      },
+      "busy-changed": {
+        "args": [
+          "boolean"
+        ],
+        "help": "Signal emitted to indicate usage of the SD card.\n\nArguments:\nbusy: New busy state."
+      }
+    },
+    "children": []
+  },
+  "/upgrade": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "in-progress": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "r",
+        "help": "true if upgrade is in progress, false otherwise."
+      }
+    },
+    "actions": {},
+    "signals": {
+      "progress": {
+        "args": [
+          "real",
+          "real"
+        ],
+        "help": "Progress reporter for upgrade.\n\nArguments:\nupload: Upload progress.\nupgrade: Upgrade progress."
+      },
+      "completed": {
+        "args": [
+          "boolean"
+        ],
+        "help": "Upgrade completion signal.\n\nArguments:\nsuccess: true if upgrade succeeded, false otherwise."
+      }
+    },
+    "children": []
+  },
+  "/webrtc": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      }
+    },
+    "actions": {
+      "delete": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Delete a WebRTC instance.\n\nArguments:\nuuid: The UUID of the WebRTC instance to delete\nReturn:\ntrue on success, false otherwise."
+      },
+      "create": {
+        "return": "string",
+        "args": [],
+        "help": "Create a new WebRTC live instance.\n\nReturn:\nThe UUID of the new live instance on success, null on failure."
+      },
+      "play": {
+        "return": "string",
+        "args": [
+          "string"
+        ],
+        "help": "Create a new WebRTC replay instance.\n\nArguments:\nuuid: The UUID of the recording to replay.\nReturn:\nThe UUID of the new replay instance on success, null on failure."
+      }
+    },
+    "signals": {
+      "child-added": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when a new object has been added.\n\nArguments:\nchild: The name of the added child object."
+      },
+      "child-removed": {
+        "args": [
+          "string"
+        ],
+        "help": "Signal is emitted when an object was removed.\n\nArguments:\nchild: The name of the removed child object."
+      }
+    },
+    "children": [
+      "1b2b058b-b840-456b-941b-ca7d1c704112"
+    ]
+  },
+  "/webrtc/<UUID>": {
+    "properties": {
+      "current-gaze-frequency": {
+        "type": "int",
+        "range": [
+          0,
+          100
+        ],
+        "mode": "r",
+        "help": "Get the current gaze frequency."
+      },
+      "name": {
+        "type": "string",
+        "range": [],
+        "mode": "r",
+        "help": "The name of the object."
+      },
+      "turn-server": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "TURN server (turn(s)://username:password@host:port) to use."
+      },
+      "stun-server": {
+        "type": "string",
+        "range": [],
+        "mode": "rw",
+        "help": "STUN server (stun://hostname:port) to use."
+      },
+      "iframe-stream": {
+        "type": "boolean",
+        "range": [
+          false,
+          true
+        ],
+        "mode": "rw",
+        "help": "If the supplied stream should only use iframes to lower bitrate."
+      }
+    },
+    "actions": {
+      "send-event": {
+        "return": "boolean",
+        "args": [
+          "string",
+          "object"
+        ],
+        "help": "Send an event to the running WebRTC session.\n\nArguments:\ntag: The name of the event.\nobject: JSON Object data for the event.\nReturn:\ntrue if the event was sent, false otherwise."
+      },
+      "start": {
+        "return": "boolean",
+        "args": [
+          "string"
+        ],
+        "help": "Start the WebRTC session using the supplied SDP offer from the client.\n\nArguments:\nsdp: The client SDP to use for streaming.\nReturn:\ntrue if the session was started, false on error."
+      },
+      "keepalive": {
+        "return": null,
+        "args": [],
+        "help": "Should be called with a set interval to keep the session alive.\nIf not called, the WebRTC session will timeout after 20 seconds.\n"
+      },
+      "setup": {
+        "return": "string",
+        "args": [],
+        "help": "Setup the WebRTC system and generate an SDP offer.\n\nArguments:\nReturn:\nThe RU SDP offer."
+      },
+      "add-ice-candidate": {
+        "return": null,
+        "args": [
+          "int",
+          "string"
+        ],
+        "help": "Add a remote ICE candidate to the session.\n\nArguments:\nid: The ICE ID.\ncandidate: The ICE candidate definition."
+      },
+      "get-ice-candidates": {
+        "return": "array",
+        "args": [],
+        "help": "Returns the collected list of ICE candidates.\nThe list is then cleared between calls. \nThis option may be used instead of the \"new-ice-candidate\" signal.\n\nReturn:\nA JSON array of candidates"
+      }
+    },
+    "signals": {
+      "event": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits event objects on event messages.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The object for the signal."
+      },
+      "gaze": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits gaze point objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The object for the signal."
+      },
+      "sync-port": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits sync port objects.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The object for the signal."
+      },
+      "imu": {
+        "args": [
+          "real",
+          "object"
+        ],
+        "help": "Emits IMU objects.\nNote; these come in chunks.\n\nArguments:\ntimestamp: The timestamp in seconds.\nobject: The object for the signal."
+      },
+      "timed-out": {
+        "args": [],
+        "help": "Emitted once the WebRTC session has timed out.\n"
+      },
+      "new-ice-candidate": {
+        "args": [
+          "int",
+          "string"
+        ],
+        "help": "Emitted on new ICE candidates.\n\nArguments:\nid: The ID of the ICE candidate.\ncandidate: The ICE candidate definition."
+      }
+    },
+    "children": []
+  }
+}

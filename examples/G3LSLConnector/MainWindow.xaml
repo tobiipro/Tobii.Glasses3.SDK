@@ -1,0 +1,17 @@
+﻿<Window x:Class="G3LSLConnector.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:G3LSLConnector"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel VerticalAlignment="Center">
+            <Button x:Name="startBtn" Width="100" Height="50" Click="StartLSL">Start</Button>
+            <Button x:Name="stopBtn" Width="100" Height="50" Click="StopLSL" IsEnabled="False">Stop</Button>
+            <Button x:Name="inspectBtn" Width="100" Height="50" Click="Button_Click_2" IsEnabled="False">Inspect</Button>
+            <TextBlock x:Name="log"></TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>
