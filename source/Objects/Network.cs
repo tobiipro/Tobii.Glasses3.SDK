@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -12,8 +9,8 @@ namespace G3SDK
 {
     public class Network : DynamicChildNode
     {
-        private ROProperty<bool> _wifiHwEnabled;
-        private RWProperty<bool> _wifiEnable;
+        private readonly ROProperty<bool> _wifiHwEnabled;
+        private readonly RWProperty<bool> _wifiEnable;
 
         public Network(G3Api g3Api) : base(g3Api, "network")
         {
@@ -21,6 +18,11 @@ namespace G3SDK
             _wifiEnable = AddRWProperty_bool("wifi-enable");
             Wifi = new Wifi(G3Api, Path);
             Ethernet = new Ethernet(G3Api, Path);
+        }
+
+        public override async Task<IEnumerable<G3Object>> GetSDKChildren()
+        {
+            return new G3Object[] { Wifi, Ethernet }.AsEnumerable();
         }
 
         public Task<bool> WifiHwEnabled => _wifiHwEnabled.Value();
@@ -50,14 +52,14 @@ namespace G3SDK
         private readonly ROProperty _macAddress;
         private readonly ROProperty _ipv4Address;
         private readonly ROProperty _ipv4Gateway;
-        private ROProperty<string[]> _ipv4NameServers;
+        private readonly ROProperty<string[]> _ipv4NameServers;
         private readonly ROProperty<int> _speed;
         private readonly RWProperty<bool> _autoConnect;
         private readonly ROProperty _connectedNetwork;
         private readonly ROProperty<Guid> _activeConfiguration;
-        private ROProperty<string[]> _ipv6NameServers;
-        private ROProperty _ipv6Gateway;
-        private ROProperty _ipv6Address;
+        private readonly ROProperty<string[]> _ipv6NameServers;
+        private readonly ROProperty _ipv6Gateway;
+        private readonly ROProperty _ipv6Address;
 
         public NetworkInterface(G3Api g3Api, string path) : base(g3Api, path)
         {
@@ -143,9 +145,14 @@ namespace G3SDK
                 var uuid = Guid.Parse(child);
                 children.Add(new EthernetConfiguration(G3Api, Path, uuid));
             }
+
             return children;
         }
 
+        public override async Task<IEnumerable<G3Object>> GetSDKChildren()
+        {
+            return await Children();
+        }
     }
 
     public class WifiConfigurations : NetworkConfigurations
@@ -163,9 +170,14 @@ namespace G3SDK
                 var uuid = Guid.Parse(child);
                 children.Add(new WifiConfiguration(G3Api, Path, uuid));
             }
+
             return children;
         }
 
+        public override async Task<IEnumerable<G3Object>> GetSDKChildren()
+        {
+            return await Children();
+        }
     }
 
     public class NetworkConfiguration : G3Object
@@ -192,12 +204,12 @@ namespace G3SDK
         {
             _autoconnect = AddRWProperty_bool("autoconnect");
             _dhcpServerEnable = AddRWProperty_bool("dhcp-server-enable");
-            _dhcpServerLeaseTime = AddRWProperty("dhcp-server-lease-time", s => int.Parse(s));
+            _dhcpServerLeaseTime = AddRWProperty("dhcp-server-lease-time", int.Parse);
 
             _dhcpServerRangeHigh = AddRWProperty("dhcp-server-range-low");
             _dhcpServerRangeLow = AddRWProperty("dhcp-server-range-high");
 
-            _default = AddROProperty("default", s => bool.Parse(s));
+            _default = AddROProperty("default", bool.Parse);
             _id = AddRWProperty("id");
             _ipv4Address = AddRWProperty("ipv4-address");
             _ipv4Gateway = AddRWProperty("ipv4-gateway");
@@ -231,7 +243,7 @@ namespace G3SDK
         public Task<bool> SetId(string value)
         {
             return _id.Set(value);
-        }       
+        }
 
         public Task<bool> SetAutoconnect(bool value)
         {
@@ -311,14 +323,15 @@ namespace G3SDK
         {
         }
     }
+
     public class WifiConfiguration : NetworkConfiguration
     {
-        private RWProperty<string> _ssid;
-        private RWProperty<string> _ssidName;
-        private RWProperty<bool> _accessPoint;
-        private RWProperty<int> _channel;
-        private RWProperty<string> _psk;
-        private RWProperty<WifiSecurity> _security;
+        private readonly RWProperty<string> _ssid;
+        private readonly RWProperty<string> _ssidName;
+        private readonly RWProperty<bool> _accessPoint;
+        private readonly RWProperty<int> _channel;
+        private readonly RWProperty<string> _psk;
+        private readonly RWProperty<WifiSecurity> _security;
 
         public WifiConfiguration(G3Api g3Api, string path, Guid uuid) : base(g3Api, path, uuid)
         {

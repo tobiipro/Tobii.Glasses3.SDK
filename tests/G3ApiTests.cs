@@ -242,39 +242,21 @@ namespace G3SDK
         {
             await EnsureApi();
             var warnings = new List<string>();
-            await G3Api.System.ValidateApi(warnings);
-            await G3Api.System.Storage.ValidateApi(warnings);
-            await G3Api.System.Battery.ValidateApi(warnings);
-
-            await G3Api.WebRTC.ValidateApi(warnings);
 
             var session = await G3Api.WebRTC.Create();
-            await session.ValidateApi(warnings);
-            Thread.Sleep(1000);
+
+            foreach (var o in G3Api.Children)
+            {
+                await o.ValidateApi(warnings);
+            }
             await G3Api.WebRTC.Delete(session);
 
-            await G3Api.Recorder.ValidateApi(warnings);
-            await G3Api.Recordings.ValidateApi(warnings);
-            var recordings = await G3Api.Recordings.Children();
-            if (recordings.Any())
-                await recordings.First().ValidateApi(warnings);
 
-            await G3Api.Upgrade.ValidateApi(warnings);
 
-            await G3Api.Network.ValidateApi(warnings);
-            await G3Api.Network.Wifi.ValidateApi(warnings);
-            var wifiConfigs = await G3Api.Network.Wifi.Configurations.Children();
-            if (wifiConfigs.Any())
-                await wifiConfigs.First().ValidateApi(warnings);
-
-            await G3Api.Network.Ethernet.ValidateApi(warnings);
             var ethernetConfigs = await G3Api.Network.Ethernet.Configurations.Children();
             if (ethernetConfigs.Any())
                 await ethernetConfigs.First().ValidateApi(warnings);
 
-            await G3Api.Calibrate.ValidateApi(warnings);
-            await G3Api.Rudimentary.ValidateApi(warnings);
-            await G3Api.Settings.ValidateApi(warnings);
             foreach (var w in warnings)
                 Console.WriteLine(w);
             Assert.IsEmpty(warnings, $"Api warnings: " +

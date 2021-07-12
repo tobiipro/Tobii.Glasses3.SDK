@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -14,20 +15,30 @@ namespace G3SDK
     public class G3Api : G3ApiBase
     {
         private readonly HttpClient _client = new HttpClient();
+        private List<G3Object> _children = new List<G3Object>();
 
         public G3Api(string ip, bool startWebSock = true) : base(ip, startWebSock)
         {
+
             SignalHandler = new SignalHandler(this);
-            Calibrate = new Calibrate(this);
-            WebRTC = new WebRTC(this);
-            Recorder = new Recorder(this);
-            System = new SystemObj(this);
-            Recordings = new Recordings(this);
-            Upgrade = new Upgrade(this);
-            Network = new Network(this);
-            Rudimentary = new Rudimentary(this);
-            Settings = new Settings(this);
+            Calibrate = Add(new Calibrate(this));
+            WebRTC = Add(new WebRTC(this));
+            Recorder = Add(new Recorder(this));
+            System = Add(new SystemObj(this));
+            Recordings = Add(new Recordings(this));
+            Upgrade = Add(new Upgrade(this));
+            Network = Add(new Network(this));
+            Rudimentary = Add(new Rudimentary(this));
+            Settings = Add(new Settings(this));
         }
+
+        private T Add<T>(T g3Object) where T: G3Object
+        {
+            _children.Add(g3Object);
+            return g3Object;
+        }
+
+        public IReadOnlyCollection<G3Object> Children => _children;
 
         protected override void HandleWebSocketMessage(WebSockMsg msg, int receivedBytes, string orgMsg)
         {

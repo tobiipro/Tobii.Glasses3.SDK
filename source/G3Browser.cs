@@ -15,7 +15,7 @@ namespace G3SDK
     {
         public async Task<List<G3Api>> ProbeForDevices()
         {
-            var results = await ZeroconfResolver.ResolveAsync("_tobii-g3api._tcp.local.");
+            var results = await ScanZeroConf();
             var res = new List<G3Api>();
             foreach (var host in results)
             {
@@ -26,6 +26,11 @@ namespace G3SDK
             }
 
             return res;
+        }
+
+        public async Task<IReadOnlyList<IZeroconfHost>> ScanZeroConf()
+        {
+            return await ZeroconfResolver.ResolveAsync("_tobii-g3api._tcp.local.");
         }
 
         public async Task<List<G3Api>> ForceProbe(int timeout = 100, int maxParallel = 50)

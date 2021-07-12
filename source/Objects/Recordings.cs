@@ -63,6 +63,11 @@ namespace G3SDK
             return recordings;
         }
 
+        public override async Task<IEnumerable<G3Object>> GetSDKChildren()
+        {
+            return await Children();
+        }
+
         public struct RecordingsResponse
         {
             public int? id { get; set; }

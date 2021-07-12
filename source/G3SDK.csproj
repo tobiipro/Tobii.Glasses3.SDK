@@ -6,12 +6,12 @@
     <Copyright>Copyright © 2021-</Copyright>
     <LangVersion>7.3</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
+    <AssemblyVersion>0.2.0.2</AssemblyVersion>
+    <FileVersion>0.2.0.2</FileVersion>
     <Authors>Jonas Högström</Authors>
     <Company>Tobii Pro AB</Company>
     <PackageId>Tobii.Glasses3.SDK</PackageId>
-    <Version>0.2</Version>
+    <Version>0.2.0.2</Version>
     <PackageReleaseNotes>First public release, supports Glasses3 firmware 1.14</PackageReleaseNotes>
     <Description>.net wrapper for the Tobii Pro Glasses 3 API.</Description>
     <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>

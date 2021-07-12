@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
@@ -74,6 +75,7 @@ namespace G3SDK
 
         public async Task ValidateApi(List<string> warnings)
         {
+            Console.WriteLine($"Validating {Path}");
             await EnsureDesc();
             foreach (var s in _signals)
             {
@@ -131,6 +133,17 @@ namespace G3SDK
                     warnings.Add($"Unimplemented action! {Path}.{actionName}({string.Join(", ", action.Args)}): {action.Return}");
                 }
             }
+
+
+            foreach (var c in await GetSDKChildren())
+            {
+                await c.ValidateApi(warnings);
+            }
+        }
+
+        public async virtual Task<IEnumerable<G3Object>> GetSDKChildren()
+        {
+            return Enumerable.Empty<G3Object>();
         }
 
         private static string CamelCase(string name)
@@ -146,7 +159,7 @@ namespace G3SDK
             return obj;
         }
 
-        public async Task<IEnumerable<G3Object>> AllChildren()
+        public async Task<IEnumerable<G3Object>> GetApiChildren()
         {
             var res = new List<G3Object>();
             var obj = await GetDocJson();
@@ -154,13 +167,10 @@ namespace G3SDK
 
             if (children is JArray array)
             {
-                for (int i = 0; i < array.Count; i++)
-                    res.Add(new G3Object(G3Api, Path + "/" + array[i].Value<string>()));
-                res.Sort((o1, o2) => o1.Path.CompareTo(o2.Path));
-            }
-            else
-            {
+                foreach (var t in array)
+                    res.Add(new G3Object(G3Api, Path + "/" + t.Value<string>()));
 
+                res.Sort((o1, o2) => o1.Path.CompareTo(o2.Path));
             }
             return res;
         }
