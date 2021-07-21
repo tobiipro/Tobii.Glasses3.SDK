@@ -9,6 +9,7 @@ namespace G3Demo
         private readonly Func<Task> _action;
         private readonly Func<bool> _canExecute;
         private bool _isExecuting;
+        private readonly Action<object> _paramAction;
 
         public bool IsExecuting
         {
@@ -27,6 +28,14 @@ namespace G3Demo
             _canExecute = canExecute;
             IsExecuting = false;
         }
+        
+        public DelegateCommand(Action<object> action, Func<bool> canExecute)
+        {
+            IsExecuting = true;
+             _paramAction = action;
+            _canExecute = canExecute;
+            IsExecuting = false;
+        }
 
         public bool CanExecute(object parameter)
         {
@@ -35,7 +44,14 @@ namespace G3Demo
 
         public async void Execute(object parameter)
         {
-            await _action();
+            IsExecuting = true;
+            if (_paramAction != null)
+                _paramAction(parameter);
+            else
+            {
+                await _action();
+            }
+            IsExecuting = false;
         }
 
         public event EventHandler CanExecuteChanged;

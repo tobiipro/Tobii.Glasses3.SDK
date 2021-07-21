@@ -1,44 +1,47 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Net;
 using System.Threading.Tasks;
-using G3Demo.Annotations;
+using System.Windows.Threading;
 using G3SDK;
 
 namespace G3Demo
 {
-    public class MainVm : INotifyPropertyChanged
+    public class MainVm : ViewModelBase
     {
         private readonly G3Browser _browser;
-        private G3Api _g3;
         private bool _trackerSelected;
-        public event PropertyChangedEventHandler PropertyChanged;
+        private DeviceDetailsVm _selectedTracker;
+        private LiveViewVM _liveView;
+        private Task _initialBrowseTask;
 
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public MainVm()
+        public MainVm(Dispatcher dispatcher): base(dispatcher)
         {
             _browser = new G3Browser();
             BrowseForGlasses = new DelegateCommand(DoBrowseForGlasses, () => true);
-            MakeCalibration = new DelegateCommand(DoMakeCalibration, () => TrackerSelected);
-            ListFrequencies = new DelegateCommand(DoListFrequencies, () => TrackerSelected);
-            WebRTCSetup = new DelegateCommand(DoWebRTCSetup, () => TrackerSelected);
+            Unosquare.FFME.Library.FFmpegDirectory = "ffmpeg\\ffmpeg-4.4-full_build-shared\\bin";
+            EnsureFFMPEG();
+            _initialBrowseTask = DoBrowseForGlasses();
+        }
+
+        private static void EnsureFFMPEG()
+        {
+            if (!Directory.Exists("ffmpeg"))
+            {
+                Directory.CreateDirectory("ffmpeg");
+                var p = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z";
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(p, "ffmpeg\\ffmpeg-release-full-shared.7z");
+
+                }
+            }
         }
 
         public DelegateCommand BrowseForGlasses { get; }
-
-        public DelegateCommand WebRTCSetup { get; }
-
-        public DelegateCommand ListFrequencies { get; }
-
-        public DelegateCommand MakeCalibration { get; }
 
         public ObservableCollection<string> Logs { get; } = new ObservableCollection<string>();
 
@@ -49,62 +52,59 @@ namespace G3Demo
             {
                 _trackerSelected = value;
                 OnPropertyChanged();
-                ListFrequencies.RaiseCanExecuteChanged();
-                WebRTCSetup.RaiseCanExecuteChanged();
-                MakeCalibration.RaiseCanExecuteChanged();
+            }
+        }
+
+        public ObservableCollection<DeviceDetailsVm> Devices { get; } = new ObservableCollection<DeviceDetailsVm>();
+
+        public DeviceDetailsVm SelectedTracker
+        {
+            get => _selectedTracker;
+            set
+            {
+                _selectedTracker = value;
+                if (LiveView != null)
+                    LiveView.Close();
+                LiveView = value.CreateLiveViewVM();
+            }
+        }
+
+        public void Close()
+        {
+            if (LiveView != null)
+                LiveView.Close();
+        }
+
+        public LiveViewVM LiveView
+        {
+            get => _liveView;
+            set
+            {
+                if (Equals(value, _liveView)) return;
+                _liveView = value;
+                OnPropertyChanged();
             }
         }
 
         private async Task DoBrowseForGlasses()
         {
-            var devices = await _browser.ProbeForDevices();
-            if (devices.Any())
+            if (_initialBrowseTask != null && !_initialBrowseTask.IsCompleted)
+                return;
+
+            var devices = await _browser.ScanZeroConf();
+
+            foreach (var d in devices)
             {
-                Logs.Add($"Found {devices.Count} devices");
-
-                _g3 = devices.FirstOrDefault();
-                Logs.Add($"Connecting to {await _g3.System.RecordingUnitSerial} at {_g3.IpAddress}");
-                TrackerSelected = true;
+                if (!Devices.Any(device => device.Id == d.Id))
+                {
+                    Logs.Add($"Found new device: {d.Id}");
+                    var deviceVm = new DeviceDetailsVm(d, Dispatcher);
+                    Devices.Add(deviceVm);
+                    await deviceVm.Init();
+                }
             }
-        }
 
-        private async Task DoWebRTCSetup()
-        {
-            var session = await _g3.WebRTC.Create();
-            var sw = new Stopwatch();
-            sw.Start();
-            var msg = "";
-            try
-            {
-                var offer = await session.Setup();
-
-                msg = offer != null ? "Offer: " + offer : "Fail";
-            }
-            catch (Exception exception)
-            {
-                msg = $"Error {exception.GetType()}: {exception.Message}";
-            }
-            sw.Stop();
-            await Task.Delay(2000);
-            await _g3.WebRTC.Delete(session);
-
-            Logs.Add(msg);
-            Logs.Add($"Time: {sw.ElapsedMilliseconds}ms");
-        }
-
-        private async Task DoListFrequencies()
-        {
-            var frequencies = await _g3.System.AvailableGazeFrequencies();
-            foreach (var f in frequencies)
-            {
-                Logs.Add(f.ToString());
-            }
-        }
-
-        private async Task DoMakeCalibration()
-        {
-            var result = await _g3.Calibrate.Run();
-            Logs.Add($"Calibration result: {result}");
+            _initialBrowseTask = null;
         }
     }
 }

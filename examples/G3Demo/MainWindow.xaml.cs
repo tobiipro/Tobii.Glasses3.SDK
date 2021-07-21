@@ -1,4 +1,4 @@
-﻿using System.Windows;
+﻿using System;
 
 namespace G3Demo
 {
@@ -7,11 +7,18 @@ namespace G3Demo
     /// </summary>
     public partial class MainWindow
     {
+        private readonly MainVm _vm;
 
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainVm();
+            DataContext = _vm = new MainVm(Dispatcher);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _vm.Close();
         }
     }
 }

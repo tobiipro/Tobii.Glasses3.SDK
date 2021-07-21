@@ -1,0 +1,14 @@
+<UserControl x:Class="G3Demo.DeviceDetailView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:G3Demo"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:DeviceDetailsVm, IsDesignTimeCreatable=false}"
+    mc:Ignorable="d">
+    <StackPanel>
+        <TextBlock Text="{Binding Id}"></TextBlock>
+        <TextBlock Text="{Binding Serial}"></TextBlock>
+        <CheckBox IsChecked="{Binding Selected}"></CheckBox>
+    </StackPanel>
+</UserControl>

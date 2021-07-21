@@ -1,0 +1,54 @@
+<UserControl x:Class="G3Demo.LiveView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:G3Demo"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
+    d:DataContext="{d:DesignInstance Type=local:LiveViewVM, IsDesignTimeCreatable=false}"
+    mc:Ignorable="d"
+    DataContextChanged="LiveView_OnDataContextChanged">
+    <StackPanel>
+        <Grid Width="480" Height="270">
+            <ffme:MediaElement  x:Name="Media" Background="Gray" LoadedBehavior="Play" UnloadedBehavior="Manual" />
+            <Canvas>
+                <Ellipse Width="{Binding GazeMarkerSize}" Height="{Binding GazeMarkerSize}" Stroke="Red" StrokeThickness="2">
+                    <Ellipse.RenderTransform>
+                        <TransformGroup>
+
+                            <TranslateTransform X="{Binding GazeX}" />
+                            <TranslateTransform Y="{Binding GazeY}"/>
+                        </TransformGroup>
+                    </Ellipse.RenderTransform>
+                </Ellipse>  
+                <Ellipse Width="{Binding GazeMarkerSize}" Height="{Binding GazeMarkerSize}" Stroke="Green" StrokeThickness="2">
+                    <Ellipse.RenderTransform>
+                        <TransformGroup>
+
+                            <TranslateTransform X="{Binding MarkerCenterX}" />
+                            <TranslateTransform Y="{Binding MarkerCenterY}"/>
+                        </TransformGroup>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Canvas>
+        </Grid>
+        <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding ShowCalibMarkers}">ShowCalibMarkers</CheckBox>
+            <CheckBox IsChecked="{Binding GazeOverlay}">GazeOverlay</CheckBox>
+            <Button Command="{Binding Calibrate}">Calibrate</Button>
+            <Button Command="{Binding StartRecording}">StartRec</Button>
+            <Button Command="{Binding StopRecording}">StopRec</Button>
+            <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>
+        </StackPanel>
+        <TextBlock Text="{Binding CardState}"></TextBlock>
+        <TextBlock Text="{Binding SpaceState}"></TextBlock>
+        <TextBlock Text="{Binding Acc}"></TextBlock>
+        <TextBlock Text="{Binding Gyr}"></TextBlock>
+        <TextBlock Text="{Binding Mag}"></TextBlock>
+        <TextBlock Text="{Binding Gaze}"></TextBlock>
+        <TextBlock Text="{Binding Sync}"></TextBlock>
+        <TextBlock Text="{Binding Event}"></TextBlock>
+        <TextBlock Text="{Binding Msg}"></TextBlock>
+        <TextBlock Text="{Binding GazeBuffer}"></TextBlock>
+    </StackPanel>
+</UserControl>

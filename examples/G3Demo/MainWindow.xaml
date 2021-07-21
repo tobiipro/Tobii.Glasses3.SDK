@@ -4,20 +4,33 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:G3Demo"
+        d:DataContext="{d:DesignInstance Type=local:MainVm, IsDesignTimeCreatable=false}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="200"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <Button Command="{Binding BrowseForGlasses}">Browse</Button>
+            <ListBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedTracker}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <local:DeviceDetailView></local:DeviceDetailView>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+<!--
             <Button Command="{Binding ListFrequencies}" >List Frequencies</Button>
             <Button Command="{Binding MakeCalibration}">Make calibration</Button>
             <Button Command="{Binding WebRTCSetup}" >WebRTCSetup</Button>
+-->
         </StackPanel>
+
         <ListBox Grid.Column="1" ItemsSource="{Binding Logs}"/>
+        <local:LiveView Grid.Column="2" DataContext="{Binding LiveView}"></local:LiveView>
 
     </Grid>
 </Window>
