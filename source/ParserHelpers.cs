@@ -75,25 +75,39 @@ namespace G3SDK
 
         public static G3SyncPortData ParseSyncPortData(JObject data, double ts)
         {
+            return ParseSyncPortData(data, GetTimestamp(ts));
+        }
+        public static G3SyncPortData ParseSyncPortData(JObject data, TimeSpan ts)
+        {
             var dir = ParseEnum(data["direction"].Value<string>(), Direction.In);
             var value = data["value"].Value<int>();
-            return new G3SyncPortData(GetTimestamp(ts), dir, value);
+            return new G3SyncPortData(ts, dir, value);
         }
 
         public static G3Event ParseEvent(JObject data, double ts)
         {
-            var tag = data["tag"].Value<string>();
-            var obj = data["object"];
-            return new G3Event(GetTimestamp(ts), tag, JsonConvert.SerializeObject(obj));
+            return ParseEvent(data, GetTimestamp(ts));
         }
 
-        public static G3GazeData ParseGazeData(JObject data, double timeStamp)
+        public static G3Event ParseEvent(JObject data, TimeSpan ts)
+        {
+            var tag = data["tag"].Value<string>();
+            var obj = data["object"];
+            return new G3Event(ts, tag, JsonConvert.SerializeObject(obj));
+        }
+
+        public static G3GazeData ParseGazeData(JObject data, TimeSpan timeStamp)
         {
             var gaze2D = (data["gaze2d"] as JArray).Arr2Vector2();
             var gaze3D = (data["gaze3d"] as JArray).Arr2Vector3();
             var eyeRight = ParseEyeData(data["eyeright"] as JObject);
             var eyeLeft = ParseEyeData(data["eyeleft"] as JObject);
-            return new G3GazeData(GetTimestamp(timeStamp), gaze2D, gaze3D, eyeRight, eyeLeft);
+            return new G3GazeData(timeStamp, gaze2D, gaze3D, eyeRight, eyeLeft);
+
+        }
+        public static G3GazeData ParseGazeData(JObject data, double timeStamp)
+        {
+            return ParseGazeData(data, GetTimestamp(timeStamp));
         }
 
         private static TimeSpan GetTimestamp(double timeStamp)
@@ -104,10 +118,15 @@ namespace G3SDK
 
         public static G3ImuData ParseImuData(JObject data, double timeStamp)
         {
-            var anglvel = ParseV3(data["gyroscope"]);
+            return ParseImuData(data, GetTimestamp(timeStamp));
+        }
+
+        public static G3ImuData ParseImuData(JObject data, TimeSpan timeStamp)
+        {
+            var gyro = ParseV3(data["gyroscope"]);
             var accel = ParseV3(data["accelerometer"]);
             var magn = ParseV3(data["magnetometer"]);
-            return new G3ImuData(GetTimestamp(timeStamp), accel, anglvel, magn);
+            return new G3ImuData(timeStamp, accel, gyro, magn);
         }
 
         private static Vector3 ParseV3(JToken jToken)

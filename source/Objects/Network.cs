@@ -183,26 +183,26 @@ namespace G3SDK
     public class NetworkConfiguration : G3Object
     {
         #region fields
-        private RWProperty<bool> _autoconnect;
-        private RWProperty<bool> _dhcpServerEnable;
-        private RWProperty<string> _id;
-        private RWProperty<string> _ipv4Address;
-        private RWProperty<string> _ipv4Gateway;
-        private RWProperty<string> _ipv4NameServers;
-        private RWProperty<Ipv4Method> _ipv4Method;
-        private RWProperty<string> _ipv6Address;
-        private RWProperty<string> _ipv6Gateway;
-        private RWProperty<string> _ipv6NameServers;
-        private RWProperty<Ipv6Method> _ipv6Method;
-        private RWProperty<int> _dhcpServerLeaseTime;
-        private RWProperty<string> _dhcpServerRangeHigh;
-        private RWProperty<string> _dhcpServerRangeLow;
-        private ROProperty<bool> _default;
+        private readonly RWProperty<bool> _autoConnect;
+        private readonly RWProperty<bool> _dhcpServerEnable;
+        private readonly RWProperty<string> _id;
+        private readonly RWProperty<string> _ipv4Address;
+        private readonly RWProperty<string> _ipv4Gateway;
+        private readonly RWProperty<string> _ipv4NameServers;
+        private readonly RWProperty<Ipv4Method> _ipv4Method;
+        private readonly RWProperty<string> _ipv6Address;
+        private readonly RWProperty<string> _ipv6Gateway;
+        private readonly RWProperty<string> _ipv6NameServers;
+        private readonly RWProperty<Ipv6Method> _ipv6Method;
+        private readonly RWProperty<int> _dhcpServerLeaseTime;
+        private readonly RWProperty<string> _dhcpServerRangeHigh;
+        private readonly RWProperty<string> _dhcpServerRangeLow;
+        private readonly ROProperty<bool> _default;
         #endregion
 
         public NetworkConfiguration(G3Api g3Api, string path, Guid uuid) : base(g3Api, $"{path}/{uuid}")
         {
-            _autoconnect = AddRWProperty_bool("autoconnect");
+            _autoConnect = AddRWProperty_bool("autoconnect");
             _dhcpServerEnable = AddRWProperty_bool("dhcp-server-enable");
             _dhcpServerLeaseTime = AddRWProperty("dhcp-server-lease-time", int.Parse);
 
@@ -223,7 +223,7 @@ namespace G3SDK
         }
 
         #region properties
-        public Task<bool> Autoconnect => _autoconnect.Value();
+        public Task<bool> AutoConnect => _autoConnect.Value();
         public Task<bool> Default => _default.Value();
         public Task<bool> DhcpServerEnable => _dhcpServerEnable.Value();
         public Task<string> DhcpServerRangeLow => _dhcpServerRangeLow.Value();
@@ -231,11 +231,11 @@ namespace G3SDK
         public Task<string> Id => _id.Value();
         public Task<string> Ipv4Address => _ipv4Address.Value();
         public Task<string> Ipv4Gateway => _ipv4Gateway.Value();
-        public Task<string> Ipv4nameServers => _ipv4NameServers.Value();
+        public Task<string> Ipv4NameServers => _ipv4NameServers.Value();
         public Task<Ipv4Method> Ipv4Method => _ipv4Method.Value();
         public Task<string> Ipv6Address => _ipv6Address.Value();
         public Task<string> Ipv6Gateway => _ipv6Gateway.Value();
-        public Task<string> Ipv6nameServers => _ipv6NameServers.Value();
+        public Task<string> Ipv6NameServers => _ipv6NameServers.Value();
         public Task<Ipv6Method> Ipv6Method => _ipv6Method.Value();
         #endregion
 
@@ -247,7 +247,7 @@ namespace G3SDK
 
         public Task<bool> SetAutoconnect(bool value)
         {
-            return _autoconnect.Set(value);
+            return _autoConnect.Set(value);
         }
         public Task<bool> SetDhcpServerEnable(bool value)
         {

@@ -87,13 +87,13 @@ namespace G3SDK
     public class G3ImuData : G3TimeStamped
     {
         public Vector3 Accelerometer { get; }
-        public Vector3 AngularVelocity { get; }
+        public Vector3 Gyroscope { get; }
         public Vector3 Magnetometer { get; }
 
-        public G3ImuData(TimeSpan timeStamp, Vector3 accelerometer, Vector3 angularVelocity, Vector3 magnetometer): base(timeStamp)
+        public G3ImuData(TimeSpan timeStamp, Vector3 accelerometer, Vector3 gyroscope, Vector3 magnetometer): base(timeStamp)
         {
             Accelerometer = accelerometer;
-            AngularVelocity = angularVelocity;
+            Gyroscope = gyroscope;
             Magnetometer = magnetometer;
         }
     }
