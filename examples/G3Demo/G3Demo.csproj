@@ -18,6 +18,10 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="images\eye-scanning.png" />
+    <None Remove="images\screen-recorder.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="ZeranoeSharedFFmpegBuild" Version="4.3.1" />
   </ItemGroup>
@@ -32,6 +36,14 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\source\G3SDK.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\eye-scanning.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\screen-recorder.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <None Update="sounds\success.wav">

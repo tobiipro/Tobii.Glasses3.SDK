@@ -141,9 +141,9 @@ namespace G3SDK
             }
         }
 
-        public async virtual Task<IEnumerable<G3Object>> GetSDKChildren()
+        public virtual Task<IEnumerable<G3Object>> GetSDKChildren()
         {
-            return Enumerable.Empty<G3Object>();
+            return Task.FromResult(Enumerable.Empty<G3Object>());
         }
 
         private static string CamelCase(string name)

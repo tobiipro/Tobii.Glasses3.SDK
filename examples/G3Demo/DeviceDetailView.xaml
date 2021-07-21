@@ -4,11 +4,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:G3Demo"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DataContext="{d:DesignInstance Type=local:DeviceDetailsVm, IsDesignTimeCreatable=false}"
+    d:DataContext="{d:DesignInstance Type=local:DeviceVM, IsDesignTimeCreatable=false}"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
     <StackPanel>
         <TextBlock Text="{Binding Id}"></TextBlock>
         <TextBlock Text="{Binding Serial}"></TextBlock>
         <CheckBox IsChecked="{Binding Selected}"></CheckBox>
+        <Image Width="20" Height="20" Visibility="{Binding IsCalibrated, Converter={StaticResource BoolToVis}}" Source="images/eye-scanning.png"></Image>
+        <Image Width="20" Height="20" Visibility="{Binding IsRecording, Converter={StaticResource BoolToVis}}" Source="images/screen-recorder.png"></Image>
     </StackPanel>
 </UserControl>

@@ -101,8 +101,11 @@ namespace G3SDK
             {
                 return ParserHelpers.ParseGazeDataFromCompressedStream(compressedData);
             }
+        }
 
-
+        public async Task<Uri> GetUri(string fileName)
+        {
+            return new Uri($"http://{G3Api.IpAddress}{await HttpPath}/{fileName}");
         }
     }
 }

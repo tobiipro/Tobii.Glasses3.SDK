@@ -54,6 +54,7 @@ namespace G3Demo
                 MarkerColor = _red;
             }
 
+            OnCalibrationResult?.Invoke(this, res);
             CenterColor = _black;
             await Task.Delay(TimeSpan.FromSeconds(2));
             MarkerColor = _black;
@@ -103,5 +104,7 @@ namespace G3Demo
                 OnPropertyChanged();
             }
         }
+
+        public event EventHandler<bool> OnCalibrationResult;
     }
 }

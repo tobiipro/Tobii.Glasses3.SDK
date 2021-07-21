@@ -61,7 +61,7 @@ namespace G3SDK
 
         public override async Task<IEnumerable<G3Object>> GetSDKChildren()
         {
-            return new G3Object[] { Battery, Storage };
+            return await Task.FromResult(new G3Object[] { Battery, Storage });
         }
 
         public Task<bool> UseNtp(bool value)

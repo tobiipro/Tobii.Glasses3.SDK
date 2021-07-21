@@ -5,7 +5,7 @@
     xmlns:local="clr-namespace:G3Demo"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
-    d:DataContext="{d:DesignInstance Type=local:LiveViewVM, IsDesignTimeCreatable=false}"
+    d:DataContext="{d:DesignInstance Type=local:DeviceVM, IsDesignTimeCreatable=false}"
     mc:Ignorable="d"
     DataContextChanged="LiveView_OnDataContextChanged">
     <StackPanel>
@@ -35,7 +35,7 @@
         <StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding ShowCalibMarkers}">ShowCalibMarkers</CheckBox>
             <CheckBox IsChecked="{Binding GazeOverlay}">GazeOverlay</CheckBox>
-            <Button Command="{Binding Calibrate}">Calibrate</Button>
+            <Button Command="{Binding ShowCalibrationMarkerWindow}">ShowCalibrationMarkerWindow</Button>
             <Button Command="{Binding StartRecording}">StartRec</Button>
             <Button Command="{Binding StopRecording}">StopRec</Button>
             <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>

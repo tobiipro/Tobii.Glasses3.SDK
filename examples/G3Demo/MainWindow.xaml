@@ -22,15 +22,20 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-<!--
-            <Button Command="{Binding ListFrequencies}" >List Frequencies</Button>
-            <Button Command="{Binding MakeCalibration}">Make calibration</Button>
-            <Button Command="{Binding WebRTCSetup}" >WebRTCSetup</Button>
--->
+            <Button Command="{Binding StartAll}">Start Recording for all selected</Button>
+            <Button Command="{Binding StopAll}">Stop Recording for all selected</Button>
+            <Button Command="{Binding CalibrateAll}">Calibrate all uncalibrated</Button>
         </StackPanel>
 
         <ListBox Grid.Column="1" ItemsSource="{Binding Logs}"/>
-        <local:LiveView Grid.Column="2" DataContext="{Binding LiveView}"></local:LiveView>
+        <TabControl Grid.Column="2">
+            <TabItem Header="LiveView">
+                <local:LiveView  DataContext="{Binding LiveView}"></local:LiveView>
+            </TabItem>
+            <TabItem Header="Recordings">
+                <local:Recordings DataContext="{Binding Recordings}"></local:Recordings>
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </Window>

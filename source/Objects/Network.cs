@@ -22,7 +22,7 @@ namespace G3SDK
 
         public override async Task<IEnumerable<G3Object>> GetSDKChildren()
         {
-            return new G3Object[] { Wifi, Ethernet }.AsEnumerable();
+            return await Task.FromResult(new G3Object[] { Wifi, Ethernet }.AsEnumerable());
         }
 
         public Task<bool> WifiHwEnabled => _wifiHwEnabled.Value();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -8,16 +9,18 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using G3SDK;
 using Unosquare.FFME.Common;
+using Zeroconf;
 
 namespace G3Demo
 {
-    public class LiveViewVM : ViewModelBase
+    public class DeviceVM : ViewModelBase
     {
+        private readonly IZeroconfHost _zeroconfHost;
         private readonly RtspDataDemuxer _rtspDataDemuxer;
         private readonly Queue<G3GazeData> _gazeQueue = new Queue<G3GazeData>();
         private readonly G3Api _g3;
         private readonly Timer _calibMarkerTimer;
-        private readonly Task _initTask;
+        private readonly Timer _externalTimeReferenceTimer;
 
         private G3GazeData _lastValidGaze;
         private string _gyr;
@@ -43,11 +46,16 @@ namespace G3Demo
         private string _event;
         private bool _showCalibMarkers;
         private CalibMarker _win;
+        private bool _selected;
+        private bool _isCalibrated;
+        private double _lastExternalTimeError;
+        private int _externalTimeReferenceIndex;
 
-        public LiveViewVM(G3Api g3, Dispatcher dispatcher) : base(dispatcher)
+        public DeviceVM(IZeroconfHost zeroconfHost, Dispatcher dispatcher) : base(dispatcher)
         {
-            _g3 = g3;
-            Calibrate = new DelegateCommand(DoCalibrate, () => true);
+            _zeroconfHost = zeroconfHost;
+            _g3 = new G3Api(zeroconfHost.IPAddress);
+            ShowCalibrationMarkerWindow = new DelegateCommand(p=>DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
 
@@ -64,13 +72,21 @@ namespace G3Demo
             };
             _calibMarkerTimer.Enabled = true;
 
+            _externalTimeReferenceTimer = new Timer(5000);
+            _externalTimeReferenceTimer.Elapsed += async (sender, args) =>
+            {
+                var sw = Stopwatch.StartNew();
+                await _g3.Recorder.SendEvent("ExternalTimeReference",
+                    new ExternalTimeReference(DateTime.UtcNow, DateTime.Now, Environment.MachineName, _lastExternalTimeError, _externalTimeReferenceIndex++));
+                _lastExternalTimeError = sw.Elapsed.TotalMilliseconds;
+            };
+            _externalTimeReferenceTimer.Enabled = true;
+
             _g3.Calibrate.Marker.SubscribeAsync(OnCalibMarker);
             _g3.Settings.Changed.SubscribeAsync(OnSettingsChanged);
             _g3.Recorder.Started.SubscribeAsync(g => IsRecording = true);
             _g3.Recorder.Stopped.SubscribeAsync(g => IsRecording = false);
             _g3.System.Storage.StateChanged.SubscribeAsync(OnCardStateChanged);
-
-            _initTask = InitG3Properties();
 
             _rtspDataDemuxer = new RtspDataDemuxer();
             _rtspDataDemuxer.OnGaze += (sender, data) =>
@@ -92,6 +108,19 @@ namespace G3Demo
         }
 
         #region ViewModel properties
+        public string Id => _zeroconfHost.Id;
+        public bool Selected
+        {
+            get => _selected;
+            set
+            {
+
+                if (value == _selected) return;
+                _selected = value;
+                OnPropertyChanged();
+            }
+        }
+        public string Serial { get; private set; }
 
         public double GazeX
         {
@@ -158,6 +187,7 @@ namespace G3Demo
                 _isRecording = value;
                 RaiseCanExecuteChange(StartRecording);
                 RaiseCanExecuteChange(StopRecording);
+                OnPropertyChanged();
             }
         }
 
@@ -318,18 +348,19 @@ namespace G3Demo
         #endregion
 
         #region Commands
-        public ICommand Calibrate { get; }
+        public ICommand ShowCalibrationMarkerWindow { get; }
         public DelegateCommand StartRecording { get; }
         public DelegateCommand StopRecording { get; }
 
-        private async Task DoStopRecording()
+        public bool IsCalibrated
         {
-            await _g3.Recorder.Stop();
-        }
-
-        private async Task DoStartRecording()
-        {
-            await _g3.Recorder.Start();
+            get => _isCalibrated;
+            set
+            {
+                if (value == _isCalibrated) return;
+                _isCalibrated = value;
+                OnPropertyChanged();
+            }
         }
 
         private bool CanStartRec()
@@ -337,18 +368,20 @@ namespace G3Demo
             return !IsRecording && CardState == CardState.Available &&
                    (SpaceState == SpaceState.Low || SpaceState == SpaceState.Good);
         }
-        private async Task DoCalibrate()
+        private void DoShowCalibrationMarkerWindow()
         {
             if (_win == null)
             {
-                _win = new CalibMarker { DataContext = new CalibMarkerVM(_g3, Dispatcher) };
+                var vm = new CalibMarkerVM(_g3, Dispatcher);
+                _win = new CalibMarker { DataContext = vm };
                 _win.Closed += (sender, args) => _win = null;
+                vm.OnCalibrationResult += (sender, res) => IsCalibrated = res;
             }
             _win.Show();
         }
         #endregion
 
-        public void Close()
+        public void CloseView()
         {
             if (_win != null)
             {
@@ -361,13 +394,15 @@ namespace G3Demo
             return v.IsValid() ? $"{v.X:F3};{v.Y:F3};{v.Z:F3}" : "---";
         }
 
-        private async Task InitG3Properties()
+        public async Task InitAsync()
         {
+            Serial = await _g3.System.RecordingUnitSerial;
             SpaceState = await _g3.System.Storage.SpaceState;
             CardState = await _g3.System.Storage.CardState;
             GazeOverlay = await _g3.Settings.GazeOverlay;
             Frequencies = await _g3.System.AvailableGazeFrequencies();
             Frequency = await _g3.Settings.GazeFrequency;
+            IsRecording = (await _g3.Recorder.Duration).HasValue;
         }
 
         private void OnCardStateChanged((SpaceState spaceState, CardState cardState) state)
@@ -426,10 +461,34 @@ namespace G3Demo
             }
         }
 
+        public async Task<(bool, Guid)> DoStartRecording()
+        {
+            var res = await _g3.Recorder.Start();
+            var guid = await _g3.Recorder.UUID;
+            return (res, guid);
+        }
+
+        public async Task<bool> DoStopRecording()
+        {
+            return await _g3.Recorder.Stop();
+        }
+
         private void HideGaze()
         {
             GazeX = int.MinValue;
             GazeY = int.MinValue;
+        }
+
+        public async Task<bool> Calibrate()
+        {
+            var res = await _g3.Calibrate.Run();
+            IsCalibrated = res;
+            return res;
+        }
+
+        public RecordingsVM CreateRecordingsVM()
+        {
+            return new RecordingsVM(Dispatcher, _g3);
         }
     }
 }
