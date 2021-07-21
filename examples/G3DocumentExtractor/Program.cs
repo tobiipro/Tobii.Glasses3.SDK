@@ -104,7 +104,7 @@ namespace G3DocumentExtractor
 
         private static async Task RecurseChildren(G3Object obj, Dictionary<string, JObject> objects)
         {
-            foreach (var child in await obj.AllChildren())
+            foreach (var child in await obj.GetApiChildren())
             {
                 objects[child.Path] = await child.GetDocJson();
                 await RecurseChildren(child, objects);
