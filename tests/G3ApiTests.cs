@@ -146,9 +146,19 @@ namespace G3SDK
             await EnsureApi();
             var session = await G3Api.WebRTC.Create();
             await session.SetIframeStream(true);
-            // this test fails if no delay is added (FW 1.12.0 build 620)
-            await Task.Delay(500);
+            var frequency = await session.CurrentGazeFrequency;
+            var stunServer = await session.StunServer;
+            var turnServer = await session.TurnServer;
+            // Deleting a WebRTC object immediately fails in FW versions prior to 1.20
+            if (FwVersion.LessThan(G3Version.Version_1_20))
+                await Task.Delay(500);
+            var iceCandidates = new List<IceCandidate>();
+            session.NewIceCandidate.Subscribe(c => iceCandidates.Add(c));
+            var offer = await session.Setup();
+            await Task.Delay(1000);
             await G3Api.WebRTC.Delete(session);
+            Assert.That(iceCandidates, Is.Not.Empty, "No ICE candidates received in 1s");
+            Assert.That(offer, Is.Not.Null, "WebRTC offer is empty");
         }
 
         [Test]
