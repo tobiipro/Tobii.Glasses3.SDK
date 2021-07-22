@@ -19,6 +19,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="images\eye-scanning.png" />
+    <None Remove="images\image-not-found.png" />
+    <None Remove="images\recycle-bin.png" />
     <None Remove="images\screen-recorder.png" />
   </ItemGroup>
   <ItemGroup>
@@ -41,6 +43,8 @@
     <Resource Include="images\eye-scanning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="images\image-not-found.png" />
+    <Resource Include="images\recycle-bin.png" />
     <Resource Include="images\screen-recorder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

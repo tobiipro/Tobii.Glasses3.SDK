@@ -58,6 +58,7 @@ namespace G3Demo
             ShowCalibrationMarkerWindow = new DelegateCommand(p=>DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
+            TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
 
             _calibMarkerTimer = new Timer(2000);
             _calibMarkerTimer.Elapsed += async (sender, args) =>
@@ -105,6 +106,11 @@ namespace G3Demo
             _rtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
             _rtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
             HideGaze();
+        }
+
+        private Task DoTakeSnapshot()
+        {
+            return _g3.Recorder.Snapshot();
         }
 
         #region ViewModel properties
@@ -187,6 +193,7 @@ namespace G3Demo
                 _isRecording = value;
                 RaiseCanExecuteChange(StartRecording);
                 RaiseCanExecuteChange(StopRecording);
+                RaiseCanExecuteChange(TakeSnapshot);
                 OnPropertyChanged();
             }
         }
@@ -351,6 +358,7 @@ namespace G3Demo
         public ICommand ShowCalibrationMarkerWindow { get; }
         public DelegateCommand StartRecording { get; }
         public DelegateCommand StopRecording { get; }
+        public DelegateCommand TakeSnapshot { get; }
 
         public bool IsCalibrated
         {

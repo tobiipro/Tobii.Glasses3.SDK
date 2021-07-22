@@ -11,26 +11,59 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="270"></RowDefinition>
-            <RowDefinition ></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <ffme:MediaElement  x:Name="Media" Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
+        <Grid Width="480" Height="270">
+            <ffme:MediaElement  x:Name="Media"  Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
+            <Canvas>
+                <Ellipse Width="{Binding GazeMarkerSize}" Height="{Binding GazeMarkerSize}" Stroke="Red" StrokeThickness="2">
+                    <Ellipse.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform X="{Binding GazeX}" />
+                            <TranslateTransform Y="{Binding GazeY}"/>
+                        </TransformGroup>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Canvas>
+        </Grid>
         <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="{Binding Position, StringFormat=hh\\:mm\\:ss\\.fff}"></TextBlock>
-        <ProgressBar Grid.Row="2" Height="20"
+        <ProgressBar Grid.Row="2" Height="7" Margin="5,0" VerticalAlignment="Center"
                      Maximum="{Binding DurationInSeconds}" 
                      Value="{Binding GazeLoadedUntil}">
         </ProgressBar>
-        <Slider Grid.Row="2" 
+        <Slider Grid.Row="2" VerticalAlignment="Center"
                 Value="{Binding PositionInSeconds}"
                 Maximum="{Binding DurationInSeconds}" 
                 Minimum="0" 
                 IsMoveToPointEnabled = "True" >
         </Slider>
-        <StackPanel Grid.Row="3">
-            <Button Command="{Binding Play}">Play/Pause</Button>
-
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
+            <Button Command="{Binding TogglePlay}">Play/Pause</Button>
+            <Button Command="{Binding StartRTA}">StartRTA</Button>
+            <Button Command="{Binding StopRTA}">StopRTA</Button>
         </StackPanel>
+        <ItemsControl Grid.Row="4" ItemsSource="{Binding Snapshots}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Black" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="{Binding FileName}"></TextBlock>
+                            <TextBlock Text="{Binding Time, StringFormat=hh\\:mm\\:ss\\.fff}"></TextBlock>
+                        <Image Width="100" Height="50" Source="{Binding Url}" />
+                    </StackPanel>
+                    </Border>
+                </DataTemplate>
+
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>

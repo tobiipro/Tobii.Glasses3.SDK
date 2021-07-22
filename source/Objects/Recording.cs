@@ -116,14 +116,20 @@ namespace G3SDK
 
         private async Task<string> GazeFilePath()
         {
-            var httpPath = await HttpPath;
-            var recordingJson = await G3Api.GetRequest(httpPath);
-            var json = (JObject)JsonConvert.DeserializeObject(recordingJson);
-            var gazeNode = json["gaze"];
+            var json = await GetRecordingJson();
+            var gazeNode = json.json["gaze"];
             var gazeFileNode = gazeNode["file"];
             var gazeFileName = gazeFileNode.Value<string>();
-            var gazeFilePath = $"{httpPath}/{gazeFileName}";
+            var gazeFilePath = $"{json.httpPath}/{gazeFileName}";
             return gazeFilePath;
+        }
+
+        public async Task<(JObject json, string httpPath)> GetRecordingJson()
+        {
+            var httpPath = await HttpPath;
+            var recordingJson = await G3Api.GetRequest(httpPath+"/recording.g3");
+            var json = (JObject) JsonConvert.DeserializeObject(recordingJson);
+            return (json, httpPath);
         }
 
         public async Task<Uri> GetUri(string fileName)

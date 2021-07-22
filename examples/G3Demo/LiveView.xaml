@@ -38,6 +38,7 @@
             <Button Command="{Binding ShowCalibrationMarkerWindow}">ShowCalibrationMarkerWindow</Button>
             <Button Command="{Binding StartRecording}">StartRec</Button>
             <Button Command="{Binding StopRecording}">StopRec</Button>
+            <Button Command="{Binding TakeSnapshot}">Snapshot</Button>
             <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>
         </StackPanel>
         <TextBlock Text="{Binding CardState}"></TextBlock>

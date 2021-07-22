@@ -16,11 +16,19 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border BorderBrush="Black" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="{Binding Created}"></TextBlock>
-                        <TextBlock Text="{Binding Duration}"></TextBlock>
-                        <TextBlock Text="{Binding VisibleName}"></TextBlock>
-                    </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="200" Height="100" Source="{Binding Thumbnail}" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding Created, StringFormat=Recorded: {0:yyyy-MM-dd\\ HH\\:mm\\:ss}}"></TextBlock>
+                                <TextBlock Text="{Binding Duration, StringFormat=Duration: {0:hh\\:mm\\:ss}}"></TextBlock>
+                                <TextBlock Text="{Binding VisibleName, StringFormat=Name: {0}}"></TextBlock>
+                                <TextBlock Text="{Binding FwVersion, StringFormat=FW: {0}}"></TextBlock>
+                                <TextBlock Text="{Binding RuSerial, StringFormat=SN: {0}}"></TextBlock>
+                                <Button Command="{Binding DeleteRecording}">
+                                    <Image Width="20" Height="20"  Source="images/recycle-bin.png" ></Image>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
