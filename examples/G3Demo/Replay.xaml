@@ -16,9 +16,18 @@
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <ffme:MediaElement  x:Name="Media" Background="Gray" LoadedBehavior="Play" UnloadedBehavior="Manual" />
+        <ffme:MediaElement  x:Name="Media" Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
         <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="{Binding Position, StringFormat=hh\\:mm\\:ss\\.fff}"></TextBlock>
-        <Slider Grid.Row="2" Maximum="{Binding DurationInSeconds}" Minimum="0" Value="{Binding PositionInSeconds}"></Slider>
+        <ProgressBar Grid.Row="2" Height="20"
+                     Maximum="{Binding DurationInSeconds}" 
+                     Value="{Binding GazeLoadedUntil}">
+        </ProgressBar>
+        <Slider Grid.Row="2" 
+                Value="{Binding PositionInSeconds}"
+                Maximum="{Binding DurationInSeconds}" 
+                Minimum="0" 
+                IsMoveToPointEnabled = "True" >
+        </Slider>
         <StackPanel Grid.Row="3">
             <Button Command="{Binding Play}">Play/Pause</Button>
 

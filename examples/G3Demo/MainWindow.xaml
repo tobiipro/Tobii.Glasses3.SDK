@@ -30,9 +30,9 @@
         <ListBox Grid.Column="1" ItemsSource="{Binding Logs}"/>
         <TabControl Grid.Column="2">
             <TabItem Header="LiveView">
-                <local:LiveView  DataContext="{Binding LiveView}"></local:LiveView>
+                <local:LiveView DataContext="{Binding LiveView}"></local:LiveView>
             </TabItem>
-            <TabItem Header="Recordings">
+            <TabItem Header="Recordings" IsSelected="True">
                 <local:Recordings DataContext="{Binding Recordings}"></local:Recordings>
             </TabItem>
         </TabControl>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -6,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Recording: G3Object, IMetaDataCapable
+    public class Recording : G3Object, IMetaDataCapable
     {
         private readonly ROProperty _httpPath;
         private readonly ROProperty _rtspPath;
@@ -19,7 +20,7 @@ namespace G3SDK
         private readonly ROProperty _timezone;
         private readonly ROProperty<bool> _gazeOverlay;
 
-        public Recording(G3Api g3api, string parentUrl, Guid uuid): base(g3api, $"{parentUrl}/{uuid}")
+        public Recording(G3Api g3api, string parentUrl, Guid uuid) : base(g3api, $"{parentUrl}/{uuid}")
         {
             UUID = uuid;
             _folder = AddROProperty("folder");
@@ -57,7 +58,7 @@ namespace G3SDK
         #endregion
 
         #region Actions
-        
+
         public async Task<bool> Move(string folderName)
         {
             return await G3Api.ExecuteCommandBool(Path, "move", LogLevel.info, folderName);
@@ -90,17 +91,39 @@ namespace G3SDK
 
         public async Task<List<G3GazeData>> GazeData()
         {
+            var gazeFilePath = await GazeFilePath();
+
+            using (var compressedData = await G3Api.GetRequestStream(gazeFilePath, "gzip"))
+            {
+                return ParserHelpers.ParseGazeDataFromCompressedStream(compressedData);
+            }
+        }
+
+        public async Task<(ConcurrentQueue<G3GazeData>, Task)> GazeDataAsync()
+        {
+            var gazeFilePath = await GazeFilePath();
+
+            var res = new ConcurrentQueue<G3GazeData>();
+            var t = Task.Run(() =>
+                {
+                    using (var response = G3Api.GetWebResponse(gazeFilePath, "gzip"))
+                    using (var compressedData = response.GetResponseStream())
+                        ParserHelpers.ParseGazeDataFromCompressedStream(compressedData, res);
+                });
+
+            return (res, t);
+        }
+
+        private async Task<string> GazeFilePath()
+        {
             var httpPath = await HttpPath;
             var recordingJson = await G3Api.GetRequest(httpPath);
             var json = (JObject)JsonConvert.DeserializeObject(recordingJson);
             var gazeNode = json["gaze"];
             var gazeFileNode = gazeNode["file"];
             var gazeFileName = gazeFileNode.Value<string>();
-
-            using (var compressedData = await G3Api.GetRequestStream($"{httpPath}/{gazeFileName}", "gzip"))
-            {
-                return ParserHelpers.ParseGazeDataFromCompressedStream(compressedData);
-            }
+            var gazeFilePath = $"{httpPath}/{gazeFileName}";
+            return gazeFilePath;
         }
 
         public async Task<Uri> GetUri(string fileName)

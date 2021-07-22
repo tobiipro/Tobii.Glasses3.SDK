@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Threading;
 using FFmpeg.AutoGen;
 using G3SDK;
@@ -89,24 +91,30 @@ namespace G3Demo
         private TimeSpan _duration;
         private string _visibleName;
         private DateTime _created;
-        private List<G3GazeData> _gaze;
+        private readonly List<G3GazeData> _gaze = new List<G3GazeData>();
+        private ConcurrentQueue<G3GazeData> _gazeQueue;
         private double _durationInSeconds;
         private MediaElement _media;
         private TimeSpan _position;
+        private double _gazeLoadedUntil;
+        private Timer _gazeLoadTimer;
 
         private RecordingVM(Dispatcher dispatcher, Recording recording) : base(dispatcher)
         {
             _recording = recording;
+
             Play = new DelegateCommand(DoPlay, () => true);
         }
 
-        public void AttachMediaPlayer(MediaElement media)
+        public async Task AttachMediaPlayer(MediaElement media)
         {
             _media = media;
             _media.RenderingVideo += (sender, args) =>
             {
                 InternalSetPosition(args.StartTime);
             };
+            await _media.Open(VideoUri);
+            await PrepareReplay();
         }
 
         private void InternalSetPosition(TimeSpan t)
@@ -137,7 +145,27 @@ namespace G3Demo
 
         private async Task PrepareReplay()
         {
-            _gaze = await _recording.GazeData();
+            var res = await _recording.GazeDataAsync();
+            _gazeQueue = res.Item1;
+            _gazeLoadTimer = new Timer(1000);
+            _gazeLoadTimer.Elapsed += (sender, args) => FlushGazeQueue();
+            _gazeLoadTimer.Enabled = true;
+
+            res.Item2.ConfigureAwait(false).GetAwaiter().OnCompleted(() =>
+            {
+                _gazeLoadTimer.Enabled = false;
+                FlushGazeQueue();
+                GazeLoadedUntil = DurationInSeconds;
+            });
+        }
+
+        private void FlushGazeQueue()
+        {
+            while (_gazeQueue.TryDequeue(out var g))
+            {
+                _gaze.Add(g);
+            }
+            GazeLoadedUntil = _gaze.Last().TimeStamp.TotalSeconds;
         }
 
         public DateTime Created
@@ -199,6 +227,17 @@ namespace G3Demo
         {
             get { return Position.TotalSeconds; }
             set { Position = TimeSpan.FromSeconds(value); }
+        }
+
+        public double GazeLoadedUntil
+        {
+            get => _gazeLoadedUntil;
+            set
+            {
+                if (value.Equals(_gazeLoadedUntil)) return;
+                _gazeLoadedUntil = value;
+                OnPropertyChanged();
+            }
         }
     }
 }

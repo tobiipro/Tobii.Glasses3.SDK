@@ -32,7 +32,7 @@ namespace G3SDK
             Settings = Add(new Settings(this));
         }
 
-        private T Add<T>(T g3Object) where T: G3Object
+        private T Add<T>(T g3Object) where T : G3Object
         {
             _children.Add(g3Object);
             return g3Object;
@@ -52,7 +52,7 @@ namespace G3SDK
             }
         }
         public SignalHandler SignalHandler { get; }
-        
+
         public Settings Settings { get; }
         public Rudimentary Rudimentary { get; }
         public Network Network { get; }
@@ -109,40 +109,45 @@ namespace G3SDK
         {
             return await GetRequest($"rest/{path}");
         }
-        
-        internal async Task<Stream> GetRequestStream(string path, string contentType = "text/plain")
+
+        internal WebResponse GetWebResponse(string path, string contentType = "text/plain")
         {
             var requestUriString = $"http://{IpAddress}/{path.TrimStart('/')}";
-            Log(LogLevel.info, $"REST-GET: >> {requestUriString}");
-            var req = WebRequest.CreateHttp(requestUriString);
-            req.Method = "GET";
-            req.ContentType = contentType;
-            req.Accept = "application/json, text/plain, */*";
             try
             {
-                using (var webResponse = req.GetResponse())
-                using (var responseStream = webResponse.GetResponseStream())
-                {
-                    var content = new MemoryStream();
-                    await responseStream.CopyToAsync(content);
-                    content.Position = 0;
-
-                    var s = Encoding.UTF8.GetString(content.ToArray());
-                    if (s.Length > 50)
-                    {
-                        Log(LogLevel.info, $"REST-GET: << {s.Length} bytes");
-                        Log(LogLevel.debug, $"REST-GET: << {s}");
-                    }
-                    else
-                    {
-                        Log(LogLevel.info, $"REST-GET: << {s}");
-                    }
-                    return content;
-                }
+                Log(LogLevel.info, $"REST-GET: >> {requestUriString}");
+                var req = WebRequest.CreateHttp(requestUriString);
+                req.Method = "GET";
+                req.ContentType = contentType;
+                req.Accept = "application/json, text/plain, */*";
+                return req.GetResponse();
             }
             catch (WebException e)
             {
                 throw new WebException($"Request failed: {e.Message}\nRequestUrl: {requestUriString}", e);
+            }
+        }
+        
+        internal async Task<Stream> GetRequestStream(string path, string contentType = "text/plain")
+        {
+            using (var webResponse = GetWebResponse(path, contentType))
+            using (var responseStream = webResponse.GetResponseStream())
+            {
+                var content = new MemoryStream();
+                await responseStream.CopyToAsync(content);
+                content.Position = 0;
+
+                var s = Encoding.UTF8.GetString(content.ToArray());
+                if (s.Length > 50)
+                {
+                    Log(LogLevel.info, $"REST-GET: << {s.Length} bytes");
+                    Log(LogLevel.debug, $"REST-GET: << {s}");
+                }
+                else
+                {
+                    Log(LogLevel.info, $"REST-GET: << {s}");
+                }
+                return content;
             }
         }
 
@@ -154,7 +159,7 @@ namespace G3SDK
                 return await x.ReadToEndAsync();
             }
         }
-        
+
         public async Task<string> GetProperty(string url, string propertyName)
         {
             return await GetRestRequest($"{url}.{propertyName}");
@@ -171,7 +176,7 @@ namespace G3SDK
             return TryParse(result, out var boolres) && boolres;
         }
     }
-    
+
     public static class Utils
     {
         public static Vector2 Arr2Vector2(this JArray arr)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -230,10 +231,8 @@ namespace G3SDK
             return result;
         }
 
-        public static List<G3GazeData> ParseGazeDataFromCompressedStream(Stream compressedData)
+        public static void ParseGazeDataFromCompressedStream(Stream compressedData, Action<G3GazeData> addAction)
         {
-            var result = new List<G3GazeData>();
-
             using (var gazeData = new GZipStream(compressedData, CompressionMode.Decompress))
             using (var x = new StreamReader(gazeData))
             {
@@ -242,9 +241,20 @@ namespace G3SDK
                     var line = x.ReadLine();
                     var g3GazeData = ParseGazeFromJson(line);
                     if (g3GazeData != null)
-                        result.Add(g3GazeData);
+                        addAction(g3GazeData);
                 }
             }
+
+        }
+        public static void ParseGazeDataFromCompressedStream(Stream compressedData, ConcurrentQueue<G3GazeData> list)
+        {
+            ParseGazeDataFromCompressedStream(compressedData, g=>list.Enqueue(g));
+        }
+
+        public static List<G3GazeData> ParseGazeDataFromCompressedStream(Stream compressedData)
+        {
+            var result = new List<G3GazeData>();
+            ParseGazeDataFromCompressedStream(compressedData, data => result.Add(data));
             return result;
         }
 
