@@ -2,8 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using System.Web.Management;
-using System.Windows.Input;
+using System.Timers;
 using System.Windows.Media;
 using System.Windows.Threading;
 using G3SDK;
@@ -15,6 +14,7 @@ namespace G3Demo
     {
         private readonly G3Api _g3;
         private readonly Brush _black = new SolidColorBrush(Colors.Black);
+        private readonly Brush _white = new SolidColorBrush(Colors.White);
         private readonly Brush _blue = new SolidColorBrush(Colors.Blue);
         private readonly Brush _red = new SolidColorBrush(Colors.Red);
         private readonly Brush _green = new SolidColorBrush(Colors.Green);
@@ -22,6 +22,8 @@ namespace G3Demo
         private double _scale = 3.6;
         private bool _isCalibrating;
         private Brush _centerColor;
+        private readonly Timer _timer;
+        private Brush _middleColor;
 
         public CalibMarkerVM(G3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
@@ -33,8 +35,18 @@ namespace G3Demo
             }
             _markerColor = _black;
             _centerColor = _black;
+            _middleColor = _white;
             ChangeScale = new DelegateCommand(DoChangeSize, () => true);
             Calibrate = new DelegateCommand(DoCalibrate, () => !_isCalibrating);
+            _timer = new Timer(2000);
+            _timer.Elapsed += async (sender, args) =>
+            {
+                await _g3.Calibrate.EmitMarkers();
+                await _g3.Rudimentary.Keepalive();
+            };
+            _timer.Enabled = true;
+            _g3.Calibrate.Marker.SubscribeAsync(m => { CenterColor = m.Marker2D.IsValid() ? _green : _red; });
+            _g3.Rudimentary.Gaze.SubscribeAsync(g => MiddleColor = g.Gaze2D.IsValid() ? _white : _red);
         }
 
         private async Task DoCalibrate()
@@ -101,6 +113,17 @@ namespace G3Demo
             {
                 if (Equals(value, _centerColor)) return;
                 _centerColor = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Brush MiddleColor
+        {
+            get => _middleColor;
+            set
+            {
+                if (Equals(value, _middleColor)) return;
+                _middleColor = value;
                 OnPropertyChanged();
             }
         }

@@ -47,11 +47,20 @@ For more information on individual methods in the SDK, please refer to the API d
 ## Limitations
 
 The SDK does not support streaming data via WebRTC or RTSP on its own, you will need exteral libraries for that. 
-[RtspClientSharp](https://github.com/BogdanovKirill/RtspClientSharp) is a good start if you want to use video streaming over RTSP.
+[RtspClientSharp](https://github.com/BogdanovKirill/RtspClientSharp) or [FFMediaElement](https://github.com/unosquare/ffmediaelement) is a good start if you want to use video streaming over RTSP.
 
 ## Samples
 ### Glasses Demo
-Simple demo that shows a couple of commands with the Glasses SDK
+Demo that shows 
+* How to find glasses
+* Show live view (using RTSP) with synchronized local gaze overlay
+* Start/stop recordings
+* Calibrate glasses
+* Change settings
+* List recordings and read recording meta data
+* Delete recordings
+* Replay recording (using HTTP) with synchronized local gaze overlay
+* Take and show snapshots/thumbnails
 
 ### LSL Connector for Glasses 3
 This is a complete sample that will expose Glasses3 data streams to as Lab Streaming Layer data streams. To run the sample, just build and start it. It will automatically locate any available Glasses 3 device and register a stream outlet for the gaze stream from the unit.

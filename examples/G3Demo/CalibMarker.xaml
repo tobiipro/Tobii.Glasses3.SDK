@@ -23,7 +23,7 @@
                     </TransformGroup>
                 </Ellipse.RenderTransform>
             </Ellipse>
-            <Ellipse Width="23" Height="23" Fill="White" Canvas.Top="10" Canvas.Left="10">
+            <Ellipse Width="23" Height="23" Fill="{Binding MiddleColor}" Canvas.Top="10" Canvas.Left="10">
                 <Ellipse.RenderTransform>
                     <TransformGroup>
                         <TranslateTransform X="-21.5" />
