@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -8,6 +9,7 @@ using System.Timers;
 using System.Windows.Input;
 using System.Windows.Threading;
 using G3SDK;
+using OxyPlot;
 using Unosquare.FFME.Common;
 using Zeroconf;
 
@@ -55,7 +57,7 @@ namespace G3Demo
         {
             _zeroconfHost = zeroconfHost;
             _g3 = new G3Api(zeroconfHost.IPAddress);
-            ShowCalibrationMarkerWindow = new DelegateCommand(p=>DoShowCalibrationMarkerWindow(), () => true);
+            ShowCalibrationMarkerWindow = new DelegateCommand(p => DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
             TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
@@ -88,17 +90,55 @@ namespace G3Demo
             _g3.Recorder.Started.SubscribeAsync(g => IsRecording = true);
             _g3.Recorder.Stopped.SubscribeAsync(g => IsRecording = false);
             _g3.System.Storage.StateChanged.SubscribeAsync(OnCardStateChanged);
+            GazePlotEnabled = true;
 
             _rtspDataDemuxer = new RtspDataDemuxer();
             _rtspDataDemuxer.OnGaze += (sender, data) =>
             {
                 Gaze = $"Gaze: {data.Gaze2D.X:F3};{data.Gaze2D.Y:F3}";
                 _gazeQueue.Enqueue(data);
+                Dispatcher.Invoke(() =>
+                {
+                    if (GazePlotEnabled)
+                    {
+                        AddPoint(GazeXSeries, data.TimeStamp, data.Gaze2D.X);
+                        AddPoint(GazeYSeries, data.TimeStamp, data.Gaze2D.Y);
+                    }
+
+                    if (PupilPlotEnabled)
+                    {
+                        AddPoint(PupilLeftSeries, data.TimeStamp, data.LeftEye?.PupilDiameter ?? float.NaN);
+                        AddPoint(PupilRightSeries, data.TimeStamp, data.RightEye?.PupilDiameter ?? float.NaN);
+                    }
+                });
             };
             _rtspDataDemuxer.OnSyncPort += (sender, data) => Sync = $"Sync: {data.Direction}={data.Value}";
             _rtspDataDemuxer.OnImu += (sender, data) =>
             {
-                if (data.Accelerometer.IsValid()) Acc = $"Acc: {FormatV3(data.Accelerometer)}";
+                Dispatcher.Invoke(() =>
+                {
+                    if (AccPlotEnabled && data.Accelerometer.IsValid())
+                    {
+                        AddPoint(AccXSeries, data.TimeStamp, data.Accelerometer.X);
+                        AddPoint(AccYSeries, data.TimeStamp, data.Accelerometer.Y);
+                        AddPoint(AccZSeries, data.TimeStamp, data.Accelerometer.Z);
+                    }
+                    
+                    if (GyrPlotEnabled && data.Gyroscope.IsValid())
+                    {
+                        AddPoint(GyrXSeries, data.TimeStamp, data.Gyroscope.X);
+                        AddPoint(GyrYSeries, data.TimeStamp, data.Gyroscope.Y);
+                        AddPoint(GyrZSeries, data.TimeStamp, data.Gyroscope.Z);
+                    }
+                    
+                    if (MagPlotEnabled && data.Magnetometer.IsValid())
+                    {
+                        AddPoint(MagXSeries, data.TimeStamp, data.Magnetometer.X);
+                        AddPoint(MagYSeries, data.TimeStamp, data.Magnetometer.Y);
+                        AddPoint(MagZSeries, data.TimeStamp, data.Magnetometer.Z);
+                    }
+                });
+
                 if (data.Magnetometer.IsValid()) Mag = $"Mag: {FormatV3(data.Magnetometer)}";
                 if (data.Gyroscope.IsValid()) Gyr = $"Gyr: {FormatV3(data.Gyroscope)}";
             };
@@ -106,6 +146,13 @@ namespace G3Demo
             _rtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
             _rtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
             HideGaze();
+        }
+
+        private void AddPoint(ObservableCollection<DataPoint> data, TimeSpan time, float value)
+        {
+            data.Add(new DataPoint(time.TotalSeconds, value));
+            while (data.Last().X - data.First().X > 10)
+                data.RemoveAt(0);
         }
 
         private Task DoTakeSnapshot()
@@ -370,6 +417,26 @@ namespace G3Demo
                 OnPropertyChanged();
             }
         }
+
+        public ObservableCollection<DataPoint> GazeXSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> GazeYSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> AccXSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> AccYSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> AccZSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> GyrXSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> GyrYSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> GyrZSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> MagXSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> MagYSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> MagZSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> PupilLeftSeries { get; } = new ObservableCollection<DataPoint>();
+        public ObservableCollection<DataPoint> PupilRightSeries { get; } = new ObservableCollection<DataPoint>();
+
+        public bool GazePlotEnabled { get; set; }
+        public bool PupilPlotEnabled { get; set; }
+        public bool AccPlotEnabled { get; set; }
+        public bool GyrPlotEnabled { get; set; }
+        public bool MagPlotEnabled { get; set; }
 
         private bool CanStartRec()
         {

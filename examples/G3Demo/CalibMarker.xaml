@@ -31,7 +31,15 @@
                     </TransformGroup>
                 </Ellipse.RenderTransform>
             </Ellipse>
-                <Ellipse Width="3" Height="3" Fill="{Binding CenterColor}" Canvas.Top="20" Canvas.Left="20">
+            <Ellipse Width="3" Height="3" Fill="Black" Canvas.Top="20" Canvas.Left="20">
+                <Ellipse.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform X="-21.5" />
+                        <TranslateTransform Y="-21.5" />
+                    </TransformGroup>
+                </Ellipse.RenderTransform>
+            </Ellipse>
+                <Ellipse Width="2" Height="2" Fill="{Binding CenterColor}" Canvas.Top="20.5" Canvas.Left="20.5">
                 <Ellipse.RenderTransform>
                     <TransformGroup>
                         <TranslateTransform X="-21.5" />
@@ -50,6 +58,7 @@
         </Canvas>
         
     </Grid>
-    <TextBlock VerticalAlignment="Bottom">Press +/- to resize marker. Press Space to calibrate</TextBlock>
+        <TextBlock TextWrapping="Wrap" VerticalAlignment="Bottom">Press +/- to resize marker. Press Space to calibrate.
+    Red mid-circle => no gaze. Red center dot => no marker detected. Red outer circle => calibration failed</TextBlock>
     </Grid>
 </Window>
