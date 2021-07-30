@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Rudimentary : G3Object
+    public class Rudimentary : G3Object, IRudimentary
     {
         private readonly RWProperty<int> _sceneQuality;
         private readonly RWProperty<int> _sceneScale;
@@ -79,5 +79,25 @@ namespace G3SDK
         {
             return await G3Api.ExecuteCommandBool(Path, "send-event", LogLevel.info, tag, obj);
         }
+    }
+
+    public interface IRudimentary
+    {
+        Task<G3GazeData> GazeSample { get; }
+        Task<G3ImuData> ImuSample { get; }
+        Task<G3Event> EventSample { get; }
+        Task<G3SyncPortData> SyncPortSample { get; }
+        Task<int> SceneScale { get; }
+        Task<int> SceneQuality { get; }
+        IG3Observable<byte[]> Scene { get; }
+        IG3Observable<G3SyncPortData> SyncPort { get; }
+        IG3Observable<G3GazeData> Gaze { get; }
+        IG3Observable<G3Event> Event { get; }
+        IG3Observable<G3ImuData> Imu { get; }
+        Task<bool> SetSceneQuality(int quality);
+        Task<bool> SetSceneScale(int scale);
+        Task<bool> Keepalive();
+        Task<bool> Calibrate();
+        Task<bool> SendEvent(string tag, object obj);
     }
 }

@@ -9,7 +9,7 @@ namespace G3Demo
 {
     public class RecordingsVM : ViewModelBase
     {
-        private readonly G3Api _g3;
+        private readonly IG3Api _g3;
         private bool _scanning;
         private RecordingVM _selectedRecording;
         public ObservableCollection<RecordingVM> Recordings { get; } = new ObservableCollection<RecordingVM>();
@@ -25,7 +25,7 @@ namespace G3Demo
             }
         }
 
-        public RecordingsVM(Dispatcher dispatcher, G3Api g3) : base(dispatcher)
+        public RecordingsVM(Dispatcher dispatcher, IG3Api g3) : base(dispatcher)
         {
             _g3 = g3;
             _g3.Recordings.ScanStart.SubscribeAsync(n => _scanning = true);
@@ -64,7 +64,7 @@ namespace G3Demo
             {
                 if (Recordings.All(rec => rec.Id != r.UUID))
                 {
-                    var recordingVm = await RecordingVM.Create(Dispatcher, r);
+                    var recordingVm = await RecordingVM.Create(Dispatcher, r, _g3);
                     Dispatcher.Invoke(() =>
                     {
                         var inserted = false;

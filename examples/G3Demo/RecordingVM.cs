@@ -17,13 +17,13 @@ namespace G3Demo
 {
     public class RecordingVM : ViewModelBase
     {
-        public static async Task<RecordingVM> Create(Dispatcher d, Recording r)
+        public static async Task<RecordingVM> Create(Dispatcher d, IRecording r, IG3Api g3)
         {
-            var vm = new RecordingVM(d, r);
+            var vm = new RecordingVM(d, r, g3);
             await vm.Init();
             return vm;
         }
-        private readonly Recording _recording;
+        private readonly IRecording _recording;
         private TimeSpan _duration;
         private string _visibleName;
         private DateTime _created;
@@ -39,17 +39,17 @@ namespace G3Demo
         private readonly IComparer<G3GazeData> _timeStampComparer = new TimeStampComparer();
         private bool _deviceIsRecording;
         private bool _rtaInProgress;
-        private readonly G3Api _g3;
+        private readonly IG3Api _g3;
         private Timer _rtaTimer;
         private string _thumbnail = "images/image-not-found.png";
         private string _huSerial;
         private string _ruSerial;
         private string _fwVersion;
 
-        private RecordingVM(Dispatcher dispatcher, Recording recording) : base(dispatcher)
+        private RecordingVM(Dispatcher dispatcher, IRecording recording, IG3Api g3) : base(dispatcher)
         {
             _recording = recording;
-            _g3 = recording.G3Api;
+            _g3 = g3;
             TogglePlay = new DelegateCommand(DoTogglePlay, () => true);
             DeleteRecording = new DelegateCommand(DoDeleteRecording, () => true);
             StartRTA = new DelegateCommand(DoStartRTA, () => !DeviceIsRecording);
@@ -68,7 +68,7 @@ namespace G3Demo
             RtaInProgress = false;
             await _g3.Recorder.Stop();
         }
-        
+
         private async Task DoStartRTA()
         {
             await _g3.Recorder.Start();
@@ -174,11 +174,11 @@ namespace G3Demo
         {
             Duration = await _recording.Duration;
             VisibleName = await _recording.VisibleName;
-            DeviceIsRecording = (await _recording.G3Api.Recorder.Duration).HasValue;
+            DeviceIsRecording = (await _g3.Recorder.Duration).HasValue;
             Created = await _recording.Created;
             FwVersion = await _recording.MetaLookupString("RuVersion");
-            RuSerial= await _recording.MetaLookupString("RuSerial");
-            HuSerial= await _recording.MetaLookupString("HuSerial");
+            RuSerial = await _recording.MetaLookupString("RuSerial");
+            HuSerial = await _recording.MetaLookupString("HuSerial");
             VideoUri = await _recording.GetUri("scenevideo.mp4");
             var json = await _recording.GetRecordingJson();
             var snapshotarr = (JArray)json.json["scenecamera"]["snapshots"];
@@ -266,7 +266,8 @@ namespace G3Demo
             {
                 _gaze.Add(g);
             }
-            GazeLoadedUntil = _gaze.Last().TimeStamp.TotalSeconds;
+            if (_gaze.Any())
+                GazeLoadedUntil = _gaze.Last().TimeStamp.TotalSeconds;
         }
 
         public DateTime Created

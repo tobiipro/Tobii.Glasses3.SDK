@@ -6,13 +6,13 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class WebRTC: DynamicChildNode
+    public class WebRTC: DynamicChildNode, IWebRTC
     {
         public WebRTC(G3Api g3Api): base(g3Api, "webrtc")
         {
         }
 
-        public async Task<WebRTCSession> Create()
+        public async Task<IWebRTCSession> Create()
         {
             var response = await G3Api.ExecuteCommand(Path, "create", LogLevel.info);
             var guidStr = response.Trim('"');
@@ -28,15 +28,15 @@ namespace G3SDK
             return new WebRTCSession(G3Api, Path, guid);
         }
 
-        public async Task<bool> Delete(WebRTCSession session)
+        public async Task<bool> Delete(IWebRTCSession session)
         {
             return await G3Api.ExecuteCommandBool(Path, "delete", LogLevel.info, session.Guid.ToString());
         }
 
-        public async Task<List<WebRTCSession>> Children()
+        public async Task<List<IWebRTCSession>> Children()
         {
             var childIds = await GetChildren();
-            var sessions = new List<WebRTCSession>();
+            var sessions = new List<IWebRTCSession>();
             foreach (var child in childIds)
             {
                 var uuid = Guid.Parse(child);
@@ -46,7 +46,7 @@ namespace G3SDK
         }
 
 
-        public class WebRTCSession: G3Object
+        public class WebRTCSession: G3Object, IWebRTCSession
         {
             private readonly Timer _keepAliveTimer;
             private readonly RWProperty<bool> _iframeStream;
@@ -146,6 +146,38 @@ namespace G3SDK
                 return await G3Api.ExecuteCommandBool(Path, "send-event", LogLevel.info, tag, obj);
             }
         }
+    }
+
+    public interface IWebRTC
+    {
+        Task<IWebRTCSession> Create();
+        Task<bool> Delete(IWebRTCSession session);
+
+        Task<List<IWebRTCSession>> Children();
+    }
+
+    public interface IWebRTCSession
+    {
+        Task<bool> IFrameStream { get; }
+        Task<string> StunServer { get; }
+        Task<string> TurnServer { get; }
+        Task<int> CurrentGazeFrequency { get; }
+        Guid Guid { get; }
+        IG3Observable<G3SyncPortData> SyncPort { get; }
+        IObservable<G3GazeData> Gaze { get; }
+        IObservable<G3Event> Event { get; }
+        IObservable<G3ImuData> Imu { get; }
+        IObservable<Notification> TimedOut { get; }
+        IObservable<IceCandidate> NewIceCandidate { get; }
+        Task<bool> SetIframeStream(bool value);
+        Task<bool> SetStunServer(string value);
+        Task<bool> SetTurnServer(string value);
+        Task Keepalive();
+        Task<bool> Start(string offer);
+        Task<string> Setup();
+        Task<string[]> GetIceCandidates();
+        Task AddIceCandidate(IceCandidate candidate);
+        Task<bool> SendEvent(string tag, object obj);
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -12,10 +13,10 @@ using static System.Boolean;
 
 namespace G3SDK
 {
-    public class G3Api : G3ApiBase
+    public class G3Api : G3ApiBase, IG3Api
     {
         private readonly HttpClient _client = new HttpClient();
-        private List<G3Object> _children = new List<G3Object>();
+        private readonly List<G3Object> _children = new List<G3Object>();
 
         public G3Api(string ip, bool startWebSock = true) : base(ip, startWebSock)
         {
@@ -53,15 +54,15 @@ namespace G3SDK
         }
         public SignalHandler SignalHandler { get; }
 
-        public Settings Settings { get; }
-        public Rudimentary Rudimentary { get; }
-        public Network Network { get; }
-        public Calibrate Calibrate { get; }
-        public WebRTC WebRTC { get; }
-        public Upgrade Upgrade { get; }
-        public Recorder Recorder { get; }
-        public SystemObj System { get; }
-        public Recordings Recordings { get; }
+        public ISettings Settings { get; }
+        public IRudimentary Rudimentary { get; }
+        public INetwork Network { get; }
+        public ICalibrate Calibrate { get; }
+        public IWebRTC WebRTC { get; }
+        public IUpgrade Upgrade { get; }
+        public IRecorder Recorder { get; }
+        public ISystem System { get; }
+        public IRecordings Recordings { get; }
 
         private static string TrimTo(string s, int length)
         {
@@ -175,6 +176,58 @@ namespace G3SDK
             var result = await PostRequest($"{path}.{propertyName}", value, logLevel);
             return TryParse(result, out var boolres) && boolres;
         }
+    }
+
+    public interface IG3Api
+    {
+        ICalibrate Calibrate { get; }
+        IRecorder Recorder { get; }
+        ISettings Settings { get; }
+        ISystem System { get; }
+        string IpAddress { get; }
+        IRudimentary Rudimentary { get; }
+        IRecordings Recordings { get; }
+        IUpgrade Upgrade { get; }
+        LogLevel LogLevel { get; set; }
+        INetwork Network { get; }
+        IWebRTC WebRTC { get; }
+    }
+
+    public interface IRecorder: IMetaDataCapable
+    {
+        Task<bool> SendEvent(string tag, object o);
+        IG3Observable<string> Stopped { get; }
+        IG3Observable<Guid> Started { get; }
+        Task<string> Folder { get; }
+        Task<bool> GazeOverlay { get; }
+        Task<string> TimeZone { get; }
+        Task<string> VisibleName { get; }
+        Task<int> GazeSamples { get; }
+        Task<int> ValidGazeSamples { get; }
+        Task<Guid> UUID { get; }
+        Task<TimeSpan?> Duration { get; }
+        Task<TimeSpan> RemainingTime { get; }
+        Task<DateTime?> Created { get; }
+        Task<int> CurrentGazeFrequency { get; }
+        Task<bool> Start();
+        Task<bool> Snapshot();
+        Task<bool> Stop();
+        Task Cancel();
+        Task<bool> SetFolder(string value);
+        Task<bool> SetVisibleName(string value);
+        Task<bool> MetaInsert(string key, string value);
+        Task<bool> MetaInsert(string key, byte[] data);
+        Task<string[]> MetaKeys();
+        Task<string> MetaLookupString(string key);
+        Task<byte[]> MetaLookup(string key);
+        Task<bool> RecordingInProgress();
+    }
+
+    public interface ICalibrate
+    {
+        Task<bool> EmitMarkers();
+        IG3Observable<G3MarkerData> Marker { get; }
+        Task<bool> Run();
     }
 
     public static class Utils

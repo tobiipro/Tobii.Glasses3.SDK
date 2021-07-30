@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -17,10 +16,10 @@ namespace G3Demo
 {
     public class DeviceVM : ViewModelBase
     {
-        private readonly IZeroconfHost _zeroconfHost;
+        private readonly string _hostName;
         private readonly RtspDataDemuxer _rtspDataDemuxer;
         private readonly Queue<G3GazeData> _gazeQueue = new Queue<G3GazeData>();
-        private readonly G3Api _g3;
+        private readonly IG3Api _g3;
         private readonly Timer _calibMarkerTimer;
         private readonly Timer _externalTimeReferenceTimer;
 
@@ -53,10 +52,10 @@ namespace G3Demo
         private double _lastExternalTimeError;
         private int _externalTimeReferenceIndex;
 
-        public DeviceVM(IZeroconfHost zeroconfHost, Dispatcher dispatcher) : base(dispatcher)
+        public DeviceVM(string hostName, IG3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
-            _zeroconfHost = zeroconfHost;
-            _g3 = new G3Api(zeroconfHost.IPAddress);
+            _hostName = hostName;
+            _g3 = g3;
             ShowCalibrationMarkerWindow = new DelegateCommand(p => DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
@@ -148,11 +147,13 @@ namespace G3Demo
             HideGaze();
         }
 
-        private void AddPoint(ObservableCollection<DataPoint> data, TimeSpan time, float value)
+
+        private void AddPoint(ThrottlingObservableCollection<DataPoint> data, TimeSpan time, float value)
         {
             data.Add(new DataPoint(time.TotalSeconds, value));
+            
             while (data.Last().X - data.First().X > 10)
-                data.RemoveAt(0);
+                data.RemoveFirst();
         }
 
         private Task DoTakeSnapshot()
@@ -161,7 +162,7 @@ namespace G3Demo
         }
 
         #region ViewModel properties
-        public string Id => _zeroconfHost.Id;
+        public string Id => _hostName;
         public bool Selected
         {
             get => _selected;
@@ -418,19 +419,19 @@ namespace G3Demo
             }
         }
 
-        public ObservableCollection<DataPoint> GazeXSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> GazeYSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> AccXSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> AccYSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> AccZSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> GyrXSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> GyrYSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> GyrZSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> MagXSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> MagYSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> MagZSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> PupilLeftSeries { get; } = new ObservableCollection<DataPoint>();
-        public ObservableCollection<DataPoint> PupilRightSeries { get; } = new ObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> GazeXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> GazeYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> AccXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> AccYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> AccZSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> GyrXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> GyrYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> GyrZSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> MagXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> MagYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> MagZSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> PupilLeftSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> PupilRightSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
 
         public bool GazePlotEnabled { get; set; }
         public bool PupilPlotEnabled { get; set; }

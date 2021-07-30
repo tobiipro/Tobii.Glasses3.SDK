@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Network : DynamicChildNode
+    public class Network : DynamicChildNode, INetwork
     {
         private readonly ROProperty<bool> _wifiHwEnabled;
         private readonly RWProperty<bool> _wifiEnable;
@@ -42,6 +42,15 @@ namespace G3SDK
         public Wifi Wifi { get; }
         public Ethernet Ethernet { get; }
 
+    }
+    public interface INetwork
+    {
+        Task<bool> WifiHwEnabled { get; }
+        Task<bool> WifiEnable { get; }
+        Wifi Wifi { get; }
+        Ethernet Ethernet { get; }
+        Task<bool> SetWifiEnable(bool value);
+        Task Reset();
     }
 
     public class NetworkInterface : DynamicChildNode

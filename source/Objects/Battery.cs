@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Battery: G3Object
+    public class Battery: G3Object, IBattery
     {
         private readonly ROProperty<float> _level;
         private readonly ROProperty<TimeSpan> _remainingTime;
@@ -43,6 +43,15 @@ namespace G3SDK
         #endregion
 
 
+    }
+
+    public interface IBattery: IG3Object
+    {
+        Task<float> Level { get; }
+        Task<TimeSpan> RemainingTime { get; }
+        Task<bool> Charging { get; }
+        Task<BatteryState> State { get; }
+        IG3Observable<(BatteryState State, bool Charging)> StateChanged { get; }
     }
 
     public enum BatteryState

@@ -17,19 +17,21 @@ namespace G3SDK
         private readonly HashSet<ROProperty> _readOnlyProperties = new HashSet<ROProperty>();
         private readonly HashSet<ROProperty> _readWriteProperties = new HashSet<ROProperty>();
         private G3ObjectDescription _desc;
-        public G3Api G3Api { get; }
+        private G3Api _g3Api;
+        public G3Api G3Api => _g3Api;
         public string Path { get; }
 
         public G3Object(G3Api g3Api, string path)
         {
-            G3Api = g3Api;
+
+            _g3Api = g3Api;
             Path = path;
             AddROProperty("name");
         }
 
         protected ROProperty<T> AddROProperty<T>(string propName, Func<string, T> convert)
         {
-            var prop = new ROProperty<T>(G3Api, Path, propName, convert);
+            var prop = new ROProperty<T>(_g3Api, Path, propName, convert);
             _readOnlyProperties.Add(prop.Prop);
             return prop;
         }
@@ -45,21 +47,21 @@ namespace G3SDK
 
         protected RWProperty<T> AddRWProperty<T>(string propName, Func<string, T> parse, Func<T, string> toString = null)
         {
-            var prop = new RWProperty<T>(G3Api, Path, propName, parse, toString);
+            var prop = new RWProperty<T>(_g3Api, Path, propName, parse, toString);
             _readWriteProperties.Add(prop.Prop);
             return prop;
         }
 
         protected ROProperty AddROProperty(string propName)
         {
-            var prop = new ROProperty(G3Api, Path, propName);
+            var prop = new ROProperty(_g3Api, Path, propName);
             _readOnlyProperties.Add(prop);
             return prop;
         }
 
         protected IG3Observable<T> AddSignal<T>(string signalName, Func<List<JToken>, T> bodyTranslator)
         {
-            var s = G3Api.SignalHandler.CreateSignal(Path, signalName, bodyTranslator);
+            var s = _g3Api.SignalHandler.CreateSignal(Path, signalName, bodyTranslator);
             _signals.Add(s as ISignal);
             return s;
         }
@@ -68,7 +70,7 @@ namespace G3SDK
         {
             if (_desc == null)
             {
-                var doc = await G3Api.GetRestRequest($"{Path}?help=true");
+                var doc = await _g3Api.GetRestRequest($"{Path}?help=true");
                 _desc = JsonConvert.DeserializeObject<G3ObjectDescription>(doc);
             }
         }
@@ -154,7 +156,7 @@ namespace G3SDK
 
         public async Task<JObject> GetDocJson()
         {
-            var json = await G3Api.GetRestRequest(Path + "?help=true");
+            var json = await _g3Api.GetRestRequest(Path + "?help=true");
             var obj = JObject.Parse(json);
             return obj;
         }
@@ -168,7 +170,7 @@ namespace G3SDK
             if (children is JArray array)
             {
                 foreach (var t in array)
-                    res.Add(new G3Object(G3Api, Path + "/" + t.Value<string>()));
+                    res.Add(new G3Object(_g3Api, Path + "/" + t.Value<string>()));
 
                 res.Sort((o1, o2) => o1.Path.CompareTo(o2.Path));
             }
@@ -209,10 +211,16 @@ namespace G3SDK
             return true;
         }
 
+        public override string ToString()
+        {
+            return string.Join(".", _versionParts);
+        }
+
         public static G3Version Version_1_20 { get; } = new G3Version("1.20");
         public static G3Version Version_1_14_Nudelsoppa { get; } = new G3Version("1.14+nudelsoppa");
         public static G3Version Version_1_11_Flytt { get; } = new G3Version("1.11+flytt");
         public static G3Version Version_1_7_SommarRegn { get; } = new G3Version("1.7+sommarregn");
+        public static G3Version Latest => Version_1_14_Nudelsoppa;
     }
 
     public class G3ObjectDescription
@@ -256,7 +264,7 @@ namespace G3SDK
 
     public interface IG3Object
     {
-        G3Api G3Api { get; }
-        string Path { get; }
+//        IG3Api G3Api { get; }
+//        string Path { get; }
     }
 }

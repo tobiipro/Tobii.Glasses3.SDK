@@ -176,11 +176,14 @@ namespace G3Demo
                 if (!Devices.Any(device => device.Id == d.Id))
                 {
                     Logs.Add($"Found new device: {d.Id}");
-                    var deviceVm = new DeviceVM(d, Dispatcher);
+                    var deviceVm = new DeviceVM(d.Id, new G3Api(d.IPAddress), Dispatcher);
                     Devices.Add(deviceVm);
                     await deviceVm.InitAsync();
                 }
             }
+            var simVM = new DeviceVM("Simulator", new G3Sim.G3Simulator(), Dispatcher);
+            Devices.Add(simVM);
+            await simVM.InitAsync();
 
             _initialBrowseTask = null;
         }

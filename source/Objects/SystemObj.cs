@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace G3SDK
 {
-    public class SystemObj : DynamicChildNode
+    public class SystemObj : DynamicChildNode, ISystem
     {
         private readonly ROProperty _headUnitSerial;
         private readonly ROProperty _recordingUnitSerial;
@@ -15,8 +15,10 @@ namespace G3SDK
         private readonly ROProperty<DateTime> _time;
         private readonly ROProperty<bool> _ntpIsEnabled;
         private readonly ROProperty<bool> _ntpIsSynchronized;
-        public Battery Battery { get; }
-        public Storage Storage { get; }
+        private readonly Storage _storage;
+        private readonly Battery _battery;
+        public IBattery Battery => _battery;
+        public IStorage Storage => _storage;
 
         public SystemObj(G3Api g3Api) : base(g3Api, "system")
         {
@@ -35,8 +37,8 @@ namespace G3SDK
             _ntpIsEnabled = AddROProperty<bool>("ntp-is-enabled", bool.Parse);
             _ntpIsSynchronized = AddROProperty<bool>("ntp-is-synchronized", bool.Parse);
 
-            Battery = new Battery(g3Api, Path);
-            Storage = new Storage(g3Api, Path);
+            _battery = new Battery(g3Api, Path);
+            _storage = new Storage(g3Api, Path);
         }
 
         #region Properties
@@ -61,7 +63,7 @@ namespace G3SDK
 
         public override async Task<IEnumerable<G3Object>> GetSDKChildren()
         {
-            return await Task.FromResult(new G3Object[] { Battery, Storage });
+            return await Task.FromResult(new G3Object[] { _battery, _storage });
         }
 
         public Task<bool> UseNtp(bool value)
@@ -78,5 +80,22 @@ namespace G3SDK
         {
             return G3Api.ExecuteCommand<int[]>(Path, "available-gaze-frequencies", LogLevel.info);
         }
+    }
+
+    public interface ISystem
+    {
+        IBattery Battery { get; }
+        IStorage Storage { get; }
+        Task<string> Version { get; }
+        Task<string> RecordingUnitSerial { get; }
+        Task<string> HeadUnitSerial { get; }
+        Task<string> TimeZone { get; }
+        Task<bool> NtpIsEnabled { get; }
+        Task<bool> NtpIsSynchronized { get; }
+        Task<DateTime> Time { get; }
+        Task<bool> SetTime(DateTime value);
+        Task<bool> UseNtp(bool value);
+        Task<bool> SetTimezone(string tz);
+        Task<int[]> AvailableGazeFrequencies();
     }
 }

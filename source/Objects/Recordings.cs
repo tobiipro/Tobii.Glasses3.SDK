@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Recordings: DynamicChildNode
+    public class Recordings: DynamicChildNode, IRecordings
     {
 
         public Recordings(G3Api g3Api): base(g3Api, "recordings")
@@ -32,7 +31,12 @@ namespace G3SDK
         public IG3Observable<Notification> ScanStart { get; }
         public IG3Observable<Notification> ScanDone { get; }
 
-        public async Task<List<Recording>> Children()
+        public async Task<List<IRecording>> Children()
+        {
+            return new List<IRecording>(await InternalChildren());
+        }
+
+        private async Task<List<Recording>> InternalChildren()
         {
             // {
             // "id":6,
@@ -65,7 +69,7 @@ namespace G3SDK
 
         public override async Task<IEnumerable<G3Object>> GetSDKChildren()
         {
-            return await Children();
+            return await InternalChildren();
         }
 
         public struct RecordingsResponse
@@ -78,5 +82,14 @@ namespace G3SDK
         {
             public string[] children { get; set; }
         }
+    }
+
+    public interface IRecordings: IDynamicChildNode
+    {
+        Task<bool> Delete(Guid uuid);
+        IG3Observable<Guid> Deleted { get; }
+        IG3Observable<Notification> ScanStart { get; }
+        IG3Observable<Notification> ScanDone { get; }
+        Task<List<IRecording>> Children();
     }
 }

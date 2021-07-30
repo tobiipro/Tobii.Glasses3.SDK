@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Recorder: G3Object, IMetaDataCapable
+    public class Recorder: G3Object, IMetaDataCapable, IRecorder
     {
         private readonly RWProperty<string> _folder;
         private readonly RWProperty<string> _visibleName;
@@ -116,34 +116,31 @@ namespace G3SDK
 
         public async Task<bool> MetaInsert(string key, string value)
         {
-            return await MetaDataCapableExtensions.MetaInsert(this, key, value);
+            return await MetaDataCapableHelpers.MetaInsert(G3Api, Path, key, value);
         }
         public async Task<bool> MetaInsert(string key, byte[] data)
         {
-            return await MetaDataCapableExtensions.MetaInsert(this, key, data);
+            return await MetaDataCapableHelpers.MetaInsert(G3Api, Path, key, data);
         }
 
         public async Task<string[]> MetaKeys()
         {
-            return await MetaDataCapableExtensions.MetaKeys(this);
+            return await MetaDataCapableHelpers.MetaKeys(G3Api, Path);
         }
 
         public async Task<string> MetaLookupString(string key)
         {
-            return await MetaDataCapableExtensions.MetaLookupString(this, key);
+            return await MetaDataCapableHelpers.MetaLookupString(G3Api, Path, key);
         }
         public async Task<byte[]> MetaLookup(string key)
         {
-            return await MetaDataCapableExtensions.MetaLookup(this, key);
+            return await MetaDataCapableHelpers.MetaLookup(G3Api, Path, key);
         }
-    }
-
-    public static class RecorderExtensions
-    {
-        public static async Task<bool> RecordingInProgress(this Recorder r)
+        public async Task<bool> RecordingInProgress()
         {
-            var uuid = await r.UUID;
+            var uuid = await UUID;
             return uuid != Guid.Empty;
         }
     }
+
 }

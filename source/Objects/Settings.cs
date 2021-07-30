@@ -7,7 +7,7 @@ using Newtonsoft.Json.Converters;
 
 namespace G3SDK
 {
-    public class Settings : G3Object
+    public class Settings : G3Object, ISettings
     {
         private readonly RWProperty<bool> _gazeOverlay;
         private readonly RWProperty<int> _gazeFrequency;
@@ -49,4 +49,12 @@ namespace G3SDK
         }
     }
 
+    public interface ISettings
+    {
+        IG3Observable<string> Changed { get; }
+        Task<bool> GazeOverlay { get; }
+        Task<int> GazeFrequency { get; }
+        Task<bool> SetGazeOverlay(bool value);
+        Task<bool> SetGazeFrequency(int value);
+    }
 }

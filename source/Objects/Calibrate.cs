@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Calibrate: G3Object
+    public class Calibrate: G3Object, ICalibrate
     {
         public Calibrate(G3Api g3Api): base(g3Api, "calibrate")
         {

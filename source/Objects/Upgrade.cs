@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Upgrade: G3Object
+    public class Upgrade: G3Object, IUpgrade
     {
         private readonly ROProperty<bool> _inProgress;
         public Upgrade(G3Api g3Api): base(g3Api, "upgrade")
@@ -29,7 +28,13 @@ namespace G3SDK
         public Task<bool> InProgress => _inProgress.Value();
     }
 
- 
+    public interface IUpgrade
+    {
+        IG3Observable<bool> Completed { get; }
+        IG3Observable<UpgradeState> Progress { get; }
+        Task<bool> InProgress { get; }
+    }
+
 
     public class UpgradeState
     {

@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Storage: G3Object
+    public class Storage: G3Object, IStorage
     {
         private readonly ROProperty<long> _free;
         private readonly ROProperty<long> _size;
@@ -43,5 +43,17 @@ namespace G3SDK
             var cardState = ParserHelpers.ParseCardState(arg[1].Value<string>());
             return (spaceState, cardState);
         }
+    }
+
+    public interface IStorage: IG3Object
+    {
+        Task<long> Free { get; }
+        Task<long> Size { get; }
+        Task<bool> Busy { get; }
+        Task<TimeSpan> RemainingTime { get; }
+        Task<SpaceState> SpaceState { get; }
+        Task<CardState> CardState { get; }
+        IG3Observable<(SpaceState spaceState, CardState cardState)> StateChanged { get; }
+        IG3Observable<bool> BusyChanged { get; }
     }
 }

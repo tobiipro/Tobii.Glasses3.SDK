@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class DynamicChildNode : G3Object
+    public abstract class DynamicChildNode : G3Object, IDynamicChildNode
     {
         public DynamicChildNode(G3Api g3Api, string path) : base(g3Api, path)
         {
@@ -25,5 +25,11 @@ namespace G3SDK
         public IG3Observable<string> ChildRemoved { get; }
 
         public IG3Observable<string> ChildAdded { get; }
+    }
+
+    public interface IDynamicChildNode
+    {
+        IG3Observable<string> ChildRemoved { get; }
+        IG3Observable<string> ChildAdded { get; }
     }
 }

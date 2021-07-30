@@ -12,7 +12,7 @@ namespace G3Demo
 {
     public class CalibMarkerVM : ViewModelBase
     {
-        private readonly G3Api _g3;
+        private readonly IG3Api _g3;
         private readonly Brush _black = new SolidColorBrush(Colors.Black);
         private readonly Brush _white = new SolidColorBrush(Colors.White);
         private readonly Brush _blue = new SolidColorBrush(Colors.Blue);
@@ -25,7 +25,7 @@ namespace G3Demo
         private readonly Timer _timer;
         private Brush _middleColor;
 
-        public CalibMarkerVM(G3Api g3, Dispatcher dispatcher) : base(dispatcher)
+        public CalibMarkerVM(IG3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
             _g3 = g3;
             if (File.Exists("markersize.dat"))

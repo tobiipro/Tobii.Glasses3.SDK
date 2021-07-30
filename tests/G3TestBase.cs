@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+
 using NUnit.Framework;
 
 namespace G3SDK
@@ -7,15 +8,17 @@ namespace G3SDK
     public class G3TestBase
     {
         protected G3Version FwVersion { get; private set; }
-        protected G3Api G3Api { get; private set; }
+        protected IG3Api G3Api { get; private set; }
         protected async Task EnsureApi()
         {
             if (G3Api != null)
                 return;
             var browser = new G3Browser();
             var devices = await browser.ProbeForDevices();
-            Assert.IsNotEmpty(devices, "no G3 device found");
-            G3Api = devices.First();
+            if (devices.Any())
+                G3Api = devices.First();
+            else 
+                G3Api = new G3Sim.G3Simulator();
             FwVersion = new G3Version(await G3Api.System.Version);
 
             var inProgress = await G3Api.Recorder.RecordingInProgress();

@@ -17,7 +17,7 @@ namespace G3SDK
 
     public class RudimentaryTimeSync: IRudimentaryTimeSync
     {
-        private readonly Rudimentary _streamProvider;
+        private readonly IRudimentary _streamProvider;
         private readonly Timer _timer;
         private readonly Guid _id = Guid.NewGuid();
         private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -27,7 +27,7 @@ namespace G3SDK
         private int _refCount;
         private TimeSyncEventArgs _lastTimeSyncEventArgs;
 
-        public RudimentaryTimeSync(Rudimentary streamProvider, int timerInterval = 5000)
+        public RudimentaryTimeSync(IRudimentary streamProvider, int timerInterval = 5000)
         {
             _streamProvider = streamProvider;
             _timer = new Timer(timerInterval);

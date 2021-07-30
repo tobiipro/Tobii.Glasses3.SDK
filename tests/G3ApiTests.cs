@@ -253,26 +253,28 @@ namespace G3SDK
             await EnsureApi();
             var warnings = new List<string>();
 
-            var session = await G3Api.WebRTC.Create();
-
-            foreach (var o in G3Api.Children)
+            if ((G3Api is G3Api x))
             {
-                await o.ValidateApi(warnings);
+                var session = await x.WebRTC.Create();
+
+                foreach (var o in x.Children)
+                {
+                    await o.ValidateApi(warnings);
+                }
+
+                await G3Api.WebRTC.Delete(session);
+
+                var ethernetConfigs = await G3Api.Network.Ethernet.Configurations.Children();
+                if (ethernetConfigs.Any())
+                    await ethernetConfigs.First().ValidateApi(warnings);
+
+                foreach (var w in warnings)
+                    Console.WriteLine(w);
+                Assert.IsEmpty(warnings, $"Api warnings: " +
+                                         Environment.NewLine + "=====" +
+                                         Environment.NewLine + string.Join(Environment.NewLine, warnings) +
+                                         Environment.NewLine + "=====");
             }
-            await G3Api.WebRTC.Delete(session);
-
-
-
-            var ethernetConfigs = await G3Api.Network.Ethernet.Configurations.Children();
-            if (ethernetConfigs.Any())
-                await ethernetConfigs.First().ValidateApi(warnings);
-
-            foreach (var w in warnings)
-                Console.WriteLine(w);
-            Assert.IsEmpty(warnings, $"Api warnings: " +
-                                     Environment.NewLine + "=====" +
-                                     Environment.NewLine + string.Join(Environment.NewLine, warnings) +
-                                     Environment.NewLine + "=====");
         }
 
         [Test]
