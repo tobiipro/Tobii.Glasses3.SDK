@@ -97,6 +97,24 @@
                 </oxy:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding MagPlotEnabled}">Enabled</CheckBox>
             </Grid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <oxy:Plot Title="CalibMag" Height="200" Width="300">
+                    <oxy:Plot.Series>
+                        <oxy:LineSeries Title="X" ItemsSource="{Binding CalibMagXSeries}"/>
+                        <oxy:LineSeries Title="Y" ItemsSource="{Binding CalibMagYSeries}"/>
+                        <oxy:LineSeries Title="Z" ItemsSource="{Binding CalibMagZSeries}"/>
+                    </oxy:Plot.Series>
+                </oxy:Plot>
+                <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding CalibMagPlotEnabled}">Enabled</CheckBox>
+                <StackPanel Grid.Row="1">
+                    <Button Command="{Binding CalibrateMagStart}">CalibrateStart</Button>
+                    <Button Command="{Binding CalibrateMagStop}">CalibrateStop</Button>
+                </StackPanel>
+            </Grid>
 
         </WrapPanel>
     </StackPanel>

@@ -25,8 +25,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3Demo", "examples\G3Demo\G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3ToScreenMapper", "examples\G3ToScreenMapper\G3ToScreenMapper.csproj", "{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3Sim", "G3Simulator\G3Sim.csproj", "{405E9244-A91B-49E1-BD88-7FFB0E44A1A1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,10 +55,6 @@ Global
 		{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{405E9244-A91B-49E1-BD88-7FFB0E44A1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{405E9244-A91B-49E1-BD88-7FFB0E44A1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{405E9244-A91B-49E1-BD88-7FFB0E44A1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{405E9244-A91B-49E1-BD88-7FFB0E44A1A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

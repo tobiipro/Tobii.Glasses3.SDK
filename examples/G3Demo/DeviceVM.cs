@@ -51,6 +51,7 @@ namespace G3Demo
         private bool _isCalibrated;
         private double _lastExternalTimeError;
         private int _externalTimeReferenceIndex;
+        private readonly CalibratedMagnetometer _calibmag;
 
         public DeviceVM(string hostName, IG3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
@@ -60,6 +61,8 @@ namespace G3Demo
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
             TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
+            CalibrateMagStart = new DelegateCommand(o => _calibmag.StartCalibration(), () => true);
+            CalibrateMagStop = new DelegateCommand(o => _calibmag.StartCalibration(), () => true);
 
             _calibMarkerTimer = new Timer(2000);
             _calibMarkerTimer.Elapsed += async (sender, args) =>
@@ -122,14 +125,14 @@ namespace G3Demo
                         AddPoint(AccYSeries, data.TimeStamp, data.Accelerometer.Y);
                         AddPoint(AccZSeries, data.TimeStamp, data.Accelerometer.Z);
                     }
-                    
+
                     if (GyrPlotEnabled && data.Gyroscope.IsValid())
                     {
                         AddPoint(GyrXSeries, data.TimeStamp, data.Gyroscope.X);
                         AddPoint(GyrYSeries, data.TimeStamp, data.Gyroscope.Y);
                         AddPoint(GyrZSeries, data.TimeStamp, data.Gyroscope.Z);
                     }
-                    
+
                     if (MagPlotEnabled && data.Magnetometer.IsValid())
                     {
                         AddPoint(MagXSeries, data.TimeStamp, data.Magnetometer.X);
@@ -145,13 +148,26 @@ namespace G3Demo
             _rtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
             _rtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
             HideGaze();
+            _calibmag = new CalibratedMagnetometer(_g3);
+            _calibmag.Start();
+            _calibmag.Subscribe(data =>
+                {
+                    if (MagPlotEnabled && data.Magnetometer.IsValid())
+                    {
+                        AddPoint(CalibMagXSeries, data.TimeStamp, data.Magnetometer.X);
+                        AddPoint(CalibMagYSeries, data.TimeStamp, data.Magnetometer.Y);
+                        AddPoint(CalibMagZSeries, data.TimeStamp, data.Magnetometer.Z);
+                    }
+
+                }
+            );
         }
 
 
         private void AddPoint(ThrottlingObservableCollection<DataPoint> data, TimeSpan time, float value)
         {
             data.Add(new DataPoint(time.TotalSeconds, value));
-            
+
             while (data.Last().X - data.First().X > 10)
                 data.RemoveFirst();
         }
@@ -430,6 +446,9 @@ namespace G3Demo
         public ThrottlingObservableCollection<DataPoint> MagXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
         public ThrottlingObservableCollection<DataPoint> MagYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
         public ThrottlingObservableCollection<DataPoint> MagZSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> CalibMagXSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> CalibMagYSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
+        public ThrottlingObservableCollection<DataPoint> CalibMagZSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
         public ThrottlingObservableCollection<DataPoint> PupilLeftSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
         public ThrottlingObservableCollection<DataPoint> PupilRightSeries { get; } = new ThrottlingObservableCollection<DataPoint>();
 
@@ -438,7 +457,10 @@ namespace G3Demo
         public bool AccPlotEnabled { get; set; }
         public bool GyrPlotEnabled { get; set; }
         public bool MagPlotEnabled { get; set; }
+        public bool CalibMagPlotEnabled { get; set; }
 
+        public ICommand CalibrateMagStop { get; }
+        public ICommand CalibrateMagStart { get; }
         private bool CanStartRec()
         {
             return !IsRecording && CardState == CardState.Available &&

@@ -17,7 +17,6 @@ namespace G3Sim
     {
         private readonly DateTime _simStarted;
 
-
         public G3Simulator()
         {
             Calibrate = new CalibrateSimulator(this);
@@ -221,6 +220,8 @@ namespace G3Sim
                 _dataTimer.Enabled = false;
                 return;
             }
+
+            var ts = _g3Simulator.GetTimestamp();
             _lastGaze = new G3GazeData(
                 _g3Simulator.GetTimestamp(),
                 new Vector2(0.5f, 0.4f),
@@ -231,7 +232,16 @@ namespace G3Sim
                 new G3GazeData.EyeData(new Vector3(1, 2, 3),
                     new Vector3(3, 4, 5),
                     4));
+
+
             _gazeSig.Emit(_lastGaze);
+            _lastImu = new G3ImuData(_g3Simulator.GetTimestamp(),
+                new Vector3(0, -10, 0),
+                new Vector3(0, 0, 0),
+                new Vector3((float) Math.Sin(ts.TotalSeconds) * 100 + 300,
+                    (float) Math.Sin(ts.TotalSeconds + 1) * 150 - 200,
+                    (float) Math.Sin(ts.TotalSeconds + 2) * 50 - 40));
+            _imuSig.Emit(_lastImu);
         }
 
         public Task<G3GazeData> GazeSample => Task.FromResult(_lastGaze);
