@@ -49,9 +49,9 @@ namespace G3Demo
         private CalibMarker _win;
         private bool _selected;
         private bool _isCalibrated;
-        private double _lastExternalTimeError;
+        private double _lastExternalTimeRoundtrip;
         private int _externalTimeReferenceIndex;
-        private readonly CalibratedMagnetometer _calibmag;
+        private readonly CalibratedMagnetometer _calibMag;
 
         public DeviceVM(string hostName, IG3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
@@ -61,8 +61,8 @@ namespace G3Demo
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
             TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
-            CalibrateMagStart = new DelegateCommand(o => _calibmag.StartCalibration(), () => true);
-            CalibrateMagStop = new DelegateCommand(o => _calibmag.StartCalibration(), () => true);
+            CalibrateMagStart = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
+            CalibrateMagStop = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
 
             _calibMarkerTimer = new Timer(2000);
             _calibMarkerTimer.Elapsed += async (sender, args) =>
@@ -82,8 +82,8 @@ namespace G3Demo
             {
                 var sw = Stopwatch.StartNew();
                 await _g3.Recorder.SendEvent("ExternalTimeReference",
-                    new ExternalTimeReference(DateTime.UtcNow, DateTime.Now, Environment.MachineName, _lastExternalTimeError, _externalTimeReferenceIndex++));
-                _lastExternalTimeError = sw.Elapsed.TotalMilliseconds;
+                    new ExternalTimeReference(DateTime.UtcNow, DateTime.Now, Environment.MachineName, _lastExternalTimeRoundtrip, _externalTimeReferenceIndex++));
+                _lastExternalTimeRoundtrip = sw.Elapsed.TotalMilliseconds;
             };
             _externalTimeReferenceTimer.Enabled = true;
 
@@ -148,9 +148,9 @@ namespace G3Demo
             _rtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
             _rtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
             HideGaze();
-            _calibmag = new CalibratedMagnetometer(_g3);
-            _calibmag.Start();
-            _calibmag.Subscribe(data =>
+            _calibMag = new CalibratedMagnetometer(_g3);
+            _calibMag.Start();
+            _calibMag.Subscribe(data =>
                 {
                     if (MagPlotEnabled && data.Magnetometer.IsValid())
                     {
@@ -415,7 +415,7 @@ namespace G3Demo
             }
         }
 
-        public string LiveVideoUrl => _g3 != null ? $"rtsp://{_g3.IpAddress}:8554/live/all" : null;
+        public Uri LiveVideoUri => _g3?.LiveRtspUri();
         #endregion
 
         #region Commands

@@ -32,8 +32,8 @@ namespace G3ToScreenMapper
 
         public void Start()
         {
-            _rtspSource = new OpenCvSharp.VideoCapture($"rtsp://{_api.IpAddress}:8554/live/all", VideoCaptureAPIs.FFMPEG);
-            Task.Run(() => ListenToFrames());
+            _rtspSource = new VideoCapture(_api.LiveRtspUrl(), VideoCaptureAPIs.FFMPEG);
+            Task.Run(ListenToFrames);
 
         }
 

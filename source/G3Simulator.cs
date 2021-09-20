@@ -43,6 +43,16 @@ namespace G3Sim
         public ISettings Settings { get; }
         public ISystem System { get; }
         public string IpAddress { get; }
+        public string LiveRtspUrl(bool gazeOverlay = false)
+        {
+            return "NotImplemented";
+        }
+
+        public Uri LiveRtspUri(bool gazeOverlay = false)
+        {
+            return new Uri(LiveRtspUrl(gazeOverlay));
+        }
+
         public IRudimentary Rudimentary { get; }
         public IRecordings Recordings => InternalRecordings;
         public IUpgrade Upgrade { get; }

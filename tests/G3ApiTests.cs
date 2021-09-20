@@ -7,13 +7,19 @@ using System.Net;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using RtspClientSharp;
+using RtspClientSharp.RawFrames.Audio;
+using RtspClientSharp.RawFrames.Video;
+using Unosquare.FFME;
+using Timer = System.Timers.Timer;
 
 namespace G3SDK
 {
     [TestFixture]
-    public class G3ApiTests: G3TestBase
+    public class G3ApiTests : G3TestBase
     {
         [Test]
         public async Task StoragePropertiesCanBeRead()
@@ -150,7 +156,7 @@ namespace G3SDK
             var stunServer = await session.StunServer;
             var turnServer = await session.TurnServer;
             // Deleting a WebRTC object immediately fails in FW versions prior to 1.20
-            if (FwVersion.LessThan(G3Version.Version_1_20))
+            if (FwVersion.LessThan(G3Version.Version_1_20_Crayfish))
                 await Task.Delay(500);
             var iceCandidates = new List<IceCandidate>();
             session.NewIceCandidate.Subscribe(c => iceCandidates.Add(c));
@@ -424,6 +430,43 @@ namespace G3SDK
         }
 
         [Test]
+        public async Task CanSendEventsDuringRecording()
+        {
+            await EnsureApi();
+            await EnsureSDCard();
+
+            if (FwVersion.LessThan(G3Version.Version_1_20_Crayfish))
+                Assert.Ignore("Test will fail in fw less than 1.20");
+
+            var d = await G3Api.Recorder.Duration;
+            if (d.HasValue)
+                await G3Api.Recorder.Cancel();
+
+            await G3Api.Recorder.Start();
+            var eventCounter = 0;
+            var t = new Timer
+            {
+                Interval = 50,
+                Enabled = true
+            };
+
+            t.Elapsed += async (sender, args) =>
+            {
+                var evRes = await G3Api.Recorder.SendEvent("tag", new Payload() { Num = eventCounter++, Str = DateTime.Now.ToString() });
+                Assert.That(evRes, Is.True);
+            };
+
+            Thread.Sleep(3000);
+            var res = await G3Api.Recorder.Stop();
+            var duration = await G3Api.Recorder.Duration;
+            var serial = await G3Api.System.RecordingUnitSerial;
+            t.Enabled = false;
+            Assert.That(res, Is.True, "Failed to stop recording");
+            Assert.That(duration, Is.Null, "Duration not null after recording stopped");
+            Assert.That(serial, Contains.Substring("TG0"), "Serial number unexpected after stopped recording");
+        }
+
+        [Test]
         public async Task CanStartAndStopRecordings()
         {
             await EnsureApi();
@@ -544,7 +587,7 @@ namespace G3SDK
             var b = new G3Browser();
             var list = await b.ForceProbe();
             Assert.That(list, Is.Not.Null);
-            foreach(var api in list)
+            foreach (var api in list)
                 Console.WriteLine(api.IpAddress);
         }
 

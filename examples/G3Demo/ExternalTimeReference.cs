@@ -7,19 +7,19 @@ namespace G3Demo
         public DateTime UtcTime { get; }
         public DateTime LocalTime { get; }
         public string MachineName { get; }
-        public double LastExternalTimeError { get; }
+        public double LastExternalTimeRoundtrip { get; }
         public int Index { get; }
 
         public ExternalTimeReference(DateTime utcTime,
             DateTime localTime,
             string machineName,
-            double lastExternalTimeError,
+            double lastExternalTimeRoundtrip,
             int index)
         {
             UtcTime = utcTime;
             LocalTime = localTime;
             MachineName = machineName;
-            LastExternalTimeError = lastExternalTimeError;
+            LastExternalTimeRoundtrip = lastExternalTimeRoundtrip;
             Index = index;
         }
     }

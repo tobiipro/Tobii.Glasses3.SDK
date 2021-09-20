@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -55,6 +54,16 @@ namespace G3SDK
         public SignalHandler SignalHandler { get; }
 
         public ISettings Settings { get; }
+        public string LiveRtspUrl(bool gazeOverlay = false)
+        {
+            return $"rtsp://{IpAddress}:8554/live/all?gaze-overlay={gazeOverlay}";
+        }
+
+        public Uri LiveRtspUri(bool gazeOverlay = false)
+        {
+            return new Uri(LiveRtspUrl(gazeOverlay));
+        }
+
         public IRudimentary Rudimentary { get; }
         public INetwork Network { get; }
         public ICalibrate Calibrate { get; }
@@ -185,6 +194,8 @@ namespace G3SDK
         ISettings Settings { get; }
         ISystem System { get; }
         string IpAddress { get; }
+        string LiveRtspUrl(bool gazeOverlay = false);
+        Uri LiveRtspUri(bool gazeOverlay = false);
         IRudimentary Rudimentary { get; }
         IRecordings Recordings { get; }
         IUpgrade Upgrade { get; }

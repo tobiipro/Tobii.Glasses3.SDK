@@ -216,7 +216,7 @@ namespace G3SDK
             return string.Join(".", _versionParts);
         }
 
-        public static G3Version Version_1_20 { get; } = new G3Version("1.20");
+        public static G3Version Version_1_20_Crayfish { get; } = new G3Version("1.20+crayfish");
         public static G3Version Version_1_14_Nudelsoppa { get; } = new G3Version("1.14+nudelsoppa");
         public static G3Version Version_1_11_Flytt { get; } = new G3Version("1.11+flytt");
         public static G3Version Version_1_7_SommarRegn { get; } = new G3Version("1.7+sommarregn");

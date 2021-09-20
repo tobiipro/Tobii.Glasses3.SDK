@@ -42,8 +42,14 @@
             <Button Command="{Binding TakeSnapshot}">Snapshot</Button>
             <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>
         </StackPanel>
-        <TextBlock Text="{Binding CardState}"></TextBlock>
-        <TextBlock Text="{Binding SpaceState}"></TextBlock>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="10,0">SD card state: </TextBlock>
+            <TextBlock Text="{Binding CardState}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="10,0">SD space state:</TextBlock>
+            <TextBlock Text="{Binding SpaceState}"></TextBlock>
+        </StackPanel>
         <TextBlock Text="{Binding Sync}"></TextBlock>
         <TextBlock Text="{Binding Event}"></TextBlock>
         <TextBlock Text="{Binding Msg}"></TextBlock>

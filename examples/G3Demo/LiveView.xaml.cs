@@ -55,10 +55,10 @@ namespace G3Demo
 
         private async void LiveView_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is DeviceVM vm && vm.LiveVideoUrl != null)
+            if (DataContext is DeviceVM vm && vm.LiveVideoUri != null)
             {
                 _vm = vm;
-                await Media.Open(new Uri(vm.LiveVideoUrl));
+                await Media.Open(vm.LiveVideoUri);
             }
         }
     }
