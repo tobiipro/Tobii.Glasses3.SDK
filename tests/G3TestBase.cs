@@ -18,7 +18,7 @@ namespace G3SDK
             if (devices.Any())
                 G3Api = devices.First();
             else 
-                G3Api = new G3Sim.G3Simulator();
+                G3Api = new G3Simulator.G3Simulator();
             FwVersion = new G3Version(await G3Api.System.Version);
 
             var inProgress = await G3Api.Recorder.RecordingInProgress();

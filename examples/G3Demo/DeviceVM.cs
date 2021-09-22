@@ -92,7 +92,7 @@ namespace G3Demo
             _g3.Recorder.Started.SubscribeAsync(g => IsRecording = true);
             _g3.Recorder.Stopped.SubscribeAsync(g => IsRecording = false);
             _g3.System.Storage.StateChanged.SubscribeAsync(OnCardStateChanged);
-            GazePlotEnabled = true;
+            GazePlotEnabled = false;
 
             _rtspDataDemuxer = new RtspDataDemuxer();
             _rtspDataDemuxer.OnGaze += (sender, data) =>
@@ -168,7 +168,7 @@ namespace G3Demo
         {
             data.Add(new DataPoint(time.TotalSeconds, value));
 
-            while (data.Last().X - data.First().X > 10)
+            while (data.Last().X - data.First().X > 3)
                 data.RemoveFirst();
         }
 

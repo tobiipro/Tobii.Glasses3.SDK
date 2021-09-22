@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace G3SDK
 {
-    public interface IMetaDataCapable: IG3Object
+    public interface IMetaDataCapable : IG3Object
     {
         Task<bool> MetaInsert(string key, string data);
         Task<bool> MetaInsert(string key, byte[] data);
@@ -37,6 +37,9 @@ namespace G3SDK
         public static async Task<byte[]> MetaLookup(G3Api g3Api, string path, string key)
         {
             var b64 = await g3Api.ExecuteCommand<string>(path, "meta-lookup", LogLevel.info, key);
+            if (b64 == null)
+                return new byte[0];
+
             return Convert.FromBase64String(b64);
         }
 

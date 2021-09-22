@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -45,12 +46,17 @@ namespace G3Demo
         private string _huSerial;
         private string _ruSerial;
         private string _fwVersion;
+        private MediaElement _rtaMedia;
+        private List<(TimeSpan, RtaInfo)> _rtaEvents;
+        private IRecording _rtaRec;
+        private bool _isPlaying;
 
         private RecordingVM(Dispatcher dispatcher, IRecording recording, IG3Api g3) : base(dispatcher)
         {
             _recording = recording;
             _g3 = g3;
             TogglePlay = new DelegateCommand(DoTogglePlay, () => true);
+            
             DeleteRecording = new DelegateCommand(DoDeleteRecording, () => true);
             StartRTA = new DelegateCommand(DoStartRTA, () => !DeviceIsRecording);
             StopRTA = new DelegateCommand(DoStopRTA, () => RtaInProgress);
@@ -74,24 +80,25 @@ namespace G3Demo
             await _g3.Recorder.Start();
             var metaInfo = new RtaMetaInfo(_recording.UUID, await _g3.Recorder.UUID, DateTime.UtcNow);
             await _g3.Recorder.MetaInsert("RTA", JsonConvert.SerializeObject(metaInfo));
-            await _recording.MetaInsert("RTA", JsonConvert.SerializeObject(metaInfo));
             RtaInProgress = true;
             _rtaTimer = new Timer();
             _rtaTimer.Interval = 5000;
             _rtaTimer.Enabled = true;
             _rtaTimer.Elapsed += async (sender, args) => { await SendRtaInfo(); };
+            SendRtaInfo();
         }
 
         private async Task SendRtaInfo()
         {
             if (_rtaInProgress)
             {
-                var info = new RtaInfo(Position, IsPlaying);
-                await _g3.Recorder.SendEvent("RTA", info);
+                this.Dispatcher.InvokeAsync(() =>
+                {
+                    var info = new RtaInfo(_media.Position, _isPlaying);
+                    _g3.Recorder.SendEvent("RTA", info);
+                });
             }
         }
-
-        public bool IsPlaying { get; set; }
 
         public bool RtaInProgress
         {
@@ -117,7 +124,7 @@ namespace G3Demo
             }
         }
 
-        public async Task AttachMediaPlayer(MediaElement media)
+        public async Task AttachMediaPlayer(MediaElement media, MediaElement rtaMedia)
         {
             _media = media;
 
@@ -125,9 +132,43 @@ namespace G3Demo
             {
                 InternalSetPosition(args.StartTime);
                 RenderGazeData(args.StartTime);
+                 if (_rtaRec != null)
+                    UpdateRTAVideo(args.StartTime);
             };
             await _media.Open(VideoUri);
             await PrepareReplay();
+
+            if (_rtaRec != null)
+            {
+                _rtaMedia = rtaMedia;
+                await _rtaMedia.Open(await _rtaRec.GetUri("scenevideo.mp4"));
+                await _rtaMedia.Pause();
+            }
+        }
+
+        private void UpdateRTAVideo(TimeSpan argsStartTime)
+        {
+            var e = _rtaEvents.LastOrDefault(x => x.Item1 < argsStartTime);
+            if (e.Item2 == null)
+                e = _rtaEvents.FirstOrDefault();
+            if (e.Item2 == null)
+                return;
+            var offset = argsStartTime - e.Item1;
+            if (e.Item2.IsPlaying)
+            {
+                var expectedPos = e.Item2.Position + offset;
+                if (Math.Abs((_rtaMedia.Position - expectedPos).TotalSeconds) > 0.2)
+                    _rtaMedia.Position = expectedPos;
+                if (_media.IsPlaying && !_rtaMedia.IsPlaying)
+                    _rtaMedia.Play();
+                if (!_media.IsPlaying)
+                    _rtaMedia.Pause();
+            }
+            else
+            {
+                _rtaMedia.Position = e.Item2.Position;
+                _rtaMedia.Pause();
+            }
         }
 
         private void RenderGazeData(TimeSpan timeStamp)
@@ -163,10 +204,16 @@ namespace G3Demo
                 await PrepareReplay();
 
             if (_media.IsPlaying)
+            {
                 await _media.Pause();
+                _isPlaying = false;
+            }
             else
+            {
                 await _media.Play();
-            IsPlaying = _media.IsPlaying;
+                _isPlaying = true;
+
+            }
             await SendRtaInfo();
         }
 
@@ -180,6 +227,11 @@ namespace G3Demo
             RuSerial = await _recording.MetaLookupString("RuSerial");
             HuSerial = await _recording.MetaLookupString("HuSerial");
             VideoUri = await _recording.GetUri("scenevideo.mp4");
+            var rtaInfoStr = await _recording.MetaLookupString("RTA");
+            if (!string.IsNullOrEmpty(rtaInfoStr))
+            {
+                InitRTAReplay(rtaInfoStr);
+            }
             var json = await _recording.GetRecordingJson();
             var snapshotarr = (JArray)json.json["scenecamera"]["snapshots"];
             if (snapshotarr != null)
@@ -198,6 +250,15 @@ namespace G3Demo
                 if (Snapshots.Any())
                     Thumbnail = Snapshots.First().Url.AbsoluteUri;
             }
+        }
+
+        private async Task InitRTAReplay(string rtaInfoStr)
+        {
+            var rtaInfo = JsonConvert.DeserializeObject<RtaMetaInfo>(rtaInfoStr);
+            _rtaRec = (await _g3.Recordings.Children()).FirstOrDefault(r => r.UUID == rtaInfo.Rec);
+            var allEvents = await _recording.Events();
+            var rtaEvents = allEvents.Where(g=>g.Tag == "RTA").ToList();
+            _rtaEvents = rtaEvents.Select(g=>(g.TimeStamp, JsonConvert.DeserializeObject<RtaInfo>(g.Obj))).ToList();
         }
 
         public string FwVersion
@@ -323,6 +384,7 @@ namespace G3Demo
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(PositionInSeconds));
                 _media.Position = value;
+                SendRtaInfo();
             }
         }
 

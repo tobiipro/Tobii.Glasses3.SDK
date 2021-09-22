@@ -98,6 +98,15 @@ namespace G3SDK
                 return ParserHelpers.ParseGazeDataFromCompressedStream(compressedData);
             }
         }
+        public async Task<List<G3Event>> Events()
+        {
+            var filePath = await EventFilePath();
+
+            using (var compressedData = await G3Api.GetRequestStream(filePath, "gzip"))
+            {
+                return ParserHelpers.ParseEventDataFromCompressedStream(compressedData);
+            }
+        }
 
         public async Task<(ConcurrentQueue<G3GazeData>, Task)> GazeDataAsync()
         {
@@ -114,14 +123,28 @@ namespace G3SDK
             return (res, t);
         }
 
-        private async Task<string> GazeFilePath()
+        private Task<string> GazeFilePath()
+        {
+            return GetFilePath("gaze");
+        }
+
+        private Task<string> EventFilePath()
+        {
+            return GetFilePath("events");
+        }
+        private Task<string> ImuFilePath()
+        {
+            return GetFilePath("imu");
+        }
+
+        private async Task<string> GetFilePath(string nodeName)
         {
             var json = await GetRecordingJson();
-            var gazeNode = json.json["gaze"];
-            var gazeFileNode = gazeNode["file"];
-            var gazeFileName = gazeFileNode.Value<string>();
-            var gazeFilePath = $"{json.httpPath}/{gazeFileName}";
-            return gazeFilePath;
+            var node = json.json[nodeName];
+            var fileNode = node["file"];
+            var fileName = fileNode.Value<string>();
+            var filePath = $"{json.httpPath}/{fileName}";
+            return filePath;
         }
 
         public async Task<(JObject json, string httpPath)> GetRecordingJson()
@@ -154,6 +177,7 @@ namespace G3SDK
         Task<bool> SetVisibleName(string value);
         Task<bool> Move(string folderName);
         Task<List<G3GazeData>> GazeData();
+        Task<List<G3Event>> Events();
         Task<(ConcurrentQueue<G3GazeData>, Task)> GazeDataAsync();
         Task<(JObject json, string httpPath)> GetRecordingJson();
         Task<Uri> GetUri(string fileName);

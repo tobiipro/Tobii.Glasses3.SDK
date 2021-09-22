@@ -11,12 +11,11 @@ using G3SDK;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace G3Sim
+namespace G3Simulator
 {
     public class G3Simulator : IG3Api
     {
         private readonly DateTime _simStarted;
-
 
         public G3Simulator()
         {
@@ -44,6 +43,19 @@ namespace G3Sim
         public ISettings Settings { get; }
         public ISystem System { get; }
         public string IpAddress { get; }
+        public string LiveRtspUrl(bool gazeOverlay = false)
+        {
+            return null;
+        }
+
+        public Uri LiveRtspUri(bool gazeOverlay = false)
+        {
+            var url = LiveRtspUrl(gazeOverlay);
+            if (url == null)
+                return null;
+            return new Uri(url);
+        }
+
         public IRudimentary Rudimentary { get; }
         public IRecordings Recordings => InternalRecordings;
         public IUpgrade Upgrade { get; }
@@ -221,6 +233,8 @@ namespace G3Sim
                 _dataTimer.Enabled = false;
                 return;
             }
+
+            var ts = _g3Simulator.GetTimestamp();
             _lastGaze = new G3GazeData(
                 _g3Simulator.GetTimestamp(),
                 new Vector2(0.5f, 0.4f),
@@ -231,7 +245,16 @@ namespace G3Sim
                 new G3GazeData.EyeData(new Vector3(1, 2, 3),
                     new Vector3(3, 4, 5),
                     4));
+
+
             _gazeSig.Emit(_lastGaze);
+            _lastImu = new G3ImuData(_g3Simulator.GetTimestamp(),
+                new Vector3(0, -10, 0),
+                new Vector3(0, 0, 0),
+                new Vector3((float) Math.Sin(ts.TotalSeconds) * 100 + 300,
+                    (float) Math.Sin(ts.TotalSeconds + 1) * 150 - 200,
+                    (float) Math.Sin(ts.TotalSeconds + 2) * 50 - 40));
+            _imuSig.Emit(_lastImu);
         }
 
         public Task<G3GazeData> GazeSample => Task.FromResult(_lastGaze);
@@ -510,6 +533,11 @@ namespace G3Sim
         }
 
         public Task<List<G3GazeData>> GazeData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<G3Event>> Events()
         {
             throw new NotImplementedException();
         }

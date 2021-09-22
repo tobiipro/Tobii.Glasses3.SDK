@@ -15,6 +15,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <Button Command="{Binding BrowseForGlasses}">Browse</Button>
+            <Button Command="{Binding AddSimulator}">Add simulator</Button>
             <ListBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedTracker}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -29,10 +30,10 @@
 
         <ListBox Grid.Column="1" ItemsSource="{Binding Logs}"/>
         <TabControl Grid.Column="2">
-            <TabItem Header="LiveView">
+            <TabItem Header="LiveView" IsSelected="True">
                 <local:LiveView DataContext="{Binding LiveView}"></local:LiveView>
             </TabItem>
-            <TabItem Header="Recordings" IsSelected="True">
+            <TabItem Header="Recordings">
                 <local:Recordings DataContext="{Binding Recordings}"></local:Recordings>
             </TabItem>
         </TabControl>

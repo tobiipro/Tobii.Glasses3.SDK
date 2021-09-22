@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,11 +20,14 @@ namespace G3Demo
         private DeviceVM _liveView;
         private Task _initialBrowseTask;
         private RecordingsVM _recordings;
+        private readonly HashSet<string> _deviceIds = new HashSet<string>();
+        private int _simCounter;
 
         public MainVm(Dispatcher dispatcher) : base(dispatcher)
         {
             _browser = new G3Browser();
             BrowseForGlasses = new DelegateCommand(DoBrowseForGlasses, () => true);
+            AddSimulator = new DelegateCommand(DoAddSimulator, () => true);
             Unosquare.FFME.Library.FFmpegDirectory = "ffmpeg\\ffmpeg-4.4-full_build-shared\\bin";
             EnsureFFMPEG();
             _initialBrowseTask = DoBrowseForGlasses();
@@ -71,7 +75,7 @@ namespace G3Demo
                 if (!device.IsCalibrated)
                 {
                     var res = await device.Calibrate();
-                    
+
                     bag.Add($"{device.Serial}: Calibration " + (res ? "OK" : "Fail"));
                 }
             });
@@ -104,6 +108,7 @@ namespace G3Demo
         }
 
         public DelegateCommand BrowseForGlasses { get; }
+        public DelegateCommand AddSimulator { get; }
 
         public ObservableCollection<string> Logs { get; } = new ObservableCollection<string>();
 
@@ -164,6 +169,13 @@ namespace G3Demo
             }
         }
 
+        private async Task DoAddSimulator()
+        {
+            var simVM = new DeviceVM($"Simulator{_simCounter++}", new G3Simulator.G3Simulator(), Dispatcher);
+            Devices.Add(simVM);
+            await simVM.InitAsync();
+        }
+
         private async Task DoBrowseForGlasses()
         {
             if (_initialBrowseTask != null && !_initialBrowseTask.IsCompleted)
@@ -173,17 +185,15 @@ namespace G3Demo
 
             foreach (var d in devices)
             {
-                if (!Devices.Any(device => device.Id == d.Id))
+                if (!_deviceIds.Contains(d.Id))
                 {
                     Logs.Add($"Found new device: {d.Id}");
                     var deviceVm = new DeviceVM(d.Id, new G3Api(d.IPAddress), Dispatcher);
                     Devices.Add(deviceVm);
+                    _deviceIds.Add(deviceVm.Id);
                     await deviceVm.InitAsync();
                 }
             }
-            var simVM = new DeviceVM("Simulator", new G3Sim.G3Simulator(), Dispatcher);
-            Devices.Add(simVM);
-            await simVM.InitAsync();
 
             _initialBrowseTask = null;
         }

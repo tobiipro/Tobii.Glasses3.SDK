@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Width="480" Height="270">
             <ffme:MediaElement  x:Name="Media"  Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
@@ -46,7 +47,8 @@
             <Button Command="{Binding StartRTA}">StartRTA</Button>
             <Button Command="{Binding StopRTA}">StopRTA</Button>
         </StackPanel>
-        <ItemsControl Grid.Row="4" ItemsSource="{Binding Snapshots}">
+        <ffme:MediaElement Grid.Row="4"  x:Name="RtaVideo"  Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
+        <ItemsControl Grid.Row="5" ItemsSource="{Binding Snapshots}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal"/>

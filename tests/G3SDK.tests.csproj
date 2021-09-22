@@ -28,6 +28,7 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\G3Simulator\G3Simulator.csproj" />
     <ProjectReference Include="..\source\G3SDK.csproj" />
   </ItemGroup>
   <ItemGroup>

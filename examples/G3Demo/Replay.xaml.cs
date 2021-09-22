@@ -30,7 +30,7 @@ namespace G3Demo
         private async void Replay_OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (DataContext is RecordingVM _vm)
-                await _vm.AttachMediaPlayer(Media);
+                await _vm.AttachMediaPlayer(Media, RtaVideo);
         }
     }
 }

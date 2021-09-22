@@ -196,39 +196,26 @@ namespace G3SDK
             return GetTimestamp(seconds);
         }
 
-        public static List<G3SyncPortData> ParseEventDataFromCompressedStream(Stream compressedData)
+        public static List<G3Event> ParseEventDataFromCompressedStream(Stream compressedData)
         {
-            var result = new List<G3SyncPortData>();
+            return ParseFromCompressedStream(compressedData, ParseEventFromJson);
+        }
 
-            using (var eventData = new GZipStream(compressedData, CompressionMode.Decompress))
-            using (var x = new StreamReader(eventData))
-            {
-                while (!x.EndOfStream)
-                {
-                    var line = x.ReadLine();
-                    var g3SyncPortData = ParseSyncPortFromJson(line);
-                    if (g3SyncPortData != null)
-                        result.Add(g3SyncPortData);
-                }
-            }
+        public static List<T> ParseFromCompressedStream<T>(Stream compressedData, Func<string, T> func)
+        {
+            var result = new List<T>();
+            ParseDataFromCompressedStream(compressedData, func, result.Add);
             return result;
         }
+
+        public static List<G3SyncPortData> ParseSyncPortDataFromCompressedStream(Stream compressedData)
+        {
+            return ParseFromCompressedStream(compressedData, ParseSyncPortFromJson);
+        }
+
         public static List<G3ImuData> ParseImuDataFromCompressedStream(Stream compressedData)
         {
-            var result = new List<G3ImuData>();
-
-            using (var imuData = new GZipStream(compressedData, CompressionMode.Decompress))
-            using (var x = new StreamReader(imuData))
-            {
-                while (!x.EndOfStream)
-                {
-                    var line = x.ReadLine();
-                    var g3ImuData = ParseImuFromJson(line);
-                    if (g3ImuData != null)
-                        result.Add(g3ImuData);
-                }
-            }
-            return result;
+            return ParseFromCompressedStream(compressedData, ParseImuFromJson);
         }
 
         public static void ParseGazeDataFromCompressedStream(Stream compressedData, Action<G3GazeData> addAction)
@@ -244,18 +231,30 @@ namespace G3SDK
                         addAction(g3GazeData);
                 }
             }
-
         }
+        public static void ParseDataFromCompressedStream<T>(Stream compressedData, Func<string, T> func, Action<T> addAction)
+        {
+            using (var stream = new GZipStream(compressedData, CompressionMode.Decompress))
+            using (var x = new StreamReader(stream))
+            {
+                while (!x.EndOfStream)
+                {
+                    var line = x.ReadLine();
+                    var data = func(line);
+                    if (data != null)
+                        addAction(data);
+                }
+            }
+        }
+
         public static void ParseGazeDataFromCompressedStream(Stream compressedData, ConcurrentQueue<G3GazeData> list)
         {
-            ParseGazeDataFromCompressedStream(compressedData, g=>list.Enqueue(g));
+            ParseDataFromCompressedStream(compressedData, ParseGazeFromJson, list.Enqueue);
         }
 
         public static List<G3GazeData> ParseGazeDataFromCompressedStream(Stream compressedData)
         {
-            var result = new List<G3GazeData>();
-            ParseGazeDataFromCompressedStream(compressedData, data => result.Add(data));
-            return result;
+            return ParseFromCompressedStream(compressedData, ParseGazeFromJson);
         }
 
         public static Guid ParseGuid(string arg)

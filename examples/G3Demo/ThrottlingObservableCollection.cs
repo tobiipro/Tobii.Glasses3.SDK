@@ -1,18 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 
 namespace G3Demo
 {
+    public class ThrottlingObservableCollection<T> : ObservableCollection<T>
+    {
+        public void RemoveFirst()
+        {
+            RemoveAt(0);
+        }
+    }
+/*
     public class ThrottlingObservableCollection<T> : ICollection<T>, INotifyCollectionChanged
     {
         private readonly Queue<T> _list = new Queue<T>();
         private readonly List<T> _removed = new List<T>();
         private readonly Stopwatch _notifyTimer = Stopwatch.StartNew();
         private readonly List<T> _added = new List<T>();
-        private bool _notificationsEnabled;
+        private bool _notificationsEnabled = true;
 
 
         public IEnumerator<T> GetEnumerator()
@@ -135,4 +144,5 @@ namespace G3Demo
             }
         }
     }
+*/
 }
