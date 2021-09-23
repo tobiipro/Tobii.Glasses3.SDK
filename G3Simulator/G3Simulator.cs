@@ -68,7 +68,6 @@ namespace G3Simulator
     public class UpgradeSimulator : IUpgrade
     {
         private readonly G3Simulator _g3Simulator;
-        private bool _inProgress;
 
         public UpgradeSimulator(G3Simulator g3Simulator)
         {
@@ -79,7 +78,7 @@ namespace G3Simulator
 
         public IG3Observable<bool> Completed { get; }
         public IG3Observable<UpgradeState> Progress { get; }
-        public Task<bool> InProgress => Task.FromResult(_inProgress);
+        public Task<bool> InProgress => Task.FromResult(false);
     }
 
     public class WebRTCSimulator : IWebRTC
@@ -210,7 +209,7 @@ namespace G3Simulator
         private G3ImuData _lastImu;
         private G3Event _lastEvent;
         private G3SyncPortData _lastSyncPort;
-        private int _sceneQuality;
+        private int _sceneQuality = 25;
         private readonly SignalSimulator<byte[]> _sceneSig = new SignalSimulator<byte[]>();
         private readonly SignalSimulator<G3SyncPortData> _syncPortSig = new SignalSimulator<G3SyncPortData>();
         private readonly SignalSimulator<G3ImuData> _imuSig = new SignalSimulator<G3ImuData>();

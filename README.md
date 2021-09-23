@@ -1,9 +1,8 @@
 # Tobii Pro Glasses 3 SDK for .net ![example workflow](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml/badge.svg)
 
 ## License
-The source code for this SDK and its examples is licensed under a permissive MIT license, but the 
-[Tobii Software Development License Agreement](SDLA/licenseagreement.html) is still in effect when 
-it comes to developing software for the Glasses3 API.
+The source code for this SDK and its examples is licensed under the 
+[Tobii Software Development License Agreement](SDLA/licenseagreement.html).
 
 ## Installation 
 
@@ -15,7 +14,7 @@ You can install using NuGet like this:
 nuget install Tobii.Glasses3.SDK.net
 ```
 
-Or select it from the NuGet packages UI on Visual Studio.
+Or select it from the NuGet packages UI in Visual Studio.
 
 On Visual Studio, make sure that you are targeting atleast either .netframework 4.7.2 or .net5, as this package uses some features of newer .NETs.  
 
@@ -53,7 +52,7 @@ The SDK does not support streaming data via WebRTC or RTSP on its own, you will 
 ### Glasses Demo
 Demo that shows 
 * How to find glasses
-* Show live view (using RTSP) with synchronized local gaze overlay
+* Show live view (using RTSP via the FFME.Windows package) with synchronized local gaze overlay
 * Start/stop recordings
 * Calibrate glasses
 * Change settings

@@ -12,9 +12,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3220B0DB-E356-42BA-9024-54E73E0D037C}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yml = .github\workflows\build.yml
-		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 		Readme.txt = Readme.txt
+		SDLA\Tobii Pro SDLA for Research Use.html = SDLA\Tobii Pro SDLA for Research Use.html
+		SDLA\Tobii Pro SDLA for Research Use.md = SDLA\Tobii Pro SDLA for Research Use.md
+		SDLA\Tobii Pro SDLA for Research Use.pdf = SDLA\Tobii Pro SDLA for Research Use.pdf
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3LSLConnector", "examples\G3LSLConnector\G3LSLConnector.csproj", "{956CB83E-BE81-4CDA-AA6B-4A1A7915666E}"
@@ -25,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3Demo", "examples\G3Demo\G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3ToScreenMapper", "examples\G3ToScreenMapper\G3ToScreenMapper.csproj", "{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3Simulator", "G3Simulator\G3Simulator.csproj", "{B79D2615-80D1-4E59-8E78-0229532743C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3Simulator", "G3Simulator\G3Simulator.csproj", "{B79D2615-80D1-4E59-8E78-0229532743C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

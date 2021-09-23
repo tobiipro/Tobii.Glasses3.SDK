@@ -226,11 +226,6 @@ namespace G3SDK
         Task Cancel();
         Task<bool> SetFolder(string value);
         Task<bool> SetVisibleName(string value);
-        Task<bool> MetaInsert(string key, string value);
-        Task<bool> MetaInsert(string key, byte[] data);
-        Task<string[]> MetaKeys();
-        Task<string> MetaLookupString(string key);
-        Task<byte[]> MetaLookup(string key);
         Task<bool> RecordingInProgress();
     }
 

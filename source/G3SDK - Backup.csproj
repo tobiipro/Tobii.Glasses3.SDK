@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net472</TargetFrameworks>
+    <AssemblyTitle>G3SDK</AssemblyTitle>
+    <Product>Glasses 3 SDK for .net</Product>
+    <Copyright>Copyright © 2021-</Copyright>
+    <LangVersion>7.3</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>0.3.0.2</AssemblyVersion>
+    <FileVersion>0.2.0.2</FileVersion>
+    <Authors>Jonas Högström</Authors>
+    <Company>Tobii Pro AB</Company>
+    <PackageId>Tobii.Glasses3.SDK</PackageId>
+    <Version>0.3.0.0</Version>
+    <PackageReleaseNotes>First public release, supports Glasses3 firmware 1.14</PackageReleaseNotes>
+    <Description>.net wrapper for the Tobii Pro Glasses 3 API.</Description>
+    <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/tobiipro/G3SDK.net</PackageProjectUrl>
+    <PackageTags>Tobii Pro Glasses 3, SDK, eye tracking</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <UserSecretsId>3b476473-242a-4270-a6ed-ccc20aad9e85</UserSecretsId>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+  <PropertyGroup>
+  	<GitDefaultBranch>main</GitDefaultBranch>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GitInfo" Version="2.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="images\icon.png">
+      <Pack>True</Pack>
+      <PackagePath />
+    </None>
+    <None Include="..\README.md" pack="true" PackagePath="." />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="License.txt" />
+    <None Remove="License.txt" />
+    <None Remove="tobii.pro.g3.sdk.net.nupkg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Zeroconf" Version="3.4.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+</Project>

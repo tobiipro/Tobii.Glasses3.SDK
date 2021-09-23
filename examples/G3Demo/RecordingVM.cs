@@ -390,8 +390,8 @@ namespace G3Demo
 
         public double PositionInSeconds
         {
-            get { return Position.TotalSeconds; }
-            set { Position = TimeSpan.FromSeconds(value); }
+            get => Position.TotalSeconds;
+            set => Position = TimeSpan.FromSeconds(value);
         }
 
         public double GazeLoadedUntil
