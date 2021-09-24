@@ -53,7 +53,7 @@ jobs:
         encodedString: ${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}
 
     - name: Sign NuGet Package
-      run: dotnet nuget sign "source\bin\Release\Tobii.Glasses3.SDK.${{steps.version.outputs.version}}.nupkg" --certificate-path "${{steps.cert_file.outputs.filePath}}" --certificate-password "${{secrets.CODESIGNPASSWORD}}" --timestamper http://timestamp.digicert.com --verbosity detailed
+      run: dotnet nuget sign "source\bin\Release\Tobii.Glasses3.SDK.*.nupkg" --certificate-path "${{steps.cert_file.outputs.filePath}}" --certificate-password "${{secrets.CODESIGNPASSWORD}}" --timestamper http://timestamp.digicert.com --verbosity detailed
 
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
