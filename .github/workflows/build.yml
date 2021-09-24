@@ -37,8 +37,8 @@ jobs:
     - name: Sign release binaries
       uses: jonashogstrom/code-sign-action@v2.0.9
       with:
-        certificate: '${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}'
-        sign_args: '/v /p ${{ secrets.CODESIGNPASSWORD }} /tr http://timestamp.digicert.com /sha1 ${{ secrets.TOBIICODESIGNCERTIFICATE_SHA1 }}'
+        certificate: '${{secrets.TOBIICODESIGNCERTIFICATE_B64}}'
+        sign_args: '/v /p ${{secrets.CODESIGNPASSWORD}} /tr http://timestamp.digicert.com /sha1 ${{secrets.TOBIICODESIGNCERTIFICATE_SHA1}}'
         folder: 'source/bin/Release'
         recursive: true
 
