@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -28,8 +27,7 @@ namespace G3Demo
             _browser = new G3Browser();
             BrowseForGlasses = new DelegateCommand(DoBrowseForGlasses, () => true);
             AddSimulator = new DelegateCommand(DoAddSimulator, () => true);
-            Unosquare.FFME.Library.FFmpegDirectory = "ffmpeg\\ffmpeg-4.4-full_build-shared\\bin";
-            EnsureFFMPEG();
+            Unosquare.FFME.Library.FFmpegDirectory = "."; 
             _initialBrowseTask = DoBrowseForGlasses();
             StartAll = new DelegateCommand(DoStartRecordingAll, () => true);
             StopAll = new DelegateCommand(DoStopRecordingAll, () => true);
@@ -91,20 +89,6 @@ namespace G3Demo
                     Logs.Add($"{device.Serial}: Stop recording " + (res ? "OK" : "Fail"));
                 }
             });
-        }
-
-        private static void EnsureFFMPEG()
-        {
-            if (!Directory.Exists("ffmpeg"))
-            {
-                Directory.CreateDirectory("ffmpeg");
-                var p = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z";
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(p, "ffmpeg\\ffmpeg-release-full-shared.7z");
-
-                }
-            }
         }
 
         public DelegateCommand BrowseForGlasses { get; }

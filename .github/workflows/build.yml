@@ -43,7 +43,7 @@ jobs:
         recursive: true
 
     - name: Build nuget package
-      run: dotnet pack --no-build --configuration Release /p:Version=${{steps.version.outputs.version}} 
+      run: dotnet pack source\G3SDK.csproj --no-build --configuration Release /p:Version=${{steps.version.outputs.version}} 
 
     - name: Extract certificate
       id: cert_file
@@ -78,3 +78,10 @@ jobs:
       with:
         name: G3LSLConnector_${{steps.version.outputs.version}}
         path: examples/G3LSLConnector/bin/Release/net48/*.*
+
+    - name: Upload G3 Demo
+      uses: actions/upload-artifact@v2
+      with:
+        name: G3Demo_${{steps.version.outputs.version}}
+        path: examples/G3Demo/bin/Release/net472/*.*
+

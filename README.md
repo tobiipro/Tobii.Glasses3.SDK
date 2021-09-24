@@ -1,17 +1,17 @@
-# Tobii Pro Glasses 3 SDK for .net ![example workflow](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml/badge.svg)
+# Tobii Pro Glasses 3 SDK for .net [![Build G3SDK](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml/badge.svg)](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml)
 
 ## License
 The source code for this SDK and its examples is licensed under the 
-[Tobii Software Development License Agreement](SDLA/licenseagreement.html).
+[Tobii Pro Software Development License Agreement](https://www.tobiipro.com/siteassets/tobii-pro/license-agreements/tobii-pro-sdk-license-agreement.pdf).
 
 ## Installation 
 
 The easiest way to get started is to use the NuGet package for the Glasses3 SDK
 
-You can install using NuGet like this:
+You can install using the dotnet CLI like this:
 
 ```cmd
-nuget install Tobii.Glasses3.SDK.net
+dotnet add package Tobii.Glasses3.SDK
 ```
 
 Or select it from the NuGet packages UI in Visual Studio.
@@ -73,4 +73,3 @@ Start the webserver in examples\G3DocumentExtractor\miniweb\miniweb.exe and poin
 This is a rather advanced demo that shows how to receive and display RTSP video using OpenCV. it also performs some image processing of the video to find and position a computer screen in the video and map the gaze data to the coordinate system of this screen.
 
 To do this, the screen is decorated with ArUco markers along the edges. The application uses OpenCV to receive live video frames from the camera of the glasses, each frame is searched for existing ArUco markers (again using OpenCV). If enough markers are found, the position of the screen in the video frame is determined, and then gaze data is transformed from frame to the screen. The original video frame is warped to a new image using the same transform so that the screen is mapped to the center of image. Both the warped image and the original video frame is displayed in a window.
-

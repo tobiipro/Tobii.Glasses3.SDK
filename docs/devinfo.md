@@ -13,21 +13,18 @@ To create a new token for access to the internal Tobii Pro package registry:
 
 ## To make a new release:
 
-* Make code changes
-* Update <Version> in G3SDK\G3SDK.csproj (Properties=>Package=>Package version)
-* Update Assembly version and File Version
-* Build and verify
+* Make code changes and commit
+* Tag commit with version number
+* build locally and verify
+* Push 
+* Download nuget package from github actions and verify
 
-## To build a new package:
+## To build a new package locally:
 
 > dotnet build --configuration release
 
-## Make sure the nupkg-file was correctly built: 
-
-> dir source\bin\Release\*.nupkg
-
 ## To push a new package to the package registry at github:
 
-> dotnet nuget push "source\bin\Release\Tobii.Pro.G3.SDK.net.<major>.<minor>.<rev>.nupkg" --source "github"
+> dotnet nuget push "source\bin\Release\Tobii.Glasses3.SDK.<major>.<minor>.<rev>.nupkg" --source "github"
 
 

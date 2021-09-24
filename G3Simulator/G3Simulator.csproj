@@ -22,7 +22,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Zeroconf" Version="3.4.2" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows" />

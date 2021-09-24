@@ -13,7 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yml = .github\workflows\build.yml
 		README.md = README.md
-		Readme.txt = Readme.txt
 		SDLA\Tobii Pro SDLA for Research Use.html = SDLA\Tobii Pro SDLA for Research Use.html
 		SDLA\Tobii Pro SDLA for Research Use.md = SDLA\Tobii Pro SDLA for Research Use.md
 		SDLA\Tobii Pro SDLA for Research Use.pdf = SDLA\Tobii Pro SDLA for Research Use.pdf

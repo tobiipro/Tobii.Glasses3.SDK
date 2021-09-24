@@ -36,9 +36,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OpenCvSharp4" Version="4.5.2.20210404" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.2.20210404" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.2.20210404" />
+    <PackageReference Include="OpenCvSharp4" Version="4.5.3.20210817" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.3.20210817" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.3.20210817" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\source\G3SDK.csproj" />

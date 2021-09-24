@@ -6,20 +6,20 @@
     <Copyright>Copyright © 2021-</Copyright>
     <LangVersion>7.3</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
+    <AssemblyVersion>0.1.99.0</AssemblyVersion>
+    <FileVersion>0.1.99.0</FileVersion>
     <Authors>Jonas Högström</Authors>
     <Company>Tobii Pro AB</Company>
     <PackageId>Tobii.Glasses3.SDK</PackageId>
-    <Version>0.3.0.0</Version>
-    <PackageReleaseNotes>First public release, supports Glasses3 firmware 1.14</PackageReleaseNotes>
-    <Description>.net client library for the Tobii Pro Glasses 3 API.</Description>
+    <Version>0.1.99.0</Version>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <Description>.Net client library for the Tobii Pro Glasses 3 API.</Description>
     <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/tobiipro/G3SDK.net</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/tobiipro/Tobii.Glasses3.SDK</PackageProjectUrl>
     <PackageTags>Tobii Pro Glasses 3, SDK, eye tracking</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <UserSecretsId>3b476473-242a-4270-a6ed-ccc20aad9e85</UserSecretsId>
-    <PackageLicenseFile>Tobii Pro SDLA for Research Use.md</PackageLicenseFile>
+    <PackageLicenseFile>License.md</PackageLicenseFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression></PackageLicenseExpression>
@@ -32,10 +32,6 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GitInfo" Version="2.1.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
@@ -43,16 +39,20 @@
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
-    <None Include="Tobii Pro SDLA for Research Use.md">
+    <None Include="..\SDLA\Tobii Pro SDLA for Research Use.md" Link="License.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(OutputPath)\net5.0\License.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="images\icon.png">
       <Pack>True</Pack>
       <PackagePath />
     </None>
-    <None Include="..\README.md" pack="true" PackagePath="." />
+    <None Include="..\README.md" pack="true" PackagePath=".">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Remove="License.txt" />
@@ -63,7 +63,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Zeroconf" Version="3.4.2" />
+    <PackageReference Include="Zeroconf" Version="3.5.11" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows" />
