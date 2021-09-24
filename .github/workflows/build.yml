@@ -45,31 +45,15 @@ jobs:
     - name: Build nuget package
       run: dotnet pack --no-build --configuration Release /p:Version=${{steps.version.outputs.version}} 
 
- 
-# https://timheuer.com/blog/use-nuget-with-github-actions-github-packages/
-#    - name: Setup NuGet
-#      uses: NuGet/setup-nuget@v1.0.2
-#      with:
-#        nuget-api-key: ${{ secrets.G3SDKNUGETAPIKEY }}
-#        nuget-version: latest
-
-    - name: Get certificate
+    - name: Extract certificate
       id: cert_file
       uses: timheuer/base64-to-file@master
       with:
         fileName: 'certfile.pfx'
         encodedString: ${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}
 
-# Sign the package
-#    - name: Setup nuget
-#      uses: nuget/setup-nuget@v1
-#      with:
-#        nuget-api-key: ${{ secrets.G3SDKNUGETAPIKEY }}
-#        nuget-version: '5.x'
-
     - name: Sign NuGet Package
       run: dotnet nuget sign "source\bin\Release\Tobii.Glasses3.SDK.${{steps.version.outputs.version}}.nupkg" --certificate-path "${{steps.cert_file.outputs.filePath}}" --certificate-password "${{secrets.CODESIGNPASSWORD}}" --timestamper http://timestamp.digicert.com --verbosity detailed
-#      run: tools\nuget.exe sign "source\bin\Release\Tobii.Glasses3.SDK.${{steps.version.outputs.version}}.nupkg" -Timestamper http://timestamp.digicert.com –NonInteractive -Verbosity detailed
 
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
@@ -82,11 +66,13 @@ jobs:
       with:
         name: Tobii.Glasses3.SDK.net4-binaries_${{steps.version.outputs.version}}
         path: source/bin/Release/net472/*.dll
+
     - name: Upload signed SDK dlls .net5
       uses: actions/upload-artifact@v2
       with:
         name: Tobii.Glasses3.SDK.net5-binaries_${{steps.version.outputs.version}}
         path: source/bin/Release/net5.0/*.dll
+
     - name: Upload LSLConnector
       uses: actions/upload-artifact@v2
       with:
