@@ -1,4 +1,4 @@
-# Tobii Pro Glasses 3 SDK for .net [![Build G3SDK](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml/badge.svg)](https://github.com/tobiipro/G3SDK.net/actions/workflows/build.yml)
+# Tobii Pro Glasses 3 SDK for .net [![Build](https://github.com/tobiipro/Tobii.Glasses3.SDK/actions/workflows/build.yml/badge.svg)](https://github.com/tobiipro/Tobii.Glasses3.SDK/actions/workflows/build.yml)
 
 ## License
 The source code for this SDK and its examples is licensed under the 
