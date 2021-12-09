@@ -39,7 +39,9 @@ namespace G3Demo
                 .Select(x => x.Value)
                 .ToList();
 
-            e.Options.VideoStream = availableStreams.First(s=>s.PixelHeight>=500);
+            var preferredStream = availableStreams.FirstOrDefault(s => s.PixelHeight >= 500);
+            if (preferredStream != null)
+                e.Options.VideoStream = preferredStream;
 
             // mixed settings trying to get lower latency
             e.Options.DecoderParams.EnableFastDecoding = true;
@@ -58,7 +60,7 @@ namespace G3Demo
             if (DataContext is DeviceVM vm && vm.LiveVideoUri != null)
             {
                 _vm = vm;
-                await Media.Open(vm.LiveVideoUri);
+                var res = await Media.Open(vm.LiveVideoUri);
             }
         }
     }

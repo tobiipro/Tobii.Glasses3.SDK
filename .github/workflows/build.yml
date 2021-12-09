@@ -65,23 +65,23 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Tobii.Glasses3.SDK.net4-binaries_${{steps.version.outputs.version}}
-        path: source/bin/Release/net472/*.dll
+        path: source/bin/Release/net472/*.*
 
     - name: Upload signed SDK dlls .net5
       uses: actions/upload-artifact@v2
       with:
         name: Tobii.Glasses3.SDK.net5-binaries_${{steps.version.outputs.version}}
-        path: source/bin/Release/net5.0/*.dll
+        path: source/bin/Release/net5.0/*.*
 
     - name: Upload LSLConnector
       uses: actions/upload-artifact@v2
       with:
         name: G3LSLConnector_${{steps.version.outputs.version}}
-        path: examples/G3LSLConnector/bin/Release/net48/*.*
+        path: examples/G3LSLConnector/bin/Release/net48/**
 
     - name: Upload G3 Demo
       uses: actions/upload-artifact@v2
       with:
         name: G3Demo_${{steps.version.outputs.version}}
-        path: examples/G3Demo/bin/Release/net472/*.*
+        path: examples/G3Demo/bin/Release/net472/**
 

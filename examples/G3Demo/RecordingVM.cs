@@ -7,16 +7,17 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
+using System.Windows.Forms;
 using System.Windows.Threading;
 using G3SDK;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Unosquare.FFME;
+using Timer = System.Timers.Timer;
 
 namespace G3Demo
 {
-    public class RecordingVM : ViewModelBase
+    public class RecordingVM : ViewModelBase, IProgress<double>
     {
         public static async Task<RecordingVM> Create(Dispatcher d, IRecording r, IG3Api g3)
         {
@@ -50,6 +51,7 @@ namespace G3Demo
         private List<(TimeSpan, RtaInfo)> _rtaEvents;
         private IRecording _rtaRec;
         private bool _isPlaying;
+        private double _downloadProgress;
 
         private RecordingVM(Dispatcher dispatcher, IRecording recording, IG3Api g3) : base(dispatcher)
         {
@@ -58,10 +60,25 @@ namespace G3Demo
             TogglePlay = new DelegateCommand(DoTogglePlay, () => true);
             
             DeleteRecording = new DelegateCommand(DoDeleteRecording, () => true);
+            Download = new DelegateCommand(DoDownload, () => true);
             StartRTA = new DelegateCommand(DoStartRTA, () => !DeviceIsRecording);
             StopRTA = new DelegateCommand(DoStopRTA, () => RtaInProgress);
             _g3.Recorder.Started.SubscribeAsync(g => DeviceIsRecording = true);
             _g3.Recorder.Stopped.SubscribeAsync(g => DeviceIsRecording = false);
+        }
+
+        private async Task DoDownload()
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    var d = new RecordingDownloader(_g3);
+                    await d.DownloadRecording(_recording, fbd.SelectedPath, this);
+                }
+            }
         }
 
         private Task DoDeleteRecording()
@@ -438,10 +455,26 @@ namespace G3Demo
             }
         }
 
+        public DelegateCommand Download{ get; }
         public DelegateCommand StartRTA { get; }
         public DelegateCommand StopRTA { get; }
 
         public ObservableCollection<SnapshotVM> Snapshots { get; } = new ObservableCollection<SnapshotVM>();
+
+        public double DownloadProgress
+        {
+            get => _downloadProgress;
+            set
+            {
+                _downloadProgress = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public void Report(double value)
+        {
+            DownloadProgress = value;
+        }
     }
 
     public class SnapshotVM : ViewModelBase

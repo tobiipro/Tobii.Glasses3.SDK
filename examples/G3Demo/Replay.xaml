@@ -42,10 +42,14 @@
                 Minimum="0" 
                 IsMoveToPointEnabled = "True" >
         </Slider>
-        <StackPanel Grid.Row="3" Orientation="Horizontal">
+        <StackPanel Grid.Row="3">
+        <StackPanel  Orientation="Horizontal">
             <Button Command="{Binding TogglePlay}">Play/Pause</Button>
             <Button Command="{Binding StartRTA}">StartRTA</Button>
             <Button Command="{Binding StopRTA}">StopRTA</Button>
+            <Button Command="{Binding Download}">Download</Button>
+        </StackPanel>
+            <ProgressBar Value="{Binding DownloadProgress}" Maximum="1" Minimum="0"></ProgressBar>
         </StackPanel>
         <ffme:MediaElement Grid.Row="4"  x:Name="RtaVideo"  Background="Gray" LoadedBehavior="Manual" UnloadedBehavior="Manual" />
         <ItemsControl Grid.Row="5" ItemsSource="{Binding Snapshots}">
