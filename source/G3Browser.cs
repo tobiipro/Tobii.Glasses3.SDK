@@ -13,7 +13,7 @@ namespace G3SDK
 {
     public class G3Browser
     {
-        public async Task<List<G3Api>> ProbeForDevices()
+        public async Task<List<G3Api>> ProbeForDevices(bool startWebSock=true)
         {
             var results = await ScanZeroConf();
             var res = new List<G3Api>();
@@ -21,7 +21,7 @@ namespace G3SDK
             {
                 if (host.IPAddress != null)
                 {
-                    res.Add(new G3Api(host.IPAddress));
+                    res.Add(new G3Api(host.IPAddress, startWebSock));
                 }
             }
 

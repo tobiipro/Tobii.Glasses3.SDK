@@ -41,17 +41,27 @@ namespace G3SDK
         private void ReconnectWebSock()
         {
             _ws?.Dispose();
+            _ws = null;
             _wsConnectTask = null;
-            _ws = new ClientWebSocket();
             ServicePointManager.MaxServicePointIdleTime = int.MaxValue;
-            _ws.Options.AddSubProtocol("g3api");
-            _ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(30);
-            _ws.Options.SetBuffer(WSBUFFERSIZE, WSBUFFERSIZE);
+            EnsureWebSocket();
             EnsureConnected();
+        }
+
+        private void EnsureWebSocket()
+        {
+            if (_ws == null)
+            {
+                _ws = new ClientWebSocket();
+                _ws.Options.AddSubProtocol("g3api");
+                _ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(30);
+                _ws.Options.SetBuffer(WSBUFFERSIZE, WSBUFFERSIZE);
+            }
         }
 
         public async Task<long> SendToWebSocket(string path, Method method, params object[] parameters)
         {
+            EnsureWebSocket();
             await EnsureConnected();
             _wsConnectTask.Wait(_cancellationToken);
             var id = _requestId++; ;
