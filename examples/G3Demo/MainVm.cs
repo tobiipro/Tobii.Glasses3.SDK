@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using G3SDK;
+using WebSocketSharper;
 
 namespace G3Demo
 {
@@ -21,6 +22,7 @@ namespace G3Demo
         private RecordingsVM _recordings;
         private readonly HashSet<string> _deviceIds = new HashSet<string>();
         private int _simCounter;
+        private readonly WebSocket _ws;
 
         public MainVm(Dispatcher dispatcher) : base(dispatcher)
         {
@@ -33,6 +35,7 @@ namespace G3Demo
             StopAll = new DelegateCommand(DoStopRecordingAll, () => true);
             CalibrateAll = new DelegateCommand(DoCalibrateAll, () => true);
             ClearCalibrationData = new DelegateCommand(DoClearCalibrationData, () => true);
+            _ws = new WebSocket(new MyLogger("test", Microsoft.Extensions.Logging.LogLevel.Debug), "ws://192.168.0.122/websocket", true, "g3api");
         }
 
         private void DoClearCalibrationData(object obj)
@@ -113,6 +116,7 @@ namespace G3Demo
             get => _selectedTracker;
             set
             {
+                _ws.Connect();
                 _selectedTracker = value;
                 if (LiveView != null)
                     LiveView.CloseView();

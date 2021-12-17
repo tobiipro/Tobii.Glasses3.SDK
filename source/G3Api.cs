@@ -188,7 +188,8 @@ namespace G3SDK
     }
 
     public interface IG3Api
-    {
+    { 
+        string State { get; }
         ICalibrate Calibrate { get; }
         IRecorder Recorder { get; }
         ISettings Settings { get; }

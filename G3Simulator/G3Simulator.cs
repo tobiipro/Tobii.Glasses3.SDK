@@ -38,6 +38,7 @@ namespace G3Simulator
             return DateTime.Now - _simStarted;
         }
 
+        public string State => "Simulator... unknown";
         public ICalibrate Calibrate { get; }
         public IRecorder Recorder { get; }
         public ISettings Settings { get; }
