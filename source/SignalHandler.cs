@@ -48,9 +48,9 @@ namespace G3SDK
         }
 
 
-        public async Task<long> SendToWebSocket(string signalPath, Method method, params object[] parameters)
+        public long SendToWebSocket(string signalPath, Method method, params object[] parameters)
         {
-            return await _api.SendToWebSocket(signalPath, method, parameters);
+            return _api.SendToWebSocket(signalPath, method, parameters);
         }
 
         internal class Signal<T> : IG3Observable<T>, ISignal
@@ -81,9 +81,9 @@ namespace G3SDK
                 return new UnSubscriber(this, observer);
             }
 
-            private async Task StartSubscription()
+            private void StartSubscription()
             {
-                var requestId = await _signalHandler.SendToWebSocket(SignalPath, Method.POST);
+                var requestId = _signalHandler.SendToWebSocket(SignalPath, Method.POST);
                 lock (_lock)
                 {
                     _requestId = requestId;
@@ -127,18 +127,18 @@ namespace G3SDK
                     _observer = observer;
                 }
 
-                public async void Dispose()
+                public void Dispose()
                 {
-                    await _signal.Unsubscribe(_observer);
+                    _signal.Unsubscribe(_observer);
                 }
             }
 
-            private async Task Unsubscribe(IObserver<T> observer)
+            private void Unsubscribe(IObserver<T> observer)
             {
                 _subscribers.Remove(observer);
                 if (!_subscribers.Any())
                 {
-                    await _signalHandler.StopSignal(SignalPath, _signalId, _requestId);
+                    _signalHandler.StopSignal(SignalPath, _signalId, _requestId);
                     lock (_lock)
                     {
                         _requestId = -1;
@@ -175,9 +175,9 @@ namespace G3SDK
             _signalByRequestId[requestId] = signal;
         }
 
-        private async Task StopSignal(string path, long signalId, long requestId)
+        private void StopSignal(string path, long signalId, long requestId)
         {
-            await SendToWebSocket(path, Method.POST, signalId);
+            SendToWebSocket(path, Method.POST, signalId);
             _signalByRequestId.TryRemove(requestId, out var signal);
             _signalBySignalId.TryRemove(signalId, out signal);
         }

@@ -19,6 +19,12 @@ namespace G3SDK
                 G3Api = devices.First();
             else 
                 G3Api = new G3Simulator.G3Simulator();
+            // while (G3Api.State != "Connected")
+            // {
+            //     await Task.Delay(100);
+            // }
+
+
             FwVersion = new G3Version(await G3Api.System.Version);
 
             var inProgress = await G3Api.Recorder.RecordingInProgress();

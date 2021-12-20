@@ -155,6 +155,9 @@ namespace G3SDK
             var frequency = await session.CurrentGazeFrequency;
             var stunServer = await session.StunServer;
             var turnServer = await session.TurnServer;
+
+            await session.SetTurnServer("1.2.3.4");
+            await session.SetStunServer("5.6.7.8");
             // Deleting a WebRTC object immediately fails in FW versions prior to 1.20
             if (FwVersion.LessThan(G3Version.Version_1_20_Crayfish))
                 await Task.Delay(500);
@@ -241,7 +244,7 @@ namespace G3SDK
             var res = await G3Api.Rudimentary.SendEvent("tag1", new Payload() { Num = 123, Str = "abc" });
             Assert.True(res, "send-event failed");
 
-            Thread.Sleep(500);
+            Thread.Sleep(1500);
 
             var sample = await G3Api.Rudimentary.EventSample;
             Assert.That(sample, Is.Not.Null, "no event-sample");
@@ -514,10 +517,10 @@ namespace G3SDK
             var recGuid = await G3Api.Recorder.UUID;
             var folder = await G3Api.Recorder.Folder;
             var visibleName = await G3Api.Recorder.VisibleName;
-            // var res = await _api.Recorder.SetVisibleName("MyRecording");
-            // Assert.True(res, "failed to set new name");
-            // var visibleName2 = await _api.Recorder.VisibleName;
-            // Assert.That(visibleName2, Is.EqualTo("MyRecording"), "failed to change name of recording");
+             var res = await G3Api.Recorder.SetVisibleName("MyRecording");
+             Assert.True(res, "Failed to set new name");
+             var visibleName2 = await G3Api.Recorder.VisibleName;
+            Assert.That(visibleName2, Is.EqualTo("MyRecording"), "Failed to change name of recording");
 
             var stop = await G3Api.Recorder.Stop();
             Assert.True(stop, "Failed to stop recording");
@@ -592,7 +595,7 @@ namespace G3SDK
         }
 
         [Test]
-        public async Task ForceProbeReturnsSomething2()
+        public async Task ForceProbeRangeReturnsSomething()
         {
             var b = new G3Browser();
             var list = await b.ForceProbe(IPAddress.Parse("192.168.0.1"), 100);
@@ -602,7 +605,7 @@ namespace G3SDK
         }
 
         [Test]
-        public async Task SubscribeToGazeGivesAtleast10SamplesIn1Second()
+        public async Task SubscribeToGazeGivesAtleast10SamplesIn2Seconds()
         {
             await EnsureApi();
             var gazeCounter = 0;
@@ -613,7 +616,7 @@ namespace G3SDK
             });
             Assert.That(subscription, Is.Not.Null);
             await G3Api.Rudimentary.Keepalive();
-            Assert.That(() => gazeCounter, Is.GreaterThan(10).After(1000), "No gaze data coming");
+            Assert.That(() => gazeCounter, Is.GreaterThan(10).After(2000), "No gaze data coming");
 
             subscription.Dispose();
             gazeCounter = 0;
