@@ -17,8 +17,7 @@ namespace G3SDK
             _g3 = g3;
         }
 
-
-        public async Task DownloadRecording(IRecording rec, string targetFolder, IProgress<double> progress)
+        public async Task<string> DownloadRecording(IRecording rec, string targetFolder, IProgress<double> progress)
         {
             var basePath = $"http://{_g3.IpAddress}{await rec.HttpPath}";
             var targetRecFolder = Path.Combine(targetFolder, await rec.Folder);
@@ -52,8 +51,8 @@ namespace G3SDK
                     try
                     {
                         var request = WebRequest.CreateHttp(basePath + x.UriPart);
-                        //                    request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1";
                         request.Method = "HEAD";
+                        request.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
                         using (var response = await request.GetResponseAsync())
                         {
                             x.Length = response.ContentLength;
@@ -64,7 +63,6 @@ namespace G3SDK
                     {
                     }
                 }
-
 
                 progress.Report(0);
                 var bytesCompleted = 0L;
@@ -84,23 +82,21 @@ namespace G3SDK
                     bytesCompleted += x.Length;
                 }
             }
+
+            return targetRecFolder;
         }
     }
 
     public class DownloadItem
     {
-        //        public string Target { get; }
         public string FileName { get; }
-        //        public Uri Source { get; }
         public long Length { get; set; }
         public bool SkipSize { get; set; }
         public string UriPart => "/" + FileName.Replace("\\", "/");
 
         public DownloadItem(string fileName)
         {
-            //Target = target;
             FileName = fileName;
-            //Source = new Uri(source);
         }
     }
 }
