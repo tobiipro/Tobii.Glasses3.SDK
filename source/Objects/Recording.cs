@@ -24,7 +24,7 @@ namespace G3SDK
         {
             UUID = uuid;
             _folder = AddROProperty("folder");
-            _visibleName = AddRWProperty("visible-name");
+            _visibleName = AddRWStringProperty("visible-name");
             _duration = AddROProperty("duration", ParserHelpers.ParseTimeSpan);
             _created = AddROProperty("created", ParserHelpers.ParseDate);
             _gazeSamples = AddROProperty("gaze-samples", int.Parse);

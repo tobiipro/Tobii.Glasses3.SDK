@@ -22,8 +22,8 @@ namespace G3SDK
 
         public Recorder(G3Api g3Api): base(g3Api, "recorder")
         {
-            _folder = AddRWProperty("folder");
-            _visibleName = AddRWProperty("visible-name");
+            _folder = AddRWStringProperty("folder");
+            _visibleName = AddRWStringProperty("visible-name");
 
             _uuid = AddROProperty("uuid", ParserHelpers.ParseGuid);
             _timezone = AddROProperty("timezone");

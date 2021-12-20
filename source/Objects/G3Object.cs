@@ -40,6 +40,11 @@ namespace G3SDK
             return AddRWProperty(propName, s => s);
         }
 
+        protected RWProperty<string> AddRWStringProperty(string propName)
+        {
+            return AddRWProperty(propName, s => s, s => $"\"{s}\"");
+        }
+
         protected RWProperty<bool> AddRWProperty_bool(string propName)
         {
             return AddRWProperty(propName, bool.Parse, b => b.ToString().ToLower());

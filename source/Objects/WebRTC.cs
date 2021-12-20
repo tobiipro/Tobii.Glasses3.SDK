@@ -58,8 +58,8 @@ namespace G3SDK
             {
                 _keepAliveTimer = new Timer(SendKeepAliveTimerCallback);
                 _iframeStream = AddRWProperty_bool("iframe-stream");
-                _stunServer = AddRWProperty("stun-server");
-                _turnServer = AddRWProperty("turn-server");
+                _stunServer = AddRWStringProperty("stun-server");
+                _turnServer = AddRWStringProperty("turn-server");
                 _currentGazeFrequency = AddROProperty("current-gaze-frequency", int.Parse);
                 Guid = guid;
                 Gaze = AddSignal("gaze", ParserHelpers.SignalToGaze);

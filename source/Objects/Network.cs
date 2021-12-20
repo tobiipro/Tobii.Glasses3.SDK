@@ -215,19 +215,19 @@ namespace G3SDK
             _dhcpServerEnable = AddRWProperty_bool("dhcp-server-enable");
             _dhcpServerLeaseTime = AddRWProperty("dhcp-server-lease-time", int.Parse);
 
-            _dhcpServerRangeHigh = AddRWProperty("dhcp-server-range-low");
-            _dhcpServerRangeLow = AddRWProperty("dhcp-server-range-high");
+            _dhcpServerRangeHigh = AddRWStringProperty("dhcp-server-range-low");
+            _dhcpServerRangeLow = AddRWStringProperty("dhcp-server-range-high");
 
             _default = AddROProperty("default", bool.Parse);
             _id = AddRWProperty("id");
-            _ipv4Address = AddRWProperty("ipv4-address");
-            _ipv4Gateway = AddRWProperty("ipv4-gateway");
-            _ipv4NameServers = AddRWProperty("ipv4-name-servers");
+            _ipv4Address = AddRWStringProperty("ipv4-address");
+            _ipv4Gateway = AddRWStringProperty("ipv4-gateway");
+            _ipv4NameServers = AddRWStringProperty("ipv4-name-servers");
             _ipv4Method = AddRWProperty("ipv4-method", ParserHelpers.Ipv4MethodParser);
 
-            _ipv6Address = AddRWProperty("ipv6-address");
-            _ipv6Gateway = AddRWProperty("ipv6-gateway");
-            _ipv6NameServers = AddRWProperty("ipv6-name-servers");
+            _ipv6Address = AddRWStringProperty("ipv6-address");
+            _ipv6Gateway = AddRWStringProperty("ipv6-gateway");
+            _ipv6NameServers = AddRWStringProperty("ipv6-name-servers");
             _ipv6Method = AddRWProperty("ipv6-method", ParserHelpers.Ipv6MethodParser);
         }
 
@@ -345,10 +345,10 @@ namespace G3SDK
         public WifiConfiguration(G3Api g3Api, string path, Guid uuid) : base(g3Api, path, uuid)
         {
             _accessPoint = AddRWProperty_bool("access-point");
-            _ssid = AddRWProperty("ssid");
-            _ssidName = AddRWProperty("ssid-name");
+            _ssid = AddRWStringProperty("ssid");
+            _ssidName = AddRWStringProperty("ssid-name");
             _channel = AddRWProperty("channel", int.Parse);
-            _psk = AddRWProperty("psk");
+            _psk = AddRWStringProperty("psk");
             _security = AddRWProperty("security", s => ParserHelpers.ParseEnum(s, WifiSecurity.unknown));
         }
 
