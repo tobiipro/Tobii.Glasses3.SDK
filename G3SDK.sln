@@ -28,6 +28,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3ToScreenMapper", "example
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3Simulator", "G3Simulator\G3Simulator.csproj", "{B79D2615-80D1-4E59-8E78-0229532743C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3SDK.WPF", "G3SDK.WPF\G3SDK.WPF.csproj", "{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{B79D2615-80D1-4E59-8E78-0229532743C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B79D2615-80D1-4E59-8E78-0229532743C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B79D2615-80D1-4E59-8E78-0229532743C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

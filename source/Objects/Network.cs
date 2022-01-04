@@ -187,6 +187,11 @@ namespace G3SDK
         {
             return await Children();
         }
+
+        public Task<List<Guid>> FindById(string ssid)
+        {
+            return G3Api.ExecuteCommand<List<Guid>>(Path, "find-by-id", LogLevel.info, ssid);
+        }
     }
 
     public class NetworkConfiguration : G3Object
@@ -428,8 +433,10 @@ namespace G3SDK
         public Wifi(G3Api g3Api, string path) : base(g3Api, $"{path}/wifi")
         {
             Configurations = new WifiConfigurations(g3Api, Path);
+            Networks = new WifiNetworks(g3Api, Path);
         }
         public WifiConfigurations Configurations { get; }
+        public WifiNetworks Networks { get; }
 
         public async Task<bool> Scan()
         {
@@ -438,6 +445,18 @@ namespace G3SDK
         public async Task<bool> ConnectNetwork(Guid g, string password)
         {
             return await G3Api.ExecuteCommandBool(Path, "connect-network", LogLevel.info, g.ToString(), password);
+        }
+    }
+
+    public class WifiNetworks: DynamicChildNode
+    {
+        public WifiNetworks(G3Api g3Api, string path): base(g3Api, $"{path}/networks")
+        {
+        }
+
+        public Task<List<Guid>> FindBySsid(string ssid)
+        {
+            return G3Api.ExecuteCommand<List<Guid>>(Path, "find-by-ssid", LogLevel.info, ssid);
         }
     }
 

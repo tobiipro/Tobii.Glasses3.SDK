@@ -4,34 +4,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:G3Demo"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
+    xmlns:g3Wpf="clr-namespace:G3SDK.WPF;assembly=G3SDK.WPF"
     xmlns:oxy="http://oxyplot.org/wpf"
     d:DataContext="{d:DesignInstance Type=local:DeviceVM, IsDesignTimeCreatable=false}"
-    mc:Ignorable="d"
-    DataContextChanged="LiveView_OnDataContextChanged">
+    mc:Ignorable="d">
     <StackPanel>
         <Grid Width="480" Height="270">
-            <ffme:MediaElement  x:Name="Media" Background="Gray" LoadedBehavior="Play" UnloadedBehavior="Manual" />
-            <Canvas>
-                <Ellipse Width="{Binding GazeMarkerSize}" Height="{Binding GazeMarkerSize}" Stroke="Red" StrokeThickness="2">
-                    <Ellipse.RenderTransform>
-                        <TransformGroup>
-
-                            <TranslateTransform X="{Binding GazeX}" />
-                            <TranslateTransform Y="{Binding GazeY}"/>
-                        </TransformGroup>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-                <Ellipse Width="{Binding GazeMarkerSize}" Height="{Binding GazeMarkerSize}" Stroke="Green" StrokeThickness="2">
-                    <Ellipse.RenderTransform>
-                        <TransformGroup>
-
-                            <TranslateTransform X="{Binding MarkerCenterX}" />
-                            <TranslateTransform Y="{Binding MarkerCenterY}"/>
-                        </TransformGroup>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-            </Canvas>
+            <g3Wpf:RtspPlayer DataContext="{Binding RtspPlayerVm}"/>
         </Grid>
         <StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding ShowCalibMarkers}">ShowCalibMarkers</CheckBox>
@@ -40,6 +19,7 @@
             <Button Command="{Binding StartRecording}">StartRec</Button>
             <Button Command="{Binding StopRecording}">StopRec</Button>
             <Button Command="{Binding TakeSnapshot}">Snapshot</Button>
+            <Button Command="{Binding ScanQRCode}">QR</Button>
             <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -49,6 +29,10 @@
         <StackPanel Orientation="Horizontal">
             <TextBlock Margin="10,0">SD space state:</TextBlock>
             <TextBlock Text="{Binding SpaceState}"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="10,0">QR data:</TextBlock>
+            <TextBlock Text="{Binding QrData}"></TextBlock>
         </StackPanel>
         <TextBlock Text="{Binding Sync}"></TextBlock>
         <TextBlock Text="{Binding Event}"></TextBlock>
@@ -120,6 +104,7 @@
                     <Button Command="{Binding CalibrateMagStart}">CalibrateStart</Button>
                     <Button Command="{Binding CalibrateMagStop}">CalibrateStop</Button>
                 </StackPanel>
+
             </Grid>
 
         </WrapPanel>

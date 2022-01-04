@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{1979B713-7EA4-4D88-97EE-EBAA3121010C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyTitle>G3Demo</AssemblyTitle>
@@ -25,6 +25,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
+    <PackageReference Include="OpenCvSharp4" Version="4.5.3.20211207" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.3.20211207" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.3.20211207" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
     <PackageReference Include="ZeranoeSharedFFmpegBuild" Version="4.3.1" />
   </ItemGroup>
@@ -38,6 +41,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\G3SDK.WPF\G3SDK.WPF.csproj" />
     <ProjectReference Include="..\..\G3Simulator\G3Simulator.csproj" />
     <ProjectReference Include="..\..\source\G3SDK.csproj" />
   </ItemGroup>

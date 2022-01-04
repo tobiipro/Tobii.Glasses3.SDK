@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:G3Demo"
         d:DataContext="{d:DesignInstance Type=local:MainVm, IsDesignTimeCreatable=false}"
         mc:Ignorable="d"
-        Title="Glasses3 .net SDK demo" Height="450" Width="800">
+        Title="Glasses3 .net SDK demo" Height="450" Width="1200">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"></ColumnDefinition>

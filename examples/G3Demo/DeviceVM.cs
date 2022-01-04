@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -9,31 +9,21 @@ using System.Timers;
 using System.Windows.Input;
 using System.Windows.Threading;
 using G3SDK;
+using G3SDK.WPF;
+using OpenCvSharp;
 using OxyPlot;
 using Unosquare.FFME.Common;
-using Zeroconf;
 
 namespace G3Demo
 {
     public class DeviceVM : ViewModelBase
     {
         private readonly string _hostName;
-        private readonly RtspDataDemuxer _rtspDataDemuxer;
-        private readonly ConcurrentQueue<G3GazeData> _gazeQueue = new ConcurrentQueue<G3GazeData>();
         private readonly IG3Api _g3;
         private readonly Timer _calibMarkerTimer;
         private readonly Timer _externalTimeReferenceTimer;
 
-        private G3GazeData _lastValidGaze;
         private string _gyr;
-        private double _gazeY;
-        private double _gazeX;
-        private string _gazeBuffer;
-        private float _gazeMarkerSize = 10;
-        private double _videoHeight;
-        private double _videoWidth;
-        private double _markerCenterX = int.MinValue;
-        private double _markerCenterY = int.MinValue;
         private bool _gazeOverlay;
         private string _msg;
         private string _gaze;
@@ -53,15 +43,20 @@ namespace G3Demo
         private double _lastExternalTimeRoundtrip;
         private int _externalTimeReferenceIndex;
         private readonly CalibratedMagnetometer _calibMag;
+        private readonly RtspPlayerVM _rtspPlayerVM;
+        private string _gazeBuffer;
 
         public DeviceVM(string hostName, IG3Api g3, Dispatcher dispatcher) : base(dispatcher)
         {
             _hostName = hostName;
             _g3 = g3;
+            _rtspPlayerVM = new RtspPlayerVM();
+            _rtspPlayerVM.OnMediaAssigned += async (sender, args) => await _rtspPlayerVM.Connect(g3, VideoStream.Scene);
             ShowCalibrationMarkerWindow = new DelegateCommand(p => DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
             TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
+            ScanQRCode = new DelegateCommand(DoScanQRCode, () => true);
             CalibrateMagStart = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
             CalibrateMagStop = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
 
@@ -70,11 +65,6 @@ namespace G3Demo
             {
                 if (_showCalibMarkers)
                     await _g3.Calibrate.EmitMarkers();
-                else
-                {
-                    MarkerCenterX = int.MinValue;
-                    MarkerCenterY = int.MinValue;
-                }
             };
             _calibMarkerTimer.Enabled = true;
 
@@ -88,18 +78,17 @@ namespace G3Demo
             };
             _externalTimeReferenceTimer.Enabled = true;
 
-            _g3.Calibrate.Marker.SubscribeAsync(OnCalibMarker);
             _g3.Settings.Changed.SubscribeAsync(OnSettingsChanged);
             _g3.Recorder.Started.SubscribeAsync(g => IsRecording = true);
             _g3.Recorder.Stopped.SubscribeAsync(g => IsRecording = false);
             _g3.System.Storage.StateChanged.SubscribeAsync(OnCardStateChanged);
             GazePlotEnabled = false;
 
-            _rtspDataDemuxer = new RtspDataDemuxer();
-            _rtspDataDemuxer.OnGaze += (sender, data) =>
+            _rtspPlayerVM.RtspDataDemuxer.OnGaze += (sender, data) =>
             {
                 Gaze = $"Gaze: {data.Gaze2D.X:F3};{data.Gaze2D.Y:F3}";
-                _gazeQueue.Enqueue(data);
+                GazeBuffer = $"GazeBuffer: {_rtspPlayerVM.GazeQueueSize} samples";
+
                 Dispatcher.Invoke(() =>
                 {
                     if (GazePlotEnabled)
@@ -115,8 +104,18 @@ namespace G3Demo
                     }
                 });
             };
-            _rtspDataDemuxer.OnSyncPort += (sender, data) => Sync = $"Sync: {data.Direction}={data.Value}";
-            _rtspDataDemuxer.OnImu += (sender, data) =>
+
+            _rtspPlayerVM.OnVideoFrame += (sender, args) =>
+            {
+                if (_grabNextImage)
+                {
+                    _grabNextImage = false;
+                    _grabbedImage = (Bitmap)args.Bitmap.CreateDrawingBitmap().Clone();
+                }
+            };
+
+            _rtspPlayerVM.RtspDataDemuxer.OnSyncPort += (sender, data) => Sync = $"Sync: {data.Direction}={data.Value}";
+            _rtspPlayerVM.RtspDataDemuxer.OnImu += (sender, data) =>
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -145,10 +144,9 @@ namespace G3Demo
                 if (data.Magnetometer.IsValid()) Mag = $"Mag: {FormatV3(data.Magnetometer)}";
                 if (data.Gyroscope.IsValid()) Gyr = $"Gyr: {FormatV3(data.Gyroscope)}";
             };
-            _rtspDataDemuxer.OnEvent += (sender, e) => Event = $"Event: {e.Tag}, {e.Obj}";
-            _rtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
-            _rtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
-            HideGaze();
+            _rtspPlayerVM.RtspDataDemuxer.OnEvent += (sender, e) => Event = $"Event: {e.Tag}, {e.Obj}";
+            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
+            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
             _calibMag = new CalibratedMagnetometer(_g3);
             _calibMag.Start();
             _calibMag.Subscribe(data =>
@@ -159,11 +157,24 @@ namespace G3Demo
                         AddPoint(CalibMagYSeries, data.TimeStamp, data.Magnetometer.Y);
                         AddPoint(CalibMagZSeries, data.TimeStamp, data.Magnetometer.Z);
                     }
-
                 }
             );
+            _qrTimer.Tick += (sender, args) => QrDetect();
         }
 
+
+        public string GazeBuffer
+        {
+            get => _gazeBuffer;
+            set
+            {
+                if (value == _gazeBuffer) return;
+                _gazeBuffer = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public RtspPlayerVM RtspPlayerVm => _rtspPlayerVM;
 
         private void AddPoint(ThrottlingObservableCollection<DataPoint> data, TimeSpan time, float value)
         {
@@ -193,28 +204,6 @@ namespace G3Demo
         }
         public string Serial { get; private set; }
 
-        public double GazeX
-        {
-            get => _gazeX;
-            set
-            {
-                if (value.Equals(_gazeX)) return;
-                _gazeX = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double GazeY
-        {
-            get => _gazeY;
-            set
-            {
-                if (value.Equals(_gazeY)) return;
-                _gazeY = value;
-                OnPropertyChanged();
-            }
-        }
-
         public int Frequency
         {
             get => _frequency;
@@ -237,6 +226,7 @@ namespace G3Demo
                 OnPropertyChanged();
             }
         }
+
         public SpaceState SpaceState
         {
             get => _spaceState;
@@ -248,6 +238,7 @@ namespace G3Demo
                 RaiseCanExecuteChange(StartRecording);
             }
         }
+
         public bool IsRecording
         {
             get => _isRecording;
@@ -275,55 +266,13 @@ namespace G3Demo
 
             }
         }
-        public double MarkerCenterY
-        {
-            get => _markerCenterY;
-            set
-            {
-                if (value.Equals(_markerCenterY)) return;
-                _markerCenterY = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double MarkerCenterX
-        {
-            get => _markerCenterX;
-            set
-            {
-                if (value.Equals(_markerCenterX)) return;
-                _markerCenterX = value;
-                OnPropertyChanged();
-            }
-        }
+ 
         public bool ShowCalibMarkers
         {
             get => _showCalibMarkers;
             set
             {
                 _showCalibMarkers = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public float GazeMarkerSize
-        {
-            get => _gazeMarkerSize;
-            set
-            {
-                if (value.Equals(_gazeMarkerSize)) return;
-                _gazeMarkerSize = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string GazeBuffer
-        {
-            get => _gazeBuffer;
-            set
-            {
-                if (value == _gazeBuffer) return;
-                _gazeBuffer = value;
                 OnPropertyChanged();
             }
         }
@@ -424,6 +373,7 @@ namespace G3Demo
         public DelegateCommand StartRecording { get; }
         public DelegateCommand StopRecording { get; }
         public DelegateCommand TakeSnapshot { get; }
+        public DelegateCommand ScanQRCode { get; }
 
         public bool IsCalibrated
         {
@@ -517,51 +467,6 @@ namespace G3Demo
         }
 
 
-        private void OnCalibMarker(G3MarkerData m)
-        {
-            MarkerCenterX = m.Marker2D.X * _videoWidth - GazeMarkerSize / 2;
-            MarkerCenterY = m.Marker2D.Y * _videoHeight - GazeMarkerSize / 2;
-        }
-
-        public void HandleData(DataFrame frame, StreamInfo stream)
-        {
-            var bytes = frame.GetPacketData();
-            if (bytes != null)
-            {
-                _rtspDataDemuxer.HandleData(bytes, frame.StartTime, frame.StreamIndex, stream.StreamIndex, stream.StreamId);
-            }
-        }
-
-        public void DrawGaze(TimeSpan argsStartTime, double width, double height)
-        {
-            _videoWidth = width;
-            _videoHeight = height;
-            while (_gazeQueue.Count > 1 && _gazeQueue.TryPeek(out var peek) && peek.TimeStamp < argsStartTime)
-            {
-                if (_gazeQueue.TryDequeue(out var g))
-                {
-                    if (g.Gaze2D.IsValid())
-                        _lastValidGaze = g;
-                }
-            }
-            if (_lastValidGaze != null && (argsStartTime - _lastValidGaze.TimeStamp).TotalMilliseconds < 150)
-            {
-                GazeX = _lastValidGaze.Gaze2D.X * width - GazeMarkerSize / 2;
-                GazeY = _lastValidGaze.Gaze2D.Y * height - GazeMarkerSize / 2;
-            }
-            else
-            {
-                HideGaze();
-            }
-
-            GazeBuffer = $"GazeBuffer: {_gazeQueue.Count} samples";
-            if (_gazeQueue.Count >= 2)
-            {
-                var bufferLength = _gazeQueue.Last().TimeStamp - _gazeQueue.First().TimeStamp;
-                GazeBuffer += $" {bufferLength.TotalMilliseconds:F0} ms";
-            }
-        }
-
         public async Task<(bool, Guid)> DoStartRecording()
         {
             var res = await _g3.Recorder.Start();
@@ -574,12 +479,6 @@ namespace G3Demo
             return await _g3.Recorder.Stop();
         }
 
-        private void HideGaze()
-        {
-            GazeX = int.MinValue;
-            GazeY = int.MinValue;
-        }
-
         public async Task<bool> Calibrate()
         {
             var res = await _g3.Calibrate.Run();
@@ -590,6 +489,99 @@ namespace G3Demo
         public RecordingsVM CreateRecordingsVM()
         {
             return new RecordingsVM(Dispatcher, _g3);
+        }
+
+        public async Task<bool> ConfigureWifiFromQR(string data)
+        {
+            var parameters = data.Split(new[] { ':' }, 2);
+            if (parameters.Length != 2 || parameters[0] != "WIFI:")
+                return false;
+            
+            var parts = parameters[1].Split(';');
+            var ssid = "";
+            var pwd = "";
+            var encryption = "";
+            foreach (var s in parts)
+            {
+                if (s.StartsWith("WIFI:S:"))
+                    ssid = s.Split(new[] { ':' }, 3).Last();
+                else if (s.StartsWith("T:"))
+                    encryption = s.Split(new[] { ':' }, 2).Last();
+                else if (s.StartsWith("P:"))
+                    pwd = s.Split(new[] { ':' }, 2).Last();
+            }
+            if (!string.IsNullOrEmpty(ssid) && (string.IsNullOrEmpty(encryption) || !string.IsNullOrEmpty(pwd)))
+            {
+                return await ConfigureWifi(ssid, pwd, encryption);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> ConfigureWifi(string ssid, string pwd, string encryption)
+        {
+            var active = await _g3.Network.Wifi.ActiveConfiguration;
+            var targetConfig = await _g3.Network.Wifi.Configurations.FindById(ssid);
+            foreach (WifiConfiguration c in await _g3.Network.Wifi.Configurations.GetApiChildren())
+            {
+                if (await c.SsidName == ssid && await c.Psk == pwd)
+                {
+                    var configId = await c.Name;
+                    return await _g3.Network.Wifi.Connect(Guid.Parse(configId));
+                }
+            }
+
+            // create a new config and connect to it
+
+            return false;
+        }
+
+
+        private Bitmap _grabbedImage;
+        private bool _grabNextImage;
+        private readonly QRCodeDetector _qrCodeDetector = new QRCodeDetector();
+        private readonly System.Windows.Forms.Timer _qrTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+        private string _qrData;
+
+        private async void QrDetect()
+        {
+            _qrTimer.Enabled = false;
+            _grabNextImage = true;
+            while (_grabbedImage == null)
+                await Task.Delay(20);
+
+            var sw2 = Stopwatch.StartNew();
+            var img = OpenCvSharp.Extensions.BitmapConverter.ToMat(_grabbedImage);
+            _grabbedImage.Dispose();
+            _grabbedImage = null;
+            var data = _qrCodeDetector.DetectAndDecode(img, out var points);
+            sw2.Stop();
+            QrData = data + $" ({sw2.ElapsedMilliseconds}ms)";
+            if (!string.IsNullOrEmpty(data) && data.StartsWith("WIFI"))
+            {
+                await ConfigureWifiFromQR(data);
+            }
+            else
+            {
+                _qrTimer.Enabled = true;
+            }
+            img.Release();
+        }
+
+        public string QrData
+        {
+            get => _qrData;
+            set
+            {
+                if (value == _qrData) return;
+                _qrData = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void DoScanQRCode(object obj)
+        {
+            _qrTimer.Enabled = true;
         }
     }
 }

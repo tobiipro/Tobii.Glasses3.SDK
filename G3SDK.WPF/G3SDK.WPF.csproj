@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FFME.Windows" Version="4.4.350" />
+    <PackageReference Include="ZeranoeSharedFFmpegBuild" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\source\G3SDK.csproj" />
+  </ItemGroup>
+
+</Project>
