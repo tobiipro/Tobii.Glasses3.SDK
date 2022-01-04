@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace G3SDK
 {
-    public class Recorder: G3Object, IMetaDataCapable, IRecorder
+    public class Recorder : G3Object, IMetaDataCapable, IRecorder
     {
         private readonly RWProperty<string> _folder;
         private readonly RWProperty<string> _visibleName;
@@ -18,9 +20,10 @@ namespace G3SDK
         private readonly ROProperty _timezone;
         private readonly ROProperty<int> _currentGazeFrequency;
         private readonly ROProperty<bool> _gazeOverlay;
+        private readonly char[] _validFolderCharacters;
 
 
-        public Recorder(G3Api g3Api): base(g3Api, "recorder")
+        public Recorder(G3Api g3Api) : base(g3Api, "recorder")
         {
             _folder = AddRWStringProperty("folder");
             _visibleName = AddRWStringProperty("visible-name");
@@ -35,9 +38,9 @@ namespace G3SDK
             _currentGazeFrequency = AddROProperty("current-gaze-frequency", int.Parse);
             _gazeOverlay = AddROProperty("gaze-overlay", bool.Parse);
 
-
             Started = AddSignal("started", ConvertGuid);
             Stopped = AddSignal("stopped", ConvertString);
+            _validFolderCharacters = new[] { '-', '.' };
         }
 
         private string ConvertString(List<JToken> arg)
@@ -66,12 +69,12 @@ namespace G3SDK
         {
             return await G3Api.ExecuteCommandBool(Path, "snapshot", LogLevel.info);
         }
-        
+
         public async Task<bool> Stop()
         {
             return await G3Api.ExecuteCommandBool(Path, "stop", LogLevel.info);
         }
-        
+
         public async Task Cancel()
         {
             await G3Api.ExecuteCommand(Path, "cancel", LogLevel.info);
@@ -84,10 +87,33 @@ namespace G3SDK
         public Task<bool> GazeOverlay => _gazeOverlay.Value();
 
         public Task<string> TimeZone => _timezone.GetString();
-        
+
         public Task<bool> SetFolder(string value)
         {
             return _folder.Set(value);
+        }
+
+        /// <summary>
+        /// This method will first try to set the folder name and then verify that the setting succeeded.
+        /// </summary>
+        /// <remarks>Folder names are validated on the device side and will only allow alphanumerical characters, minus (-) and dot (.).</remarks>
+        /// <param name="value">The folder name</param>
+        /// <returns>True if the folder name actually changed</returns>
+        public async Task<bool> SetFolderAndVerify(string value)
+        {
+            if (await SetFolder(value))
+                return false;
+            return await Folder == value;
+        }
+
+        /// <summary>
+        /// This method will convert the input to a valid folder name using "MakeValidFolderName"
+        /// </summary>
+        /// <param name="value">The folder name</param>
+        /// <returns>True if the setting of the folder name was successful</returns>
+        public Task<bool> SetFolderSafe(string value)
+        {
+            return SetFolderAndVerify(MakeValidFolderName(value));
         }
 
         public Task<string> VisibleName => _visibleName.Value();
@@ -141,6 +167,19 @@ namespace G3SDK
             var uuid = await UUID;
             return uuid != Guid.Empty;
         }
-    }
 
+        public string MakeValidFolderName(string folderName)
+        {
+            var sb = new StringBuilder(folderName.Length);
+            foreach (var c in folderName)
+            {
+                if (char.IsLetterOrDigit(c) || _validFolderCharacters.Contains(c))
+                    sb.Append(c);
+                else
+                    sb.Append('-');
+            }
+
+            return sb.ToString();
+        }
+    }
 }
