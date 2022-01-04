@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace G3Demo
     {
         private readonly string _hostName;
         private readonly RtspDataDemuxer _rtspDataDemuxer;
-        private readonly Queue<G3GazeData> _gazeQueue = new Queue<G3GazeData>();
+        private readonly ConcurrentQueue<G3GazeData> _gazeQueue = new ConcurrentQueue<G3GazeData>();
         private readonly IG3Api _g3;
         private readonly Timer _calibMarkerTimer;
         private readonly Timer _externalTimeReferenceTimer;
@@ -535,11 +536,13 @@ namespace G3Demo
         {
             _videoWidth = width;
             _videoHeight = height;
-            while (_gazeQueue.Count > 1 && _gazeQueue.Peek().TimeStamp < argsStartTime)
+            while (_gazeQueue.Count > 1 && _gazeQueue.TryPeek(out var peek) && peek.TimeStamp < argsStartTime)
             {
-                var g = _gazeQueue.Dequeue();
-                if (g.Gaze2D.IsValid())
-                    _lastValidGaze = g;
+                if (_gazeQueue.TryDequeue(out var g))
+                {
+                    if (g.Gaze2D.IsValid())
+                        _lastValidGaze = g;
+                }
             }
             if (_lastValidGaze != null && (argsStartTime - _lastValidGaze.TimeStamp).TotalMilliseconds < 150)
             {
