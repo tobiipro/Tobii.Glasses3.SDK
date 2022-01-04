@@ -18,6 +18,7 @@ namespace G3SDK
         private readonly HashSet<ROProperty> _readWriteProperties = new HashSet<ROProperty>();
         private G3ObjectDescription _desc;
         private G3Api _g3Api;
+        private readonly ROProperty _name;
         public G3Api G3Api => _g3Api;
         public string Path { get; }
 
@@ -26,8 +27,10 @@ namespace G3SDK
 
             _g3Api = g3Api;
             Path = path;
-            AddROProperty("name");
+            _name = AddROProperty("name");
         }
+
+        public Task<string> Name => _name.GetString();
 
         protected ROProperty<T> AddROProperty<T>(string propName, Func<string, T> convert)
         {
