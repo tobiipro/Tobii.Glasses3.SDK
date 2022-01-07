@@ -45,7 +45,7 @@ namespace G3SDK.WPF
             // mixed settings trying to get lower latency
             e.Options.DecoderParams.EnableFastDecoding = true;
             e.Options.DecoderParams.EnableLowDelayDecoding = true;
-            e.Options.MinimumPlaybackBufferPercent = 0;
+            e.Options.MinimumPlaybackBufferPercent = 0.5;
             e.Options.VideoBlockCache = 0;
             e.Options.UseParallelDecoding = true;
             e.Options.UseParallelRendering = true;

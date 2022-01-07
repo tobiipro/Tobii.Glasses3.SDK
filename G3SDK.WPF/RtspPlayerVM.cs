@@ -33,6 +33,7 @@ namespace G3SDK.WPF
         public RtspPlayerVM()
         {
             _bufferingTimer = new Timer(UpdateBufferingProgress);
+            Library.FFmpegDirectory = ".";
         }
 
         private void UpdateBufferingProgress(object state)

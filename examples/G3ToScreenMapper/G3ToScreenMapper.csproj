@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{C84B11C9-C2BE-441E-BB85-F1B775F30DE7}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyTitle>G3ToScreenMapper</AssemblyTitle>
@@ -36,9 +36,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OpenCvSharp4" Version="4.5.3.20210817" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.3.20210817" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.3.20210817" />
+    <PackageReference Include="OpenCvSharp4" Version="4.5.5.20211231" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.5.20211231" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.5.20211231" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\source\G3SDK.csproj" />

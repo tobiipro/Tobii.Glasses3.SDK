@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -7,12 +8,15 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using G3SDK;
 using G3SDK.WPF;
 using OpenCvSharp;
 using OxyPlot;
 using Unosquare.FFME.Common;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace G3Demo
 {
@@ -266,7 +270,7 @@ namespace G3Demo
 
             }
         }
- 
+
         public bool ShowCalibMarkers
         {
             get => _showCalibMarkers;
@@ -493,38 +497,21 @@ namespace G3Demo
 
         public async Task<bool> ConfigureWifiFromQR(string data)
         {
-            var parameters = data.Split(new[] { ':' }, 2);
-            if (parameters.Length != 2 || parameters[0] != "WIFI:")
-                return false;
-            
-            var parts = parameters[1].Split(';');
-            var ssid = "";
-            var pwd = "";
-            var encryption = "";
-            foreach (var s in parts)
+            if (WifiSettings.TryParseFromQR(data, out var wifi) && (string.IsNullOrEmpty(wifi.Encryption) || !string.IsNullOrEmpty(wifi.Pwd)))
             {
-                if (s.StartsWith("WIFI:S:"))
-                    ssid = s.Split(new[] { ':' }, 3).Last();
-                else if (s.StartsWith("T:"))
-                    encryption = s.Split(new[] { ':' }, 2).Last();
-                else if (s.StartsWith("P:"))
-                    pwd = s.Split(new[] { ':' }, 2).Last();
-            }
-            if (!string.IsNullOrEmpty(ssid) && (string.IsNullOrEmpty(encryption) || !string.IsNullOrEmpty(pwd)))
-            {
-                return await ConfigureWifi(ssid, pwd, encryption);
+                return await ConfigureWifi(wifi);
             }
 
             return false;
         }
-
-        private async Task<bool> ConfigureWifi(string ssid, string pwd, string encryption)
+        
+        private async Task<bool> ConfigureWifi(WifiSettings wifi)
         {
             var active = await _g3.Network.Wifi.ActiveConfiguration;
-            var targetConfig = await _g3.Network.Wifi.Configurations.FindById(ssid);
+            var targetConfig = await _g3.Network.Wifi.Configurations.FindById(wifi.Ssid);
             foreach (WifiConfiguration c in await _g3.Network.Wifi.Configurations.GetApiChildren())
             {
-                if (await c.SsidName == ssid && await c.Psk == pwd)
+                if (await c.SsidName == wifi.Ssid && await c.Psk == wifi.Pwd)
                 {
                     var configId = await c.Name;
                     return await _g3.Network.Wifi.Connect(Guid.Parse(configId));
@@ -535,7 +522,6 @@ namespace G3Demo
 
             return false;
         }
-
 
         private Bitmap _grabbedImage;
         private bool _grabNextImage;
@@ -551,12 +537,18 @@ namespace G3Demo
                 await Task.Delay(20);
 
             var sw2 = Stopwatch.StartNew();
-            var img = OpenCvSharp.Extensions.BitmapConverter.ToMat(_grabbedImage);
+            var s = Convert(_grabbedImage);
+            var img = OpenCvSharp.WpfExtensions.BitmapSourceConverter.ToMat(s);
             _grabbedImage.Dispose();
             _grabbedImage = null;
-            var data = _qrCodeDetector.DetectAndDecode(img, out var points);
+            var smallImage = new Mat();
+            Cv2.Resize(img, smallImage, new OpenCvSharp.Size(img.Width / 2, img.Height / 2));
+
+            var x = sw2.ElapsedMilliseconds;
+            var data = _qrCodeDetector.DetectAndDecode(smallImage, out var points);
+
             sw2.Stop();
-            QrData = data + $" ({sw2.ElapsedMilliseconds}ms)";
+            QrData = $"{data} ({x} / {sw2.ElapsedMilliseconds - x}ms)";
             if (!string.IsNullOrEmpty(data) && data.StartsWith("WIFI"))
             {
                 await ConfigureWifiFromQR(data);
@@ -565,7 +557,35 @@ namespace G3Demo
             {
                 _qrTimer.Enabled = true;
             }
+            smallImage.Release();
             img.Release();
+        }
+
+        public static BitmapSource Convert(Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+            var pixelFormats = PixelFormats.Bgr24;
+            switch (bitmap.PixelFormat)
+            {
+                case PixelFormat.Format32bppArgb:
+                    pixelFormats = PixelFormats.Bgra32;
+                    break;
+                case PixelFormat.Format32bppRgb:
+                    pixelFormats = PixelFormats.Bgr32;
+                    break;
+            }
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width, bitmapData.Height,
+                bitmap.HorizontalResolution, bitmap.VerticalResolution,
+                pixelFormats, null,
+                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmapSource;
         }
 
         public string QrData

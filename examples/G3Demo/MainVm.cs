@@ -2,9 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using G3SDK;
@@ -29,7 +27,6 @@ namespace G3Demo
             _browser = new G3Browser();
             BrowseForGlasses = new DelegateCommand(DoBrowseForGlasses, () => true);
             AddSimulator = new DelegateCommand(DoAddSimulator, () => true);
-            Unosquare.FFME.Library.FFmpegDirectory = "."; 
             _initialBrowseTask = DoBrowseForGlasses();
             StartAll = new DelegateCommand(DoStartRecordingAll, () => true);
             StopAll = new DelegateCommand(DoStopRecordingAll, () => true);
