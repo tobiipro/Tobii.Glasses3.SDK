@@ -73,8 +73,10 @@ namespace G3SDK
         internal void Log(LogLevel level, string msg)
         {
             if (level >= LogLevel)
-                Console.WriteLine(msg);
+                OnLog?.Invoke(this, new LogMessage(level, msg));
         }
+
+        public event EventHandler<LogMessage> OnLog;
 
         private void DoReceive(WebMessage webMessage)
         {
@@ -91,7 +93,7 @@ namespace G3SDK
             }
             catch (Exception e)
             {
-                Log(LogLevel.error, $"WS: Failed to parse message to WebSockMsg. error: [{e.Message}] msg=[{orgMsg}]");
+                Log(LogLevel.error, $"WS: Failed to parse message to WebSockMsg. error: [{e.Message}] message=[{orgMsg}]");
                 return;
             }
 

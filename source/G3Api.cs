@@ -203,7 +203,22 @@ namespace G3SDK
         LogLevel LogLevel { get; set; }
         INetwork Network { get; }
         IWebRTC WebRTC { get; }
+
+        event EventHandler<LogMessage> OnLog;
     }
+
+    public class LogMessage
+    {
+        public string Message { get; }
+        public LogLevel Level { get; }
+
+        public LogMessage(LogLevel level, string message)
+        {
+            Level = level;
+            Message = message;
+        }
+    }
+
 
     public interface IRecorder: IMetaDataCapable
     {
