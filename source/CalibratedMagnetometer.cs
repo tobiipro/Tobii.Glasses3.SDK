@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
+using System.Text;
 
 namespace G3SDK
 {
@@ -10,10 +12,8 @@ namespace G3SDK
         private bool _calibrated;
         private IG3Api _api;
         private IDisposable _token;
+        private MagnetometerCalibration _magcalib = new MagnetometerCalibration();
 
-        private MagData _x;
-        private MagData _y;
-        private MagData _z;
         private readonly Dictionary<int, IObserver<G3ImuData>> _observers = new Dictionary<int, IObserver<G3ImuData>>();
         private int _observerCounter;
         private int _startCounter;
@@ -31,6 +31,7 @@ namespace G3SDK
             }
 
             _startCounter++;
+            _magcalib.ResetCalibration();
         }
 
         public void Stop()
@@ -46,9 +47,6 @@ namespace G3SDK
         public void StartCalibration()
         {
             _calibrating = true;
-            _x = new MagData();
-            _y = new MagData();
-            _z = new MagData();
         }
 
         public void EndCalibration()
@@ -64,37 +62,18 @@ namespace G3SDK
 
             if (_calibrating)
             {
-                UpdateCalib(_x, imu.Magnetometer.X);
-                UpdateCalib(_y, imu.Magnetometer.Y);
-                UpdateCalib(_z, imu.Magnetometer.Z);
-
-                var avgDelta = (_x.AvgDelta + _y.AvgDelta + _z.AvgDelta) / 3;
-
-                _x.Scale = avgDelta / _x.AvgDelta;
-                _y.Scale = avgDelta / _y.AvgDelta;
-                _z.Scale = avgDelta / _z.AvgDelta;
+                _magcalib.AddSampleToCalibration(imu.Magnetometer);
             }
 
             if (_calibrated)
             {
-                var correctedX = (imu.Magnetometer.X - _x.Offset) * _x.Scale;
-                var correctedY = (imu.Magnetometer.Y - _y.Offset) * _y.Scale;
-                var correctedZ = (imu.Magnetometer.Z - _z.Offset) * _z.Scale;
-                var mag = new Vector3(correctedX, correctedY, correctedZ);
+                var calibratedMagData = _magcalib.CalibrateMagnetometerData(imu.Magnetometer);
                 foreach(var obs in _observers.Values)
                     obs.OnNext(new G3ImuData(imu.TimeStamp, 
                         Vector3Extensions.INVALID, 
                         Vector3Extensions.INVALID, 
-                        mag));
+                        calibratedMagData));
             }
-        }
-
-        private void UpdateCalib(MagData magData, float value)
-        {
-            magData.Min = Math.Min(magData.Min, value);
-            magData.Max = Math.Max(magData.Max, value);
-            magData.AvgDelta = (magData.Max - magData.Min) / 2;
-            magData.Offset = (magData.Max + magData.Min) / 2;
         }
 
         public IDisposable Subscribe(IObserver<G3ImuData> observer)
@@ -124,6 +103,83 @@ namespace G3SDK
             {
                 _calibratedMagnetometer.Unsubscribe(_observerId);
             }
+        }
+    }
+
+    public class MagnetometerCalibration
+    {
+        private MagData _x;
+        private MagData _y;
+        private MagData _z;
+
+        public MagnetometerCalibration()
+        {
+            ResetCalibration();
+        }
+
+        public void ResetCalibration()
+        {
+            _x = new MagData();
+            _y = new MagData();
+            _z = new MagData();
+        }
+
+        public Vector3 CalibrateMagnetometerData(Vector3 magnetometer)
+        {
+            var correctedX = (magnetometer.X - _x.Offset) * _x.Scale;
+            var correctedY = (magnetometer.Y - _y.Offset) * _y.Scale;
+            var correctedZ = (magnetometer.Z - _z.Offset) * _z.Scale;
+            return new Vector3(correctedX, correctedY, correctedZ);
+        }
+
+        public string SaveCalibration()
+        {
+            var sb = new StringBuilder();
+            WriteCalibration(sb, _x);
+            WriteCalibration(sb, _y);
+            WriteCalibration(sb, _z);
+            return sb.ToString();
+        }
+
+        public void LoadCalibration(string calib)
+        {
+            var lines = calib.Split('\n');
+            LoadCalibration(lines, 0, _x);
+            LoadCalibration(lines, 2, _y);
+            LoadCalibration(lines, 4, _z);
+        }
+
+        private void LoadCalibration(string[] lines, int index, MagData magData)
+        {
+            float.TryParse(lines[index], NumberStyles.Float, CultureInfo.InvariantCulture, out magData.Offset);
+            float.TryParse(lines[index + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out magData.Scale);
+        }
+
+        private void WriteCalibration(StringBuilder sb, MagData magData)
+        {
+            sb.AppendLine(magData.Offset.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine(magData.Scale.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void AddSampleToCalibration(Vector3 magnetometer)
+        {
+            UpdateCalib(_x, magnetometer.X);
+            UpdateCalib(_y, magnetometer.Y);
+            UpdateCalib(_z, magnetometer.Z);
+
+            var avgDelta = (_x.AvgDelta + _y.AvgDelta + _z.AvgDelta) / 3;
+
+            _x.Scale = avgDelta / _x.AvgDelta;
+            _y.Scale = avgDelta / _y.AvgDelta;
+            _z.Scale = avgDelta / _z.AvgDelta;
+        }
+
+        private void UpdateCalib(MagData magData, float value)
+        {
+            magData.Min = Math.Min(magData.Min, value);
+            magData.Max = Math.Max(magData.Max, value);
+            magData.AvgDelta = (magData.Max - magData.Min) / 2;
+            magData.Offset = (magData.Max + magData.Min) / 2;
         }
 
         private class MagData
