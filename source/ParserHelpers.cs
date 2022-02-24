@@ -14,6 +14,8 @@ namespace G3SDK
     {
         public static readonly Dictionary<string, CardState> CardStateTranslations = new Dictionary<string, CardState>();
 
+        public static Action<string> ErrorHandler { get; set; }
+
         static ParserHelpers()
         {
             CardStateTranslations["not-inserted"] = CardState.NotInserted;
@@ -25,7 +27,17 @@ namespace G3SDK
 
         public static G3GazeData ParseGazeFromJson(string json)
         {
-            var obj = (JObject)JsonConvert.DeserializeObject(json);
+            JObject obj;
+            try
+            {
+                obj = JObject.Parse(json);
+            }
+            catch
+            {
+                ErrorHandler?.Invoke($"Failed to parse Json: {json}");
+                return null;
+            }
+
             if (obj["type"].Value<string>() == "gaze")
             {
                 var timeStamp = obj["timestamp"].Value<double>();
@@ -33,6 +45,7 @@ namespace G3SDK
                 return ParseGazeData(data, timeStamp);
             }
 
+            ErrorHandler?.Invoke($"Type is not gaze: " + json);
             return null;
         }
 
@@ -218,20 +231,16 @@ namespace G3SDK
             return ParseFromCompressedStream(compressedData, ParseImuFromJson);
         }
 
+        public static void ParseImuDataFromCompressedStream(Stream compressedData, Action<G3ImuData> addAction)
+        {
+            ParseDataFromCompressedStream(compressedData, ParseImuFromJson, addAction);
+        }
+
         public static void ParseGazeDataFromCompressedStream(Stream compressedData, Action<G3GazeData> addAction)
         {
-            using (var gazeData = new GZipStream(compressedData, CompressionMode.Decompress))
-            using (var x = new StreamReader(gazeData))
-            {
-                while (!x.EndOfStream)
-                {
-                    var line = x.ReadLine();
-                    var g3GazeData = ParseGazeFromJson(line);
-                    if (g3GazeData != null)
-                        addAction(g3GazeData);
-                }
-            }
+            ParseDataFromCompressedStream(compressedData, ParseGazeFromJson, addAction);
         }
+
         public static void ParseDataFromCompressedStream<T>(Stream compressedData, Func<string, T> func, Action<T> addAction)
         {
             using (var stream = new GZipStream(compressedData, CompressionMode.Decompress))
@@ -306,16 +315,17 @@ namespace G3SDK
         {
             return arg[0].Value<bool>();
         }
+
         public static string SignalToString(List<JToken> arg)
         {
             return arg[0].Value<string>();
         }
 
-
         public static Ipv6Method Ipv6MethodParser(string arg)
         {
             return ParseEnum(arg, Ipv6Method.unknown);
         }
+
         public static Ipv4Method Ipv4MethodParser(string arg)
         {
             return ParseEnum(arg, Ipv4Method.unknown);
