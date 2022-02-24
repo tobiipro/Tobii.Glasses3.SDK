@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -34,6 +32,9 @@ namespace G3SDK
 
                 downloadQ.Enqueue(new DownloadItem(recG3.gaze.file));
                 downloadQ.Enqueue(new DownloadItem(recG3.scenecamera.file));
+
+                if (recG3.imu != null)
+                    downloadQ.Enqueue(new DownloadItem(recG3.imu.file));
 
                 if (recG3.eyecameras != null)
                     downloadQ.Enqueue(new DownloadItem(recG3.eyecameras.file));

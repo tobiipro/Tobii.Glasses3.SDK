@@ -52,6 +52,7 @@ namespace G3SDK
         public EyeCamerasInfo eyecameras;
         public GazeInfo gaze;
         public EventsInfo events;
+        public ImuInfo imu;
 
         public class FileInfo
         {
@@ -99,6 +100,10 @@ namespace G3SDK
 
         }
         public class EventsInfo : FileInfo
+        {
+
+        }
+        public class ImuInfo : FileInfo
         {
 
         }
