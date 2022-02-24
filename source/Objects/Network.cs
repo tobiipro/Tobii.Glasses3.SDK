@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -456,7 +457,8 @@ namespace G3SDK
 
         public Task<List<Guid>> FindBySsid(string ssid)
         {
-            return G3Api.ExecuteCommand<List<Guid>>(Path, "find-by-ssid", LogLevel.info, ssid);
+            var ssidAsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(ssid));
+            return G3Api.ExecuteCommand<List<Guid>>(Path, "find-by-ssid", LogLevel.info, ssidAsBase64);
         }
     }
 
