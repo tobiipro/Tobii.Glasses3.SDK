@@ -495,32 +495,48 @@ namespace G3Demo
             return new RecordingsVM(Dispatcher, _g3);
         }
 
-        public async Task<bool> ConfigureWifiFromQR(string data)
+        public async Task<string> ConfigureWifiFromQR(string data)
         {
             if (WifiSettings.TryParseFromQR(data, out var wifi) && (string.IsNullOrEmpty(wifi.Encryption) || !string.IsNullOrEmpty(wifi.Pwd)))
             {
                 return await ConfigureWifi(wifi);
             }
 
-            return false;
+            return "invalid QR code";
         }
         
-        private async Task<bool> ConfigureWifi(WifiSettings wifi)
+        private async Task<string> ConfigureWifi(WifiSettings wifi)
         {
-            var active = await _g3.Network.Wifi.ActiveConfiguration;
-            var targetConfig = await _g3.Network.Wifi.Configurations.FindById(wifi.Ssid);
-            foreach (WifiConfiguration c in await _g3.Network.Wifi.Configurations.GetApiChildren())
+            if (!await _g3.Network.WifiHwEnabled)
+                return "wifi not supported";
+
+            if (!await _g3.Network.WifiEnable)
+                await _g3.Network.SetWifiEnable(true);
+            await _g3.Network.Wifi.Disconnect();
+
+            await _g3.Network.Wifi.Scan();
+
+            foreach (WifiConfiguration c in await _g3.Network.Wifi.Configurations.Children())
             {
                 if (await c.SsidName == wifi.Ssid && await c.Psk == wifi.Pwd)
                 {
                     var configId = await c.Name;
-                    return await _g3.Network.Wifi.Connect(Guid.Parse(configId));
+                    if (await _g3.Network.Wifi.Connect(Guid.Parse(configId)))
+                        return "Connection to existing network config successful?";
+                    return "Connection to existing network config failed";
                 }
             }
 
-            // create a new config and connect to it
+            var networks = await _g3.Network.Wifi.Networks.FindBySsid(wifi.Ssid);
+            if (networks.Any())
+            {
+                var res = await _g3.Network.Wifi.ConnectNetwork(networks.First(), wifi.Pwd);
+                if (res)
+                    return "Connection to new network successful?";
+                return "Connection to new network failed";
+            }
 
-            return false;
+            return "Unable to find config or network with ssid " + wifi.Ssid;
         }
 
         private Bitmap _grabbedImage;
@@ -551,7 +567,8 @@ namespace G3Demo
             QrData = $"{data} ({x} / {sw2.ElapsedMilliseconds - x}ms)";
             if (!string.IsNullOrEmpty(data) && data.StartsWith("WIFI"))
             {
-                await ConfigureWifiFromQR(data);
+                var res = await ConfigureWifiFromQR(data);
+                QrData = QrData + " " + res;
             }
             else
             {
