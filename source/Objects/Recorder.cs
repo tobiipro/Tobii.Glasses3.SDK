@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -20,7 +18,6 @@ namespace G3SDK
         private readonly ROProperty _timezone;
         private readonly ROProperty<int> _currentGazeFrequency;
         private readonly ROProperty<bool> _gazeOverlay;
-        private readonly char[] _validFolderCharacters;
 
 
         public Recorder(G3Api g3Api) : base(g3Api, "recorder")
@@ -40,7 +37,6 @@ namespace G3SDK
 
             Started = AddSignal("started", ConvertGuid);
             Stopped = AddSignal("stopped", ConvertString);
-            _validFolderCharacters = new[] { '-', '.' };
         }
 
         private string ConvertString(List<JToken> arg)
@@ -93,36 +89,12 @@ namespace G3SDK
             return _folder.Set(value);
         }
 
-        /// <summary>
-        /// This method will first try to set the folder name and then verify that the setting succeeded.
-        /// </summary>
-        /// <remarks>Folder names are validated on the device side and will only allow alphanumerical characters, minus (-) and dot (.).</remarks>
-        /// <param name="value">The folder name</param>
-        /// <returns>True if the folder name actually changed</returns>
-        public async Task<bool> SetFolderAndVerify(string value)
-        {
-            if (await SetFolder(value))
-                return false;
-            return await Folder == value;
-        }
-
-        /// <summary>
-        /// This method will convert the input to a valid folder name using "MakeValidFolderName"
-        /// </summary>
-        /// <param name="value">The folder name</param>
-        /// <returns>True if the setting of the folder name was successful</returns>
-        public Task<bool> SetFolderSafe(string value)
-        {
-            return SetFolderAndVerify(MakeValidFolderName(value));
-        }
-
         public Task<string> VisibleName => _visibleName.Value();
 
         public Task<bool> SetVisibleName(string value)
         {
             return _visibleName.Set(value);
         }
-
 
         public async Task<bool> SendEvent(string tag, object obj)
         {
@@ -166,20 +138,6 @@ namespace G3SDK
         {
             var uuid = await UUID;
             return uuid != Guid.Empty;
-        }
-
-        public string MakeValidFolderName(string folderName)
-        {
-            var sb = new StringBuilder(folderName.Length);
-            foreach (var c in folderName)
-            {
-                if (char.IsLetterOrDigit(c) || _validFolderCharacters.Contains(c))
-                    sb.Append(c);
-                else
-                    sb.Append('-');
-            }
-
-            return sb.ToString();
         }
     }
 }
