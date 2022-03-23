@@ -28,16 +28,19 @@ namespace G3SDK
                 var recG3 = G3FileParser.ReadRecording(targetRecFolder);
                 var downloadQ = new Queue<DownloadItem>();
                 if (recG3.events != null)
-                    downloadQ.Enqueue(new DownloadItem(recG3.events.file));
+                    AddToQueue(downloadQ, recG3.events.file);
 
-                downloadQ.Enqueue(new DownloadItem(recG3.gaze.file));
-                downloadQ.Enqueue(new DownloadItem(recG3.scenecamera.file));
+                AddToQueue(downloadQ, recG3.gaze.file);
+                AddToQueue(downloadQ, recG3.scenecamera.file);
+
+                foreach (var s in recG3.scenecamera.snapshots)
+                    AddToQueue(downloadQ, s.file);
 
                 if (recG3.imu != null)
-                    downloadQ.Enqueue(new DownloadItem(recG3.imu.file));
+                    AddToQueue(downloadQ, recG3.imu.file);
 
                 if (recG3.eyecameras != null)
-                    downloadQ.Enqueue(new DownloadItem(recG3.eyecameras.file));
+                    AddToQueue(downloadQ, recG3.eyecameras.file);
 
                 var metaFolder = Path.Combine(targetRecFolder, recG3.metafolder);
                 Directory.CreateDirectory(metaFolder);
@@ -85,6 +88,11 @@ namespace G3SDK
             }
 
             return targetRecFolder;
+        }
+
+        private void AddToQueue(Queue<DownloadItem> queue, string file)
+        {
+            queue.Enqueue(new DownloadItem(file));
         }
     }
 
