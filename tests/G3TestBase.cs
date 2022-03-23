@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using NUnit.Framework;
@@ -15,14 +17,21 @@ namespace G3SDK
                 return;
             var browser = new G3Browser();
             var devices = await browser.ProbeForDevices();
-            if (devices.Any())
-                G3Api = devices.First();
-            else 
+            var units = Environment.GetEnvironmentVariable("G3UNITS")?.ToUpper().Split(',');
+            var validDevices = new List<G3Api>();
+            foreach (var d in devices)
+            {
+                var serial = (await d.System.RecordingUnitSerial).ToUpper();
+                if (units.Length == 0 || units.Any(s=>serial.Contains(s.Trim())))
+                    validDevices.Add(d);
+            }
+
+            if (validDevices.Count == 1)
+                G3Api = validDevices.First();
+            else if (validDevices.Count == 0)
                 G3Api = new G3Simulator.G3Simulator();
-            // while (G3Api.State != "Connected")
-            // {
-            //     await Task.Delay(100);
-            // }
+            else
+                throw new Exception("more than one device found, aborted");
 
 
             FwVersion = new G3Version(await G3Api.System.Version);
