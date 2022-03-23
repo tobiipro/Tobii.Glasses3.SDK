@@ -78,7 +78,7 @@ namespace G3Demo
                 var sw = Stopwatch.StartNew();
                 await _g3.Recorder.SendEvent("ExternalTimeReference",
                     new ExternalTimeReference(DateTime.UtcNow, DateTime.Now, Environment.MachineName, _lastExternalTimeRoundtrip, _externalTimeReferenceIndex++));
-                _lastExternalTimeRoundtrip = sw.Elapsed.TotalMilliseconds;
+                _lastExternalTimeRoundtrip = sw.Elapsed.TotalSeconds;
             };
             _externalTimeReferenceTimer.Enabled = true;
 
