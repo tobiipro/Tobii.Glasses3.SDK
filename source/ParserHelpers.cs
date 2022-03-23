@@ -182,6 +182,10 @@ namespace G3SDK
         {
             return (BatteryState)Enum.Parse(typeof(BatteryState), s, true);
         }
+        public static HuConnectionState ParseHuConnectionState(string s)
+        {
+            return (HuConnectionState)Enum.Parse(typeof(HuConnectionState), s, true);
+        }
 
         public static TimeSpan ParseTimeSpan(string s)
         {

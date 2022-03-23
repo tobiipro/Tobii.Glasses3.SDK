@@ -17,8 +17,12 @@ namespace G3SDK
         private readonly ROProperty<bool> _ntpIsSynchronized;
         private readonly Storage _storage;
         private readonly Battery _battery;
+        private readonly HeadUnit _headUnit;
+        private readonly HwTests _hwTests;
         public IBattery Battery => _battery;
         public IStorage Storage => _storage;
+        public IHwTests HwTests => _hwTests;
+        public IHeadUnit HeadUnit => _headUnit;
 
         public SystemObj(G3Api g3Api) : base(g3Api, "system")
         {
@@ -39,6 +43,8 @@ namespace G3SDK
 
             _battery = new Battery(g3Api, Path);
             _storage = new Storage(g3Api, Path);
+            _hwTests = new HwTests(g3Api, Path);
+            _headUnit = new HeadUnit(g3Api, Path);
         }
 
         #region Properties
@@ -86,6 +92,8 @@ namespace G3SDK
     {
         IBattery Battery { get; }
         IStorage Storage { get; }
+        IHwTests HwTests { get; }
+        IHeadUnit HeadUnit{ get; }
         Task<string> Version { get; }
         Task<string> RecordingUnitSerial { get; }
         Task<string> HeadUnitSerial { get; }

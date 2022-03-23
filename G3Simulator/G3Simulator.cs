@@ -320,10 +320,14 @@ namespace G3Simulator
             _g3Simulator = g3Simulator;
             Battery = new BatterySimulator(g3Simulator);
             Storage = new StorageSimulator(g3Simulator);
+            HeadUnit = new HeadUnitSimulator(g3Simulator);
+            HwTests= new HwTestsSimulator(g3Simulator);
         }
 
         public IBattery Battery { get; }
         public IStorage Storage { get; }
+        public IHwTests HwTests { get; }
+        public IHeadUnit HeadUnit { get; }
         public Task<string> Version => Task.FromResult(_version.ToString());
         public Task<string> RecordingUnitSerial => Task.FromResult(_ruSerial);
         public Task<string> HeadUnitSerial => Task.FromResult(_huSerial);
@@ -355,6 +359,49 @@ namespace G3Simulator
         {
             return Task.FromResult(new[] { 50, 100 });
         }
+    }
+
+    public class HwTestsSimulator : IHwTests
+    {
+        private readonly G3Simulator _g3Simulator;
+
+        private HwTestResult _sampleTestResult = new HwTestResult(
+            "G3-123", 
+            true, 
+            "general hw test", 
+            "{\"sensor1\":123)}");
+
+        public HwTestsSimulator(G3Simulator g3Simulator)
+        {
+            _g3Simulator = g3Simulator;
+        }
+
+        public Task<bool> Running => Task.FromResult(false);
+        public Task<List<HwTestResult>> Result => Task.FromResult(new List<HwTestResult> { _sampleTestResult });
+
+        public Task<bool> Run()
+        {
+            return Task.FromResult(true);
+        }
+
+        public IG3Observable<int> Done => new SignalSimulator<int>();
+    }
+
+    public class HeadUnitSimulator : IHeadUnit
+    {
+        private readonly G3Simulator _g3Simulator;
+        private readonly SignalSimulator<HuConnectionState> _connectionStateChanged;
+        private HuConnectionState _connectionState = HuConnectionState.connected;
+
+        public HeadUnitSimulator(G3Simulator g3Simulator)
+        {
+            _g3Simulator = g3Simulator;
+            _connectionStateChanged = new SignalSimulator<HuConnectionState>();
+            ConnectionState = Task.FromResult(_connectionState);
+        }
+
+        public IG3Observable<HuConnectionState> ConnectionStateChanged => _connectionStateChanged;
+        public Task<HuConnectionState> ConnectionState { get; }
     }
 
     public class BatterySimulator : IBattery

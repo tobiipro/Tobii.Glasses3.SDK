@@ -301,6 +301,31 @@ namespace G3SDK
         }
 
         [Test]
+        public async Task HeadUnitPropertiesCanBeRead()
+        {
+            await EnsureApi();
+            var state = await G3Api.System.HeadUnit.ConnectionState;
+            var stateSignalToken = await G3Api.System.HeadUnit.ConnectionStateChanged.SubscribeAsync(s => { });
+
+            Assert.That(state, Is.Not.Null);
+            stateSignalToken.Dispose();
+        }
+
+        [Test]
+        public async Task HwTestsPropertiesCanBeRead()
+        {
+            await EnsureApi();
+            var token = await G3Api.System.HwTests.Done.SubscribeAsync(s => { });
+            var running = await G3Api.System.HwTests.Running;
+            var res = await G3Api.System.HwTests.Result;
+
+            Assert.That(running, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+      
+            token.Dispose();
+        }
+
+        [Test]
         public async Task CanSetAndReadMeta()
         {
             await EnsureApi();

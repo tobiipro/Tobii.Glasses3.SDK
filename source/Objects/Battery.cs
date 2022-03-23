@@ -21,15 +21,14 @@ namespace G3SDK
             _state = AddROProperty("state", ParserHelpers.ParseBatteryState);
 
             StateChanged = AddSignal("state-changed", ConvertBatteryChanged);
-
         }
+
         private (BatteryState, bool) ConvertBatteryChanged(List<JToken> arg)
         {
             var batteryState = ParserHelpers.ParseBatteryState(arg[0].Value<string>());
             var charging = bool.Parse(arg[1].Value<string>());
             return (batteryState, charging);
         }
-
 
         #region Properties
         public Task<float> Level => _level.Value();
@@ -41,8 +40,6 @@ namespace G3SDK
         #region Signals
         public IG3Observable<(BatteryState State, bool Charging)> StateChanged { get; }
         #endregion
-
-
     }
 
     public interface IBattery: IG3Object
