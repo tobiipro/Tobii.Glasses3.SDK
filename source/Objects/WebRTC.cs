@@ -148,7 +148,7 @@ namespace G3SDK
         }
     }
 
-    public interface IWebRTC
+    public interface IWebRTC: IDynamicChildNode
     {
         Task<IWebRTCSession> Create();
         Task<bool> Delete(IWebRTCSession session);

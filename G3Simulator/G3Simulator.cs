@@ -83,7 +83,7 @@ namespace G3Simulator
         public Task<bool> InProgress => Task.FromResult(false);
     }
 
-    public class WebRTCSimulator : IWebRTC
+    public class WebRTCSimulator : DynamicChildNode , IWebRTC
     {
         private readonly G3Simulator _g3Simulator;
         private List<WebRTCSessionSim> _sessions = new List<WebRTCSessionSim>();
