@@ -41,6 +41,9 @@ namespace G3SDK
             _sendMessagesTask = Task.Run(() => SendMessages(_sendMessagesTokenSource.Token));
         }
 
+        public event EventHandler<string> WebSocketMessage;
+
+
         private void HandleWebSockClose(CloseEventArgs closeEventArgs)
         {
             _webSocketState = "closed";
@@ -103,6 +106,7 @@ namespace G3SDK
             }
 
             HandleWebSocketMessage(msg, webMessage.Text.Length, orgMsg);
+            WebSocketMessage?.Invoke(this, orgMsg);
         }
 
 
@@ -119,11 +123,18 @@ namespace G3SDK
             var msg = $"{{\"path\":\"//{path}\",\"id\":{id},\"method\":\"{method}\",\"body\":{ParametersToWsBody(parameters)}}}";
             Log(LogLevel.info, $"WS: >> {msg}");
 
-            var msgObject = new QueueMessage(id, msg);
+            SendToWebSocket(msg);
+
+            return id;
+        }
+
+        public void SendToWebSocket(string msg)
+        {
+            EnsureConnected();
+
+            var msgObject = new QueueMessage( msg);
             _msgQueue.Enqueue(msgObject);
             _sendMsgWaitHandle.Set();
-
-            return msgObject.MsgId;
         }
 
         private static string ParametersToWsBody(object[] parameters)
@@ -200,11 +211,8 @@ namespace G3SDK
     public class QueueMessage
     {
         public string Msg { get; }
-        public long MsgId { get; }
-
-        public QueueMessage(long id, string msg)
+        public QueueMessage(string msg)
         {
-            MsgId = id;
             Msg = msg;
         }
     }

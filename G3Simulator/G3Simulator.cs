@@ -63,6 +63,12 @@ namespace G3Simulator
         public LogLevel LogLevel { get; set; }
         public INetwork Network { get; }
         public IWebRTC WebRTC { get; }
+        public void SendToWebSocket(string msg)
+        {
+            // empty            
+        }
+
+        public event EventHandler<string> WebSocketMessage;
         public event EventHandler<LogMessage> OnLog;
         public RecordingsSimulator InternalRecordings { get; }
     }

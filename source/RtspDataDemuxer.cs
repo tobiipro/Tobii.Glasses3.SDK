@@ -50,7 +50,6 @@ namespace G3SDK
             {
                 OnUnknownEvent2?.Invoke(this, (s, timeStamp));
             }
-
         }
 
         private void HandleImu(JObject j, TimeSpan timeStamp)

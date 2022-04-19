@@ -204,6 +204,9 @@ namespace G3SDK
         INetwork Network { get; }
         IWebRTC WebRTC { get; }
 
+        void SendToWebSocket(string msg);
+        event EventHandler<string> WebSocketMessage;
+
         event EventHandler<LogMessage> OnLog;
     }
 
