@@ -108,6 +108,16 @@ namespace G3SDK
             }
         }
 
+        public async Task<List<G3ImuData>> ImuData()
+        {
+            var filePath = await ImuFilePath();
+
+            using (var compressedData = await G3Api.GetRequestStream(filePath, "gzip"))
+            {
+                return ParserHelpers.ParseImuDataFromCompressedStream(compressedData);
+            }
+        }
+
         public async Task<(ConcurrentQueue<G3GazeData>, Task)> GazeDataAsync()
         {
             var gazeFilePath = await GazeFilePath();
@@ -132,6 +142,7 @@ namespace G3SDK
         {
             return GetFilePath("events");
         }
+        
         private Task<string> ImuFilePath()
         {
             return GetFilePath("imu");
@@ -178,6 +189,7 @@ namespace G3SDK
         Task<bool> Move(string folderName);
         Task<List<G3GazeData>> GazeData();
         Task<List<G3Event>> Events();
+        Task<List<G3ImuData>> ImuData();
         Task<(ConcurrentQueue<G3GazeData>, Task)> GazeDataAsync();
         Task<(JObject json, string httpPath)> GetRecordingJson();
         Task<Uri> GetUri(string fileName);

@@ -590,6 +590,10 @@ namespace G3Simulator
         {
             throw new NotImplementedException();
         }
+        public Task<List<G3ImuData>> ImuData()
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<List<G3Event>> Events()
         {
