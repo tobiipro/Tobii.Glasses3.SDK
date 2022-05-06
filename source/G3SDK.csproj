@@ -11,7 +11,7 @@
     <Authors>Jonas Högström</Authors>
     <Company>Tobii Pro AB</Company>
     <PackageId>Tobii.Glasses3.SDK</PackageId>
-    <Version>0.99.99.11</Version>
+    <Version>0.99.99.12</Version>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Description>.Net client library for the Tobii Pro Glasses 3 API.</Description>
     <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>
@@ -64,7 +64,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-    <PackageReference Include="WebSocketSharper" Version="1.0.39" />
+    <PackageReference Include="WebSocketSharper" Version="1.0.42" />
     <PackageReference Include="Zeroconf" Version="3.6.11" />
   </ItemGroup>
   <ItemGroup>
