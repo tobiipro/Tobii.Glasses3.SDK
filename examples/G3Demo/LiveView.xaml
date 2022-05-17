@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:g3Wpf="clr-namespace:G3SDK.WPF;assembly=G3SDK.WPF"
     xmlns:oxy="http://oxyplot.org/wpf"
+    xmlns:oxyc="http://oxyplot.org/wpf/contrib"
     d:DataContext="{d:DesignInstance Type=local:DeviceVM, IsDesignTimeCreatable=false}"
     mc:Ignorable="d">
     <StackPanel>
@@ -40,51 +41,51 @@
         <TextBlock Text="{Binding GazeBuffer}"></TextBlock>
         <WrapPanel Orientation="Horizontal">
             <Grid>
-                <oxy:Plot Title="Gaze" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="X" ItemsSource="{Binding GazeXSeries}"/>
-                        <oxy:LineSeries Title="Y" ItemsSource="{Binding GazeYSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="Gaze" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="X" ItemsSource="{Binding GazeXSeries}"/>
+                        <oxyc:LineSeries Title="Y" ItemsSource="{Binding GazeYSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding GazePlotEnabled}">Enabled</CheckBox>
             </Grid>
             <Grid>
-                <oxy:Plot Title="Pupil" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="Left" ItemsSource="{Binding PupilLeftSeries}"/>
-                        <oxy:LineSeries Title="Right" ItemsSource="{Binding PupilRightSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="Pupil" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="Left" ItemsSource="{Binding PupilLeftSeries}"/>
+                        <oxyc:LineSeries Title="Right" ItemsSource="{Binding PupilRightSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding PupilPlotEnabled}">Enabled</CheckBox>
             </Grid>
             <Grid>
-                <oxy:Plot Title="Acc" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="X" ItemsSource="{Binding AccXSeries}"/>
-                        <oxy:LineSeries Title="Y" ItemsSource="{Binding AccYSeries}"/>
-                        <oxy:LineSeries Title="Z" ItemsSource="{Binding AccZSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="Acc" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="X" ItemsSource="{Binding AccXSeries}"/>
+                        <oxyc:LineSeries Title="Y" ItemsSource="{Binding AccYSeries}"/>
+                        <oxyc:LineSeries Title="Z" ItemsSource="{Binding AccZSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding AccPlotEnabled}">Enabled</CheckBox>
             </Grid>
             <Grid>
-                <oxy:Plot Title="Gyr" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="X" ItemsSource="{Binding GyrXSeries}"/>
-                        <oxy:LineSeries Title="Y" ItemsSource="{Binding GyrYSeries}"/>
-                        <oxy:LineSeries Title="Z" ItemsSource="{Binding GyrZSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="Gyr" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="X" ItemsSource="{Binding GyrXSeries}"/>
+                        <oxyc:LineSeries Title="Y" ItemsSource="{Binding GyrYSeries}"/>
+                        <oxyc:LineSeries Title="Z" ItemsSource="{Binding GyrZSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding GyrPlotEnabled}">Enabled</CheckBox>
             </Grid>
             <Grid>
-                <oxy:Plot Title="Mag" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="X" ItemsSource="{Binding MagXSeries}"/>
-                        <oxy:LineSeries Title="Y" ItemsSource="{Binding MagYSeries}"/>
-                        <oxy:LineSeries Title="Z" ItemsSource="{Binding MagZSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="Mag" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="X" ItemsSource="{Binding MagXSeries}"/>
+                        <oxyc:LineSeries Title="Y" ItemsSource="{Binding MagYSeries}"/>
+                        <oxyc:LineSeries Title="Z" ItemsSource="{Binding MagZSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding MagPlotEnabled}">Enabled</CheckBox>
             </Grid>
             <Grid>
@@ -92,13 +93,13 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <oxy:Plot Title="CalibMag" Height="200" Width="300">
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Title="X" ItemsSource="{Binding CalibMagXSeries}"/>
-                        <oxy:LineSeries Title="Y" ItemsSource="{Binding CalibMagYSeries}"/>
-                        <oxy:LineSeries Title="Z" ItemsSource="{Binding CalibMagZSeries}"/>
-                    </oxy:Plot.Series>
-                </oxy:Plot>
+                <oxyc:Plot Title="CalibMag" Height="200" Width="300">
+                    <oxyc:Plot.Series>
+                        <oxyc:LineSeries Title="X" ItemsSource="{Binding CalibMagXSeries}"/>
+                        <oxyc:LineSeries Title="Y" ItemsSource="{Binding CalibMagYSeries}"/>
+                        <oxyc:LineSeries Title="Z" ItemsSource="{Binding CalibMagZSeries}"/>
+                    </oxyc:Plot.Series>
+                </oxyc:Plot>
                 <CheckBox Margin="10, 15" HorizontalAlignment="Right" IsChecked="{Binding CalibMagPlotEnabled}">Enabled</CheckBox>
                 <StackPanel Grid.Row="1">
                     <Button Command="{Binding CalibrateMagStart}">CalibrateStart</Button>
