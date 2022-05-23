@@ -41,9 +41,22 @@
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
-    <None Include="..\SDLA\Tobii Pro SDLA for Research Use.md" Link="License.md">
+    <None Include="..\SDLA\Tobii Research SDLA (accept on use) (2022.05.10).md" Link="License.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SDLA\images\header.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\SDLA\images\footer.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+	<None Include="..\SDLA\images\transparency-policy-ui.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+
     <None Include="$(OutputPath)\net5.0\License.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
