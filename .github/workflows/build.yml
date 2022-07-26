@@ -16,29 +16,36 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+
     - name: Application Version
       id: version
       uses: paulhatch/semantic-version@v4.0.2
       with:        
         format: "${major}.${minor}.${patch}.${increment}"
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
         include-prerelease: true
+
     - name: Install dependencies
       run: dotnet restore
+
     - name: Build debug
       run: dotnet build --configuration Debug /p:Version=${{steps.version.outputs.version}} /p:FileVersion=${{steps.version.outputs.version}} /p:AssemblyVersion=${{steps.version.outputs.version}}
+
     - name: Build release
       run: dotnet build --configuration Release /p:Version=${{steps.version.outputs.version}} /p:FileVersion=${{steps.version.outputs.version}} /p:AssemblyVersion=${{steps.version.outputs.version}}
+
     - name: Remove nuget package
       run: del source/bin/Release/*.nupkg
+
     - name: Sign release binaries
       uses: jonashogstrom/code-sign-action@v2.0.9
       with:
-        certificate: '${{secrets.TOBIICODESIGNCERTIFICATE_B64}}'
-        sign_args: '/v /p ${{secrets.CODESIGNPASSWORD}} /tr http://timestamp.digicert.com /sha1 ${{secrets.TOBIICODESIGNCERTIFICATE_SHA1}}'
+        certificate: '${{secrets.TOBIICODESIGNCERTIFICATE_2022_B64}}'
+        sign_args: '/v /p ${{secrets.TOBIICODESIGNPASSWORD_2022}} /tr http://timestamp.digicert.com'
         folder: 'source/bin/Release'
         recursive: true
 
@@ -50,10 +57,10 @@ jobs:
       uses: timheuer/base64-to-file@master
       with:
         fileName: 'certfile.pfx'
-        encodedString: ${{ secrets.TOBIICODESIGNCERTIFICATE_B64 }}
+        encodedString: ${{ secrets.TOBIICODESIGNCERTIFICATE_2022_B64 }}
 
     - name: Sign NuGet Package
-      run: dotnet nuget sign "source\bin\Release\Tobii.Glasses3.SDK.*.nupkg" --certificate-path "${{steps.cert_file.outputs.filePath}}" --certificate-password "${{secrets.CODESIGNPASSWORD}}" --timestamper http://timestamp.digicert.com --verbosity detailed
+      run: dotnet nuget sign "source\bin\Release\Tobii.Glasses3.SDK.*.nupkg" --certificate-path "${{steps.cert_file.outputs.filePath}}" --certificate-password "${{secrets.TOBIICODESIGNPASSWORD_2022}}" --timestamper http://timestamp.digicert.com --verbosity detailed
 
     - name: Upload nuget package
       uses: actions/upload-artifact@v2
@@ -84,4 +91,3 @@ jobs:
       with:
         name: G3Demo_${{steps.version.outputs.version}}
         path: examples/G3Demo/bin/Release/net48/**
-
