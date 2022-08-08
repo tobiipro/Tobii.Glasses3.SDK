@@ -45,8 +45,8 @@ For more information on individual methods in the SDK, please refer to the API d
 
 ## Limitations
 
-The SDK does not support streaming data via WebRTC or RTSP on its own, you will need exteral libraries for that. 
-[RtspClientSharp](https://github.com/BogdanovKirill/RtspClientSharp) or [FFMediaElement](https://github.com/unosquare/ffmediaelement) is a good start if you want to use video streaming over RTSP.
+The SDK does not handle streaming data via WebRTC or RTSP on its own, you will need exteral libraries for that. 
+[FFMediaElement](https://github.com/unosquare/ffmediaelement) is a good start if you want to displayt streaming video over RTSP. It also supports the data streams provided by Glasses3. [RtspClientSharp](https://github.com/BogdanovKirill/RtspClientSharp) is another low lever alterntive, but this package will only handle the transport layer, not the decoding, and it does not seem to support data channels.
 
 ## Samples
 ### Glasses Demo
