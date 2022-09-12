@@ -48,6 +48,10 @@ namespace G3SDK
             var keys = await g3Api.ExecuteCommand<string[]>(path, "meta-keys", LogLevel.info);
             return keys;
         }
+
+        public static string MetaDataKey_RuVersion = "RuVersion";
+        public static string MetaDataKey_HuSerial = "HuSerial";
+        public static string MetaDataKey_RuSerial = "RuSerial";
     }
 
 }

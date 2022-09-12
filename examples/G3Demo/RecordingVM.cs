@@ -240,9 +240,9 @@ namespace G3Demo
             VisibleName = await _recording.VisibleName;
             DeviceIsRecording = (await _g3.Recorder.Duration).HasValue;
             Created = await _recording.Created;
-            FwVersion = await _recording.MetaLookupString("RuVersion");
-            RuSerial = await _recording.MetaLookupString("RuSerial");
-            HuSerial = await _recording.MetaLookupString("HuSerial");
+            FwVersion = await _recording.MetaLookupString(MetaDataCapableHelpers.MetaDataKey_RuVersion);
+            RuSerial = await _recording.MetaLookupString(MetaDataCapableHelpers.MetaDataKey_RuSerial);
+            HuSerial = await _recording.MetaLookupString(MetaDataCapableHelpers.MetaDataKey_HuSerial);
             VideoUri = await _recording.GetUri("scenevideo.mp4");
             var rtaInfoStr = await _recording.MetaLookupString("RTA");
             if (!string.IsNullOrEmpty(rtaInfoStr))

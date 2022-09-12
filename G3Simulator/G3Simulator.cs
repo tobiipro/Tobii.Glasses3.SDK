@@ -690,9 +690,9 @@ namespace G3Simulator
             _visibleName = null;
             _uuid = Guid.NewGuid();
             _meta.Clear();
-            _meta["RuVersion"] = await _sim.System.Version;
-            _meta["RuSerial"] = await _sim.System.RecordingUnitSerial;
-            _meta["HuSerial"] = await _sim.System.HeadUnitSerial;
+            _meta[MetaDataCapableHelpers.MetaDataKey_RuVersion] = await _sim.System.Version;
+            _meta[MetaDataCapableHelpers.MetaDataKey_RuSerial] = await _sim.System.RecordingUnitSerial;
+            _meta[MetaDataCapableHelpers.MetaDataKey_HuSerial] = await _sim.System.HeadUnitSerial;
             _gazeOverlay = await _sim.Settings.GazeOverlay;
             _started.Emit(_uuid);
             return true;
