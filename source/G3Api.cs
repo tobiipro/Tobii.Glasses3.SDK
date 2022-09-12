@@ -51,6 +51,14 @@ namespace G3SDK
                 Log(LogLevel.warning, $"WS Unhandled message << {receivedBytes} bytes: {TrimTo(orgMsg, 80)}");
             }
         }
+
+        protected override void AfterConnect()
+        {
+            Version = new G3Version(System.Version.Result);
+        }
+
+        public G3Version Version { get; private set; } = G3Version.Unknown;
+
         public SignalHandler SignalHandler { get; }
 
         public ISettings Settings { get; }
@@ -208,6 +216,8 @@ namespace G3SDK
         event EventHandler<string> WebSocketMessage;
 
         event EventHandler<LogMessage> OnLog;
+
+        G3Version Version { get; }
     }
 
     public class LogMessage

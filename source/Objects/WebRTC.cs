@@ -64,7 +64,7 @@ namespace G3SDK
                 Guid = guid;
                 Gaze = AddSignal("gaze", ParserHelpers.SignalToGaze);
                 Event = AddSignal("event", ParserHelpers.SignalToEvent);
-                Imu = AddSignal("imu", ParserHelpers.SignalToIMU);
+                Imu = AddSignal("imu", tokens=>ParserHelpers.SignalToIMU(tokens, G3ImuData.VersionToCoordSystem(g3Api.Version)));
                 SyncPort = AddSignal("sync-port", ParserHelpers.SignalToSyncPort);
                 TimedOut = AddSignal("timed-out", list => new Notification());
                 NewIceCandidate = AddSignal("new-ice-candidate", list => new IceCandidate(list[0].Value<int>(), list[1].Value<string>()));

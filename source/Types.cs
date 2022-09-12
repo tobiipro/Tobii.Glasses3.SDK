@@ -21,7 +21,7 @@ namespace G3SDK
 
         public TimeSpan TimeStamp { get; }
     }
-    
+
 
     public enum SpaceState
     {
@@ -60,7 +60,7 @@ namespace G3SDK
         public Direction Direction { get; }
         public int Value { get; }
 
-        public G3SyncPortData(TimeSpan timeStamp, Direction direction, int value): base(timeStamp)
+        public G3SyncPortData(TimeSpan timeStamp, Direction direction, int value) : base(timeStamp)
         {
             Direction = direction;
             Value = value;
@@ -71,7 +71,7 @@ namespace G3SDK
         public string Tag { get; }
         public string Obj { get; }
 
-        public G3Event(TimeSpan timeStamp, string tag, string obj): base(timeStamp)
+        public G3Event(TimeSpan timeStamp, string tag, string obj) : base(timeStamp)
         {
             Tag = tag;
             Obj = obj;
@@ -90,17 +90,80 @@ namespace G3SDK
         public Vector3 Gyroscope { get; }
         public Vector3 Magnetometer { get; }
 
-        public G3ImuData(TimeSpan timeStamp, Vector3 accelerometer, Vector3 gyroscope, Vector3 magnetometer): base(timeStamp)
+        public ImuCoordSystem CoordSystem { get; }
+
+        public G3ImuData(TimeSpan timeStamp, Vector3 accelerometer, Vector3 gyroscope, Vector3 magnetometer, ImuCoordSystem coordSystem) : base(timeStamp)
         {
             Accelerometer = accelerometer;
             Gyroscope = gyroscope;
             Magnetometer = magnetometer;
+            CoordSystem = coordSystem;
         }
+
+        private static readonly double DegreesToRadians = 2 * Math.PI / 360;
+        private static readonly double ImuAngle = 12 * DegreesToRadians;
+        private static readonly float SinAngle = (float)Math.Sin(ImuAngle);
+        private static readonly float CosAngle = (float)Math.Cos(ImuAngle);
+
+        private static readonly Vector3[] AccGyroTransform = {
+            new Vector3(1f, 0f, 0f),
+            new Vector3(0f, -CosAngle, SinAngle),
+            new Vector3(0f, SinAngle, CosAngle )
+        };
+
+        private static readonly Vector3[] MagTransform = {
+            new Vector3(-1f, 0f, 0f),
+            new Vector3(0f, -CosAngle, SinAngle),
+            new Vector3(0f, SinAngle, CosAngle )
+        };
+
+        private Vector3 multiply(Vector3[] matrix, Vector3 vector)
+        {
+            return new Vector3(
+                matrix[0].X * vector.X + matrix[0].Y * vector.Y + matrix[0].Z * vector.Z,
+                matrix[1].X * vector.X + matrix[1].Y * vector.Y + matrix[1].Z * vector.Z,
+                matrix[2].X * vector.X + matrix[2].Y * vector.Y + matrix[2].Z * vector.Z);
+        }
+
+        /// <summary>
+        /// This method will transform IMU data recorded prior to g3 firmware 1.29 to the coordinate system of the scene camera.
+        /// </summary>
+        /// <remarks>
+        /// The IMU is mounted with a 12 degree angle relative to the scene camera, and the orientation of the axis is
+        /// not the same as the orientation in the scene camera. The transformation matrices available here will convert
+        /// data recorded with earlier fw versions to match the coordinate system of the scene camera.
+        /// </remarks>
+        /// <returns>transformed IMU data.</returns>
+        public G3ImuData TransformImuDataToCameraCoordinates(bool force = false)
+
+        {
+            if (CoordSystem != ImuCoordSystem.Imu && !force)
+                throw new Exception("Can't transform IMU data to scenecam coordinates unless it is in imu coordinates");
+
+            return new G3ImuData(TimeStamp,
+                multiply(AccGyroTransform, Accelerometer),
+                multiply(AccGyroTransform, Gyroscope),
+                multiply(MagTransform, Magnetometer), ImuCoordSystem.SceneCam);
+        }
+
+        public static G3Version ImuDataInCameraCoordinatesVersion => G3Version.Version_1_29_Sarek;
+
+
+        public static ImuCoordSystem VersionToCoordSystem(G3Version version)
+        {
+            if (version.Equals(G3Version.Unknown))
+                return ImuCoordSystem.Unknown;
+            if (version.GreaterOrEqualTo(ImuDataInCameraCoordinatesVersion))
+                return ImuCoordSystem.SceneCam;
+            return ImuCoordSystem.Imu;
+        }
+        public enum ImuCoordSystem { Imu, SceneCam, Unknown }
     }
 
-    public class G3GazeData: G3TimeStamped
+
+    public class G3GazeData : G3TimeStamped
     {
-        public G3GazeData(TimeSpan timeStamp, Vector2 gaze2D, Vector3 gaze3D, EyeData leftEye, EyeData rightEye): base(timeStamp)
+        public G3GazeData(TimeSpan timeStamp, Vector2 gaze2D, Vector3 gaze3D, EyeData leftEye, EyeData rightEye) : base(timeStamp)
         {
             Gaze2D = gaze2D;
             Gaze3D = gaze3D;

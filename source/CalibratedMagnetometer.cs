@@ -72,7 +72,7 @@ namespace G3SDK
                     obs.OnNext(new G3ImuData(imu.TimeStamp, 
                         Vector3Extensions.INVALID, 
                         Vector3Extensions.INVALID, 
-                        calibratedMagData));
+                        calibratedMagData, imu.CoordSystem));
             }
         }
 

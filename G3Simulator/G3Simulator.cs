@@ -70,6 +70,7 @@ namespace G3Simulator
 
         public event EventHandler<string> WebSocketMessage;
         public event EventHandler<LogMessage> OnLog;
+        public G3Version Version { get; set; } = G3Version.Latest;
         public RecordingsSimulator InternalRecordings { get; }
     }
 
@@ -260,7 +261,8 @@ namespace G3Simulator
                 new Vector3(0, 0, 0),
                 new Vector3((float) Math.Sin(ts.TotalSeconds) * 100 + 300,
                     (float) Math.Sin(ts.TotalSeconds + 1) * 150 - 200,
-                    (float) Math.Sin(ts.TotalSeconds + 2) * 50 - 40));
+                    (float) Math.Sin(ts.TotalSeconds + 2) * 50 - 40),
+                G3ImuData.ImuCoordSystem.SceneCam);
             _imuSig.Emit(_lastImu);
         }
 

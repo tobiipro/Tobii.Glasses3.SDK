@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -184,51 +183,6 @@ namespace G3SDK
             }
             return res;
         }
-    }
-
-    public class G3Version
-    {
-        private readonly List<int> _versionParts;
-
-        public G3Version(string versionString)
-        {
-            _versionParts = new List<int>();
-            foreach (var p in versionString.Split(new[] { '.', '+' }))
-            {
-                if (int.TryParse(p, out var pValue))
-                    _versionParts.Add(pValue);
-            }
-        }
-
-        public bool LessThan(G3Version other)
-        {
-            return !GreaterOrEqualTo(other);
-        }
-
-        public bool GreaterOrEqualTo(G3Version other)
-        {
-            for (var i = 0; i < other._versionParts.Count; i++)
-            {
-                if (_versionParts[i] < other._versionParts[i])
-                    return false;
-
-                if (_versionParts[i] > other._versionParts[i])
-                    return true;
-            }
-
-            return true;
-        }
-
-        public override string ToString()
-        {
-            return string.Join(".", _versionParts);
-        }
-
-        public static G3Version Version_1_20_Crayfish { get; } = new G3Version("1.20+crayfish");
-        public static G3Version Version_1_14_Nudelsoppa { get; } = new G3Version("1.14+nudelsoppa");
-        public static G3Version Version_1_11_Flytt { get; } = new G3Version("1.11+flytt");
-        public static G3Version Version_1_7_SommarRegn { get; } = new G3Version("1.7+sommarregn");
-        public static G3Version Latest => Version_1_14_Nudelsoppa;
     }
 
     public class G3ObjectDescription

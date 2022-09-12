@@ -8,11 +8,13 @@ namespace G3SDK
 {
     public class RtspDataDemuxer
     {
+        private readonly IG3Api _g3Api;
         private readonly Dictionary<int, Action<JObject, TimeSpan>> _streamHandler = new Dictionary<int, Action<JObject, TimeSpan>>();
         private readonly Dictionary<string, Action<JObject, TimeSpan>> _keyProperties = new Dictionary<string, Action<JObject, TimeSpan>>();
 
-        public RtspDataDemuxer()
+        public RtspDataDemuxer(IG3Api g3Api)
         {
+            _g3Api = g3Api;
             _keyProperties["gaze2d"] = HandleGaze;
             _keyProperties["accelerometer"] = HandleImu;
             _keyProperties["gyroscope"] = HandleImu;
@@ -54,7 +56,7 @@ namespace G3SDK
 
         private void HandleImu(JObject j, TimeSpan timeStamp)
         {
-            var imu = ParserHelpers.ParseImuData(j, timeStamp);
+            var imu = ParserHelpers.ParseImuData(j, timeStamp, G3ImuData.VersionToCoordSystem(_g3Api.Version));
             OnImu?.Invoke(this, imu);
         }
 

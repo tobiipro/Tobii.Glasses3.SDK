@@ -18,12 +18,12 @@ namespace G3SDK
         public Rudimentary(G3Api g3Api) : base(g3Api, "rudimentary")
         {
             _gazeSample = AddROProperty("gaze-sample", ParserHelpers.ParseGazeFromJson);
-            _imuSample = AddROProperty("imu-sample", ParserHelpers.ParseImuFromJson);
+            _imuSample = AddROProperty("imu-sample", json => ParserHelpers.ParseImuFromJson(json, G3ImuData.VersionToCoordSystem(g3Api.Version)));
             _syncPortSample = AddROProperty("sync-port-sample", ParserHelpers.ParseSyncPortFromJson);
             _eventSample = AddROProperty("event-sample", ParserHelpers.ParseEventFromJson);
             Gaze = AddSignal("gaze", ParserHelpers.SignalToGaze);
             Event = AddSignal("event", ParserHelpers.SignalToEvent);
-            Imu = AddSignal("imu", ParserHelpers.SignalToIMU);
+            Imu = AddSignal("imu", tokens => ParserHelpers.SignalToIMU(tokens, G3ImuData.VersionToCoordSystem(g3Api.Version)));
             SyncPort = AddSignal("sync-port", ParserHelpers.SignalToSyncPort);
             Scene = AddSignal("scene", ParseB64);
 

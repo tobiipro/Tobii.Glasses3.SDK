@@ -11,7 +11,7 @@
     <Authors>Jonas Högström</Authors>
     <Company>Tobii Pro AB</Company>
     <PackageId>Tobii.Glasses3.SDK</PackageId>
-    <Version>0.99.99.12</Version>
+    <Version>0.99.99.17</Version>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Description>.Net client library for the Tobii Pro Glasses 3 API.</Description>
     <RepositoryUrl>https://github.com/tobiipro/G3SDK.net</RepositoryUrl>

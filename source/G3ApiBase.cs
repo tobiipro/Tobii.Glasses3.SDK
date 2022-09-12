@@ -180,8 +180,13 @@ namespace G3SDK
                 if (_ws2.ReadyState == WebSocketState.Closed || _ws2.ReadyState == WebSocketState.Connecting)
                 {
                     _ws2.Connect();
+                    AfterConnect();
                 }
             }
+        }
+
+        protected virtual void AfterConnect()
+        {
         }
 
         public async Task Disconnect()

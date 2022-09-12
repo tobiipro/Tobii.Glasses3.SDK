@@ -49,14 +49,14 @@ namespace G3SDK
             return null;
         }
 
-        public static G3ImuData ParseImuFromJson(string json)
+        public static G3ImuData ParseImuFromJson(string json, G3ImuData.ImuCoordSystem coordSystem)
         {
             var obj = (JObject)JsonConvert.DeserializeObject(json);
             if (obj["type"].Value<string>() == "imu")
             {
                 var timeStamp = obj["timestamp"].Value<double>();
                 var data = obj["data"] as JObject;
-                return ParseImuData(data, timeStamp);
+                return ParseImuData(data, timeStamp, coordSystem);
             }
 
             return null;
@@ -130,17 +130,17 @@ namespace G3SDK
             return t;
         }
 
-        public static G3ImuData ParseImuData(JObject data, double timeStamp)
+        public static G3ImuData ParseImuData(JObject data, double timeStamp, G3ImuData.ImuCoordSystem coordSystem)
         {
-            return ParseImuData(data, GetTimestamp(timeStamp));
+            return ParseImuData(data, GetTimestamp(timeStamp), coordSystem);
         }
 
-        public static G3ImuData ParseImuData(JObject data, TimeSpan timeStamp)
+        public static G3ImuData ParseImuData(JObject data, TimeSpan timeStamp, G3ImuData.ImuCoordSystem coordSystem)
         {
             var gyro = ParseV3(data["gyroscope"]);
             var accel = ParseV3(data["accelerometer"]);
             var magn = ParseV3(data["magnetometer"]);
-            return new G3ImuData(timeStamp, accel, gyro, magn);
+            return new G3ImuData(timeStamp, accel, gyro, magn, coordSystem);
         }
 
         private static Vector3 ParseV3(JToken jToken)
@@ -230,14 +230,14 @@ namespace G3SDK
             return ParseFromCompressedStream(compressedData, ParseSyncPortFromJson);
         }
 
-        public static List<G3ImuData> ParseImuDataFromCompressedStream(Stream compressedData)
+        public static List<G3ImuData> ParseImuDataFromCompressedStream(Stream compressedData, G3ImuData.ImuCoordSystem coordSystem)
         {
-            return ParseFromCompressedStream(compressedData, ParseImuFromJson);
+            return ParseFromCompressedStream(compressedData, json => ParseImuFromJson(json, coordSystem));
         }
 
-        public static void ParseImuDataFromCompressedStream(Stream compressedData, Action<G3ImuData> addAction)
+        public static void ParseImuDataFromCompressedStream(Stream compressedData, Action<G3ImuData> addAction, G3ImuData.ImuCoordSystem coordSystem)
         {
-            ParseDataFromCompressedStream(compressedData, ParseImuFromJson, addAction);
+            ParseDataFromCompressedStream(compressedData, json => ParseImuFromJson(json, coordSystem), addAction);
         }
 
         public static void ParseGazeDataFromCompressedStream(Stream compressedData, Action<G3GazeData> addAction)
@@ -299,11 +299,11 @@ namespace G3SDK
             return gaze;
         }
 
-        public static G3ImuData SignalToIMU(List<JToken> bodyValues)
+        public static G3ImuData SignalToIMU(List<JToken> bodyValues, G3ImuData.ImuCoordSystem coordSystem)
         {
             var ts = bodyValues[0].Value<double>();
             var data = bodyValues[1] as JObject;
-            var gaze = ParseImuData(data, ts);
+            var gaze = ParseImuData(data, ts, coordSystem);
             return gaze;
         }
 
@@ -333,6 +333,18 @@ namespace G3SDK
         public static Ipv4Method Ipv4MethodParser(string arg)
         {
             return ParseEnum(arg, Ipv4Method.unknown);
+        }
+
+        public static G3ImuData.ImuCoordSystem GetCoordSystemFromRecordingFolder(string path)
+        {
+            var fwversionPath = Path.Combine(path, "meta", MetaDataCapableHelpers.MetaDataKey_RuVersion);
+            var version = G3Version.ReadFromFile(fwversionPath);
+            if (version == G3Version.Unknown)
+                return G3ImuData.ImuCoordSystem.Unknown;
+            if (version.GreaterOrEqualTo(G3Version.Version_1_29_Sarek))
+                return G3ImuData.ImuCoordSystem.SceneCam;
+            return G3ImuData.ImuCoordSystem.Imu;
+
         }
     }
 }

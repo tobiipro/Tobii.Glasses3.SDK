@@ -13,7 +13,8 @@ namespace G3SDK.WPF
 {
     public class RtspPlayerVM : INotifyPropertyChanged
     {
-        private readonly RtspDataDemuxer _rtspDataDemuxer = new RtspDataDemuxer();
+        private readonly IG3Api _g3Api;
+        private RtspDataDemuxer _rtspDataDemuxer;
         private readonly ConcurrentQueue<G3GazeData> _gazeQueue = new ConcurrentQueue<G3GazeData>();
 
         private static readonly CoordVm Invalid = new CoordVm(float.MinValue, float.MinValue);
@@ -23,15 +24,16 @@ namespace G3SDK.WPF
         private CoordVm _gaze = Invalid;
         private float _gazeMarkerSize = 40;
         private IDisposable _markerSubscriber;
-        private IG3Api _g3;
         private MediaElement _media;
         private DateTime _lastMarker;
         private VideoStream _videoStream;
         private bool _buffering;
         private readonly Timer _bufferingTimer;
 
-        public RtspPlayerVM()
+        public RtspPlayerVM(IG3Api g3Api)
         {
+            _g3Api = g3Api;
+            _rtspDataDemuxer = new RtspDataDemuxer(_g3Api);
             _bufferingTimer = new Timer(UpdateBufferingProgress);
             Library.FFmpegDirectory = ".";
         }
@@ -41,20 +43,19 @@ namespace G3SDK.WPF
             OnPropertyChanged(nameof(BufferingProgress));
         }
 
-        public async Task Connect(IG3Api g3, VideoStream videoStream)
+        public async Task Connect(VideoStream videoStream)
         {
-            _g3 = g3;
             while (_gazeQueue.TryDequeue(out var dummy))
             { }
 
-            var rtspUrl = $"rtsp://{_g3.IpAddress}:8554/live/all?gaze-overlay=False";
+            var rtspUrl = $"rtsp://{_g3Api.IpAddress}:8554/live/all?gaze-overlay=False";
             await _media.Open(new Uri(rtspUrl));
             _rtspDataDemuxer.OnGaze += ReceiveGaze;
             _videoStream = videoStream;
             switch (videoStream)
             {
                 case VideoStream.Scene:
-                    _markerSubscriber = await _g3.Calibrate.Marker.SubscribeAsync(HandleMarker);
+                    _markerSubscriber = await _g3Api.Calibrate.Marker.SubscribeAsync(HandleMarker);
                     break;
                 case VideoStream.Eyes:
                     await _media.ChangeMedia();
@@ -181,7 +182,7 @@ namespace G3SDK.WPF
             _media = media;
             _media.RenderingVideo += DrawGaze;
             _media.DataFrameReceived += HandleData;
-            _media.BufferingStarted += (s,a) =>
+            _media.BufferingStarted += (s, a) =>
             {
                 Buffering = true;
                 _bufferingTimer.Change(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));

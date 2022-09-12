@@ -111,10 +111,11 @@ namespace G3SDK
         public async Task<List<G3ImuData>> ImuData()
         {
             var filePath = await ImuFilePath();
+            var version = new G3Version(await MetaLookupString(MetaDataCapableHelpers.MetaDataKey_RuVersion));
 
             using (var compressedData = await G3Api.GetRequestStream(filePath, "gzip"))
             {
-                return ParserHelpers.ParseImuDataFromCompressedStream(compressedData);
+                return ParserHelpers.ParseImuDataFromCompressedStream(compressedData, G3ImuData.VersionToCoordSystem(version));
             }
         }
 

@@ -54,8 +54,11 @@ namespace G3Demo
         {
             _hostName = hostName;
             _g3 = g3;
-            _rtspPlayerVM = new RtspPlayerVM();
-            _rtspPlayerVM.OnMediaAssigned += async (sender, args) => await _rtspPlayerVM.Connect(g3, VideoStream.Scene);
+            _rtspPlayerVM = new RtspPlayerVM(g3);
+            _rtspPlayerVM.OnMediaAssigned += async (sender, args) =>
+            {
+                await _rtspPlayerVM.Connect(VideoStream.Scene);
+            };
             ShowCalibrationMarkerWindow = new DelegateCommand(p => DoShowCalibrationMarkerWindow(), () => true);
             StartRecording = new DelegateCommand(DoStartRecording, CanStartRec);
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
@@ -88,7 +91,7 @@ namespace G3Demo
             _g3.System.Storage.StateChanged.SubscribeAsync(OnCardStateChanged);
             GazePlotEnabled = false;
 
-            _rtspPlayerVM.RtspDataDemuxer.OnGaze += (sender, data) =>
+            _rtspPlayerVM.OnGaze += (sender, data) =>
             {
                 Gaze = $"Gaze: {data.Gaze2D.X:F3};{data.Gaze2D.Y:F3}";
                 GazeBuffer = $"GazeBuffer: {_rtspPlayerVM.GazeQueueSize} samples";
@@ -118,7 +121,11 @@ namespace G3Demo
                 }
             };
 
-            _rtspPlayerVM.RtspDataDemuxer.OnSyncPort += (sender, data) => Sync = $"Sync: {data.Direction}={data.Value}";
+            _rtspPlayerVM.RtspDataDemuxer.OnSyncPort += (sender, data) =>
+            {
+                Sync = $"Sync: {data.Direction}={data.Value}";
+            };
+
             _rtspPlayerVM.RtspDataDemuxer.OnImu += (sender, data) =>
             {
                 Dispatcher.Invoke(() =>
@@ -148,9 +155,20 @@ namespace G3Demo
                 if (data.Magnetometer.IsValid()) Mag = $"Mag: {FormatV3(data.Magnetometer)}";
                 if (data.Gyroscope.IsValid()) Gyr = $"Gyr: {FormatV3(data.Gyroscope)}";
             };
-            _rtspPlayerVM.RtspDataDemuxer.OnEvent += (sender, e) => Event = $"Event: {e.Tag}, {e.Obj}";
-            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent += (sender, e) => Msg = $"** {e.Item1}";
-            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent2 += (sender, e) => Msg = $"-- {e.Item1}";
+            _rtspPlayerVM.RtspDataDemuxer.OnEvent += (sender, e) =>
+            {
+                Event = $"Event: {e.Tag}, {e.Obj}";
+            };
+
+            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent += (sender, e) =>
+            {
+                Msg = $"** {e.Item1}";
+            };
+
+            _rtspPlayerVM.RtspDataDemuxer.OnUnknownEvent2 += (sender, e) =>
+            {
+                Msg = $"-- {e.Item1}";
+            };
             _calibMag = new CalibratedMagnetometer(_g3);
             _calibMag.Start();
             _calibMag.Subscribe(data =>
