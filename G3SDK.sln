@@ -13,9 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yml = .github\workflows\build.yml
 		README.md = README.md
-		SDLA\Tobii Pro SDLA for Research Use.html = SDLA\Tobii Pro SDLA for Research Use.html
-		SDLA\Tobii Pro SDLA for Research Use.md = SDLA\Tobii Pro SDLA for Research Use.md
-		SDLA\Tobii Pro SDLA for Research Use.pdf = SDLA\Tobii Pro SDLA for Research Use.pdf
+		SDLA\Tobii Research SDLA (accept on use) (2022.05.10).docx = SDLA\Tobii Research SDLA (accept on use) (2022.05.10).docx
+		SDLA\Tobii Research SDLA (accept on use) (2022.05.10).htm = SDLA\Tobii Research SDLA (accept on use) (2022.05.10).htm
+		SDLA\Tobii Research SDLA (accept on use) (2022.05.10).md = SDLA\Tobii Research SDLA (accept on use) (2022.05.10).md
+		SDLA\Tobii Research SDLA (accept on use) (2022.05.10).pdf = SDLA\Tobii Research SDLA (accept on use) (2022.05.10).pdf
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3LSLConnector", "examples\G3LSLConnector\G3LSLConnector.csproj", "{956CB83E-BE81-4CDA-AA6B-4A1A7915666E}"
@@ -28,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3ToScreenMapper", "example
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3Simulator", "G3Simulator\G3Simulator.csproj", "{B79D2615-80D1-4E59-8E78-0229532743C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3SDK.WPF", "G3SDK.WPF\G3SDK.WPF.csproj", "{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "G3SDK.WPF", "G3SDK.WPF\G3SDK.WPF.csproj", "{9BF3F20F-BC0D-4A78-9269-3B81DB717DB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

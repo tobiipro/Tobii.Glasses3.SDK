@@ -232,6 +232,7 @@ namespace G3Simulator
             _g3Simulator = g3Simulator;
             _dataTimer.Interval = 10;
             _dataTimer.Elapsed += (sender, args) => SendData();
+            _lastSyncPort = new G3SyncPortData(TimeSpan.Zero, Direction.In, 0);
         }
 
         private void SendData()
@@ -528,6 +529,8 @@ namespace G3Simulator
             _timeZone = timeZone;
             _duration = duration;
             _created = recordingStart.Value;
+            _httpPath = $"/recordings/{uuid}";
+            _rtspPath = $"/recordings?uuid={uuid}";
             _meta = meta;
 
         }

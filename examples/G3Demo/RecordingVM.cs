@@ -58,7 +58,7 @@ namespace G3Demo
             _recording = recording;
             _g3 = g3;
             TogglePlay = new DelegateCommand(DoTogglePlay, () => true);
-            
+
             DeleteRecording = new DelegateCommand(DoDeleteRecording, () => true);
             Download = new DelegateCommand(DoDownload, () => true);
             StartRTA = new DelegateCommand(DoStartRTA, () => !DeviceIsRecording);
@@ -102,14 +102,14 @@ namespace G3Demo
             _rtaTimer.Interval = 5000;
             _rtaTimer.Enabled = true;
             _rtaTimer.Elapsed += async (sender, args) => { await SendRtaInfo(); };
-            SendRtaInfo();
+            await SendRtaInfo();
         }
 
         private async Task SendRtaInfo()
         {
             if (_rtaInProgress)
             {
-                this.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.InvokeAsync(() =>
                 {
                     var info = new RtaInfo(_media.Position, _isPlaying);
                     _g3.Recorder.SendEvent("RTA", info);
@@ -149,7 +149,7 @@ namespace G3Demo
             {
                 InternalSetPosition(args.StartTime);
                 RenderGazeData(args.StartTime);
-                 if (_rtaRec != null)
+                if (_rtaRec != null)
                     UpdateRTAVideo(args.StartTime);
             };
             await _media.Open(VideoUri);
@@ -247,7 +247,7 @@ namespace G3Demo
             var rtaInfoStr = await _recording.MetaLookupString("RTA");
             if (!string.IsNullOrEmpty(rtaInfoStr))
             {
-                InitRTAReplay(rtaInfoStr);
+                await InitRTAReplay(rtaInfoStr);
             }
             var json = await _recording.GetRecordingJson();
             var snapshotarr = (JArray)json.json["scenecamera"]["snapshots"];
@@ -274,8 +274,8 @@ namespace G3Demo
             var rtaInfo = JsonConvert.DeserializeObject<RtaMetaInfo>(rtaInfoStr);
             _rtaRec = (await _g3.Recordings.Children()).FirstOrDefault(r => r.UUID == rtaInfo.Rec);
             var allEvents = await _recording.Events();
-            var rtaEvents = allEvents.Where(g=>g.Tag == "RTA").ToList();
-            _rtaEvents = rtaEvents.Select(g=>(g.TimeStamp, JsonConvert.DeserializeObject<RtaInfo>(g.Obj))).ToList();
+            var rtaEvents = allEvents.Where(g => g.Tag == "RTA").ToList();
+            _rtaEvents = rtaEvents.Select(g => (g.TimeStamp, JsonConvert.DeserializeObject<RtaInfo>(g.Obj))).ToList();
         }
 
         public string FwVersion
@@ -455,7 +455,7 @@ namespace G3Demo
             }
         }
 
-        public DelegateCommand Download{ get; }
+        public DelegateCommand Download { get; }
         public DelegateCommand StartRTA { get; }
         public DelegateCommand StopRTA { get; }
 
