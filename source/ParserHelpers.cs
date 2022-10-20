@@ -114,9 +114,9 @@ namespace G3SDK
         {
             var gaze2D = (data["gaze2d"] as JArray).Arr2Vector2();
             var gaze3D = (data["gaze3d"] as JArray).Arr2Vector3();
-            var eyeRight = ParseEyeData(data["eyeright"] as JObject);
             var eyeLeft = ParseEyeData(data["eyeleft"] as JObject);
-            return new G3GazeData(timeStamp, gaze2D, gaze3D, eyeRight, eyeLeft);
+            var eyeRight = ParseEyeData(data["eyeright"] as JObject);
+            return new G3GazeData(timeStamp, gaze2D, gaze3D, eyeLeft, eyeRight);
 
         }
         public static G3GazeData ParseGazeData(JObject data, double timeStamp)
