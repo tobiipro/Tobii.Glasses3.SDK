@@ -75,7 +75,7 @@
     <None Remove="tobii.pro.g3.sdk.net.nupkg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="WebSocketSharper" Version="1.0.42" />
     <PackageReference Include="Zeroconf" Version="3.6.11" />
