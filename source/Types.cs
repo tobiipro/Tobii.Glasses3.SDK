@@ -205,6 +205,14 @@ namespace G3SDK
         }
     }
 
+    public static class G3ImuDataExtensions
+    {
+        public static G3ImuData CloneWithTimestamp(this G3ImuData imu, TimeSpan t)
+        {
+            return new G3ImuData(t, imu.Accelerometer, imu.Gyroscope, imu.Magnetometer, imu.CoordSystem);
+        }
+    }
+
     public static class G3GazeDataExtensions
     {
         public static G3GazeData CloneWithTimestamp(this G3GazeData g, TimeSpan t)
