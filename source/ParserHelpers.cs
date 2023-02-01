@@ -74,6 +74,7 @@ namespace G3SDK
 
             return null;
         }
+
         public static G3Event ParseEventFromJson(string json)
         {
             var obj = (JObject)JsonConvert.DeserializeObject(json);
