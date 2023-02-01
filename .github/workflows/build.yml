@@ -19,15 +19,15 @@ jobs:
 
     - name: Application Version
       id: version
-      uses: paulhatch/semantic-version@v4.0.2
+      uses: paulhatch/semantic-version@v5.0.1
       with:        
-        format: "${major}.${minor}.${patch}.${increment}"
+         version_format: "${major}.${minor}.${patch}.${increment}"
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
-        include-prerelease: true
+#    - name: Setup .NET
+#      uses: actions/setup-dotnet@v1
+#      with:
+#        dotnet-version: '6.0.x'
+#        include-prerelease: true
 
     - name: Install dependencies
       run: dotnet restore
@@ -54,7 +54,7 @@ jobs:
 
     - name: Extract certificate
       id: cert_file
-      uses: timheuer/base64-to-file@master
+      uses: timheuer/base64-to-file@v1.2
       with:
         fileName: 'certfile.pfx'
         encodedString: ${{ secrets.TOBIICODESIGNCERTIFICATE_2022_B64 }}
