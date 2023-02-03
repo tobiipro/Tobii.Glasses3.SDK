@@ -19,10 +19,12 @@ namespace G3SDK
         private readonly Battery _battery;
         private readonly HeadUnit _headUnit;
         private readonly HwTests _hwTests;
+        private readonly SceneCamera _sceneCamera;
         public IBattery Battery => _battery;
         public IStorage Storage => _storage;
         public IHwTests HwTests => _hwTests;
         public IHeadUnit HeadUnit => _headUnit;
+        public ISceneCamera SceneCamera => _sceneCamera;
 
         public SystemObj(G3Api g3Api) : base(g3Api, "system")
         {
@@ -45,6 +47,7 @@ namespace G3SDK
             _storage = new Storage(g3Api, Path);
             _hwTests = new HwTests(g3Api, Path);
             _headUnit = new HeadUnit(g3Api, Path);
+            _sceneCamera = new SceneCamera(g3Api, Path);
         }
 
         #region Properties
@@ -92,6 +95,7 @@ namespace G3SDK
     {
         IBattery Battery { get; }
         IStorage Storage { get; }
+        ISceneCamera SceneCamera { get; }
         IHwTests HwTests { get; }
         IHeadUnit HeadUnit{ get; }
         Task<string> Version { get; }

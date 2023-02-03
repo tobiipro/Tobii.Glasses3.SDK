@@ -40,6 +40,74 @@ namespace G3SDK
         }
 
         [Test]
+        public async Task SceneCameraPropertiesCanBeRead()
+        {
+            await EnsureApi();
+            var changeSpeed = await G3Api.System.SceneCamera.AutoExposureChangeSpeed;
+            var size = await G3Api.System.SceneCamera.AutoExposureGazeSpotSize;
+            var weight = await G3Api.System.SceneCamera.AutoExposureGazeSpotWeight;
+            var changedProps = new HashSet<string>();
+            using (await G3Api.System.SceneCamera.Changed.SubscribeAsync(prop => changedProps.Add(prop)))
+            {
+                Assert.That(changeSpeed, Is.GreaterThanOrEqualTo(0), "changeSpeed");
+                Assert.That(size, Is.GreaterThanOrEqualTo(0), "size");
+                Assert.That(weight, Is.GreaterThanOrEqualTo(0), "weight");
+
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureChangeSpeed(1 - changeSpeed), Is.True);
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotSize(2* (float)Math.PI), Is.True);
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotWeight(1 - weight), Is.True);
+                await Task.Delay(1000);
+                Assert.That(changedProps, Contains.Item(SceneCamera.AutoExposureChangeSpeedName));
+                Assert.That(changedProps, Contains.Item(SceneCamera.AutoExposureGazeSpotSizeName));
+                Assert.That(changedProps, Contains.Item(SceneCamera.AutoExposureGazeSpotWeightName));
+                changedProps.Clear();
+
+                // reset the values again
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureChangeSpeed(changeSpeed), Is.True);
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotSize(size), Is.True);
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotWeight(weight), Is.True);
+                await Task.Delay(1000);
+                Assert.That(changedProps.Count, Is.EqualTo(3));
+            }
+
+            SetAndVerifyZoom(true, 0.9f, 0.3f);
+            SetAndVerifyZoom(true, 0.2f, 0.7f);
+            SetAndVerifyZoom(false, 0.2f, 0.7f);
+
+        }
+
+        private async Task SetAndVerifyZoom(bool enabled, float x, float y)
+        {
+            ZoomSetResult res = null;
+
+            using (await G3Api.System.SceneCamera.ZoomSet.SubscribeAsync(r => res = r))
+            {
+                if (enabled)
+                    Assert.That(await G3Api.System.SceneCamera.EnableZoom(x, y), Is.True);
+                else
+                {
+                    Assert.That(await G3Api.System.SceneCamera.DisableZoom(), Is.True);
+                }
+                var actualX = await G3Api.System.SceneCamera.ZoomX;
+                var actualY = await G3Api.System.SceneCamera.ZoomY;
+                Assert.That(actualX, Is.EqualTo(x).Within(0.001f));
+                Assert.That(actualY, Is.EqualTo(y).Within(0.001f));
+                if (enabled)
+                {
+                    Assert.That(res.X, Is.EqualTo(x).Within(0.001).After(1000, 40));
+                    Assert.That(res.Y, Is.EqualTo(y).Within(0.001).After(1000, 40));
+                }
+                else
+                {
+                    Assert.That(res.X, Is.EqualTo(0).Within(0.001).After(1000, 40));
+                    Assert.That(res.Y, Is.EqualTo(0).Within(0.001).After(1000, 40));
+
+                }
+                Assert.That(res.Enabled, Is.EqualTo(enabled).After(1000, 40));
+            }
+        }
+
+        [Test]
         public async Task UpgradePropertiesCanBeRead()
         {
             await EnsureApi();
@@ -321,7 +389,7 @@ namespace G3SDK
 
             Assert.That(running, Is.Not.Null);
             Assert.That(res, Is.Not.Null);
-      
+
             token.Dispose();
         }
 
@@ -542,9 +610,9 @@ namespace G3SDK
             var recGuid = await G3Api.Recorder.UUID;
             var folder = await G3Api.Recorder.Folder;
             var visibleName = await G3Api.Recorder.VisibleName;
-             var res = await G3Api.Recorder.SetVisibleName("MyRecording");
-             Assert.True(res, "Failed to set new name");
-             var visibleName2 = await G3Api.Recorder.VisibleName;
+            var res = await G3Api.Recorder.SetVisibleName("MyRecording");
+            Assert.True(res, "Failed to set new name");
+            var visibleName2 = await G3Api.Recorder.VisibleName;
             Assert.That(visibleName2, Is.EqualTo("MyRecording"), "Failed to change name of recording");
 
             var stop = await G3Api.Recorder.Stop();

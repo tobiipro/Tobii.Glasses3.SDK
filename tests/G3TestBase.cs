@@ -18,16 +18,20 @@ namespace G3SDK
             var browser = new G3Browser();
             var devices = await browser.ProbeForDevices();
             var units = Environment.GetEnvironmentVariable("G3UNITS")?.ToUpper().Split(',');
-            var validDevices = new List<G3Api>();
+            var validDevices = new Dictionary<string, G3Api>();
             foreach (var d in devices)
             {
                 var serial = (await d.System.RecordingUnitSerial).ToUpper();
-                if (units.Length == 0 || units.Any(s=>serial.Contains(s.Trim())))
-                    validDevices.Add(d);
+                if (units == null || units.Length == 0 || units.Any(s => serial.Contains(s.Trim())))
+                {
+                    // devices that are connected via multiple network interfaces only need to be added once
+                    if (!validDevices.ContainsKey(serial)) 
+                        validDevices[serial] = d;
+                }
             }
 
             if (validDevices.Count == 1)
-                G3Api = validDevices.First();
+                G3Api = validDevices.Values.First();
             else if (validDevices.Count == 0)
                 G3Api = new G3Simulator.G3Simulator();
             else

@@ -15,7 +15,7 @@ namespace G3SDK
 
         public Battery(G3Api api, string parentUrl): base(api, $"{parentUrl}/battery")
         {
-            _level = AddROProperty( "level", s=>float.Parse(s, CultureInfo.InvariantCulture));
+            _level = AddROProperty( "level", ParserHelpers.ParseFloat);
             _remainingTime = AddROProperty("remaining-time", s => TimeSpan.FromSeconds(int.Parse(s)));
             _charging = AddROProperty("charging", bool.Parse);
             _state = AddROProperty("state", ParserHelpers.ParseBatteryState);

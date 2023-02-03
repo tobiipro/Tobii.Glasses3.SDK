@@ -331,10 +331,12 @@ namespace G3Simulator
             Storage = new StorageSimulator(g3Simulator);
             HeadUnit = new HeadUnitSimulator(g3Simulator);
             HwTests= new HwTestsSimulator(g3Simulator);
+            SceneCamera = new SceneCameraSimulator(g3Simulator);
         }
 
         public IBattery Battery { get; }
         public IStorage Storage { get; }
+        public ISceneCamera SceneCamera { get; }
         public IHwTests HwTests { get; }
         public IHeadUnit HeadUnit { get; }
         public Task<string> Version => Task.FromResult(_version.ToString());
@@ -367,6 +369,68 @@ namespace G3Simulator
         public Task<int[]> AvailableGazeFrequencies()
         {
             return Task.FromResult(new[] { 50, 100 });
+        }
+    }
+
+    public class SceneCameraSimulator : ISceneCamera
+    {
+        private readonly G3Simulator _g3Simulator;
+        private float _speed;
+        private float _size;
+        private float _weight;
+        private readonly SignalSimulator<ZoomSetResult> _zoomSet;
+        private bool _zoomEnabled;
+        private float _zoomX;
+        private float _zoomY;
+
+        public SceneCameraSimulator(G3Simulator g3Simulator)
+        {
+            _g3Simulator = g3Simulator;
+            _zoomSet = new SignalSimulator<ZoomSetResult>();
+        }
+
+        public IG3Observable<ZoomSetResult> ZoomSet => _zoomSet;
+        public IG3Observable<string> Changed { get; }
+        public Task<float> AutoExposureChangeSpeed => Task.FromResult(_speed);
+        public Task<float> AutoExposureGazeSpotSize => Task.FromResult(_size);
+        public Task<float> AutoExposureGazeSpotWeight => Task.FromResult(_weight);
+        public Task<bool> ZoomEnabled { get; }
+        public Task<float> ZoomX { get; }
+        public Task<float> ZoomY { get; }
+        public Task<bool> SetAutoExposureChangeSpeed(float value)
+        {
+            _speed = value;
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SetAutoExposureGazeSpotSize(float value)
+        {
+            _size = value;
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SetAutoExposureGazeSpotWeight(float value)
+        {
+            _weight = value;
+            return Task.FromResult(true);
+        }
+
+        public Task<DisableZoomState> DisableZoom()
+        {
+            _zoomEnabled = false;
+            _zoomSet.Emit(new ZoomSetResult(false, 0, 0));
+            return Task.FromResult(DisableZoomState.Success);
+
+        }
+
+        public Task<EnableZoomState> EnableZoom(float normalizedXCenter, float normalizedYCenter)
+        {
+            _zoomEnabled = true;
+            _zoomX = normalizedXCenter;
+            _zoomY = normalizedYCenter;
+            _zoomSet.Emit(new ZoomSetResult(true, _zoomX, _zoomY));
+            return Task.FromResult(EnableZoomState.Success);
+
         }
     }
 
