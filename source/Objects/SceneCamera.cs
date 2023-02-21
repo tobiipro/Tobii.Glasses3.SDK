@@ -9,19 +9,18 @@ namespace G3SDK
 
     public interface ISceneCamera : IG3Object
     {
-        IG3Observable<ZoomSetResult> ZoomSet { get; }
         IG3Observable<string> Changed { get; }
         Task<float> AutoExposureChangeSpeed { get; }
         Task<float> AutoExposureGazeSpotSize { get; }
         Task<float> AutoExposureGazeSpotWeight { get; }
-        Task<bool> ZoomEnabled { get; }
+        Task<bool> Zoomed { get; }
         Task<float> ZoomX { get; }
         Task<float> ZoomY { get; }
         Task<bool> SetAutoExposureChangeSpeed(float value);
         Task<bool> SetAutoExposureGazeSpotSize(float value);
         Task<bool> SetAutoExposureGazeSpotWeight(float value);
-        Task<DisableZoomState> DisableZoom();
-        Task<EnableZoomState> EnableZoom(float normalizedXCenter, float normalizedYCenter);
+        Task<ZoomOffResult> ZoomOff();
+        Task<ZoomOnResult> ZoomOn(float normalizedXCenter, float normalizedYCenter);
     }
 
     public class SceneCamera : G3Object, ISceneCamera
@@ -29,10 +28,15 @@ namespace G3SDK
         public const string AutoExposureChangeSpeedName = "autoexposure-change-speed";
         public const string AutoExposureGazeSpotSizeName = "autoexposure-gaze-spot-size";
         public const string AutoExposureGazeSpotWeightName = "autoexposure-gaze-spot-weight";
+        public const string ZoomXName = "zoom-x";
+        public const string ZoomYName = "zoom-y";
+        public const string ZoomedName = "zoomed";
+        public const string ZoomOnName = "zoom-on";
+        public const string ZoomOffName = "zoom-off";
         private readonly RWProperty<float> _autoexposureChangeSpeed;
         private readonly RWProperty<float> _autoexposureGazeSpotSize;
         private readonly RWProperty<float> _autoexposureGazeSpotWeight;
-        private readonly ROProperty<bool> _zoomEnabled;
+        private readonly ROProperty<bool> _zoomed;
         private readonly ROProperty<float> _zoomX;
         private readonly ROProperty<float> _zoomY;
 
@@ -41,22 +45,12 @@ namespace G3SDK
             _autoexposureChangeSpeed = AddRWProperty(AutoExposureChangeSpeedName, ParserHelpers.ParseFloat, f => f.ToString(CultureInfo.InvariantCulture));
             _autoexposureGazeSpotSize = AddRWProperty(AutoExposureGazeSpotSizeName, ParserHelpers.ParseFloat, f => f.ToString(CultureInfo.InvariantCulture));
             _autoexposureGazeSpotWeight = AddRWProperty(AutoExposureGazeSpotWeightName, ParserHelpers.ParseFloat, f => f.ToString(CultureInfo.InvariantCulture));
-            _zoomEnabled = AddROProperty("zoom-enabled", bool.Parse);
-            _zoomX = AddROProperty("zoom-x", ParserHelpers.ParseFloat);
-            _zoomY = AddROProperty("zoom-y", ParserHelpers.ParseFloat);
+            _zoomed = AddROProperty(ZoomedName, bool.Parse);
+            _zoomX = AddROProperty(ZoomXName, ParserHelpers.ParseFloat);
+            _zoomY = AddROProperty(ZoomYName, ParserHelpers.ParseFloat);
 
             Changed = AddSignal("changed", ConvertChanged);
-            ZoomSet = AddSignal("zoom-set", ConvertZoomSet);
         }
-
-        private ZoomSetResult ConvertZoomSet(List<JToken> arg)
-        {
-            return new ZoomSetResult(arg[0].Value<bool>(),
-                arg[1].Value<float>(),
-                arg[2].Value<float>());
-        }
-
-        public IG3Observable<ZoomSetResult> ZoomSet { get; }
 
         private string ConvertChanged(List<JToken> arg)
         {
@@ -69,7 +63,7 @@ namespace G3SDK
         public Task<float> AutoExposureChangeSpeed => _autoexposureChangeSpeed.Value();
         public Task<float> AutoExposureGazeSpotSize => _autoexposureGazeSpotSize.Value();
         public Task<float> AutoExposureGazeSpotWeight => _autoexposureGazeSpotWeight.Value();
-        public Task<bool> ZoomEnabled => _zoomEnabled.Value();
+        public Task<bool> Zoomed => _zoomed.Value();
         public Task<float> ZoomX => _zoomX.Value();
         public Task<float> ZoomY => _zoomY.Value();
 
@@ -86,54 +80,33 @@ namespace G3SDK
             return _autoexposureGazeSpotWeight.Set(value);
         }
 
-        public async Task<DisableZoomState> DisableZoom()
+        public async Task<ZoomOffResult> ZoomOff()
         {
-            var res = await G3Api.ExecuteCommand<string>(Path, "disable-zoom", LogLevel.info);
+            var res = await G3Api.ExecuteCommand<string>(Path, ZoomOffName, LogLevel.info);
             switch (res)
             {
-                case "success": return DisableZoomState.Success;
-                default: return DisableZoomState.Unknown;
-            }
-        }
-        public async Task<EnableZoomState> EnableZoom(float normalizedXCenter, float normalizedYCenter)
-        {
-            var res = await G3Api.ExecuteCommand<string>(Path, "enable-zoom", LogLevel.info, normalizedXCenter, normalizedYCenter);
-            switch (res)
-            {
-                case "success": return EnableZoomState.Success;
-                case "No action handler found for enable-zoom": return EnableZoomState.NoActionHandlerFound;
-                case "fail-zoom-coordinates-out-of-range": return EnableZoomState.CoordinatesOutOfRange;
+                case "success": return ZoomOffResult.Success;
                 default:
-                    G3Api.Log(LogLevel.info, $"Unknown error message from enable-zoom: {res}");
-                    return EnableZoomState.Unknown;
+                    G3Api.Log(LogLevel.info, $"Unknown error message from {ZoomOffName}: {res}");
+                    return ZoomOffResult.Unknown;
             }
         }
-
-
-
-        // public IG3Observable<HuConnectionState> ConnectionStateChanged { get; }
-        //
-        // private HuConnectionState ConvertConnectionStateChanged(List<JToken> arg)
-        // {
-        //     return ParserHelpers.ParseHuConnectionState(arg[0].Value<string>());
-        // }
-    }
-
-    public class ZoomSetResult
-    {
-        public ZoomSetResult(bool enabled, float x, float y)
+        public async Task<ZoomOnResult> ZoomOn(float normalizedXCenter, float normalizedYCenter)
         {
-            Enabled = enabled;
-            X = x;
-            Y = y;
+            var res = await G3Api.ExecuteCommand<string>(Path, ZoomOnName, LogLevel.info, normalizedXCenter, normalizedYCenter);
+            switch (res)
+            {
+                case "success": return ZoomOnResult.Success;
+                case "No action handler found for "+ZoomOnName: return ZoomOnResult.NoActionHandlerFound;
+                case "fail-zoom-coordinates-out-of-range": return ZoomOnResult.CoordinatesOutOfRange;
+                default:
+                    G3Api.Log(LogLevel.info, $"Unknown error message from {ZoomOnName}: {res}");
+                    return ZoomOnResult.Unknown;
+            }
         }
-
-        public bool Enabled { get; }
-        public float X { get; }
-        public float Y { get; }
     }
 
-    public enum EnableZoomState
+    public enum ZoomOnResult
     {
         Success,
         Unknown,
@@ -141,7 +114,7 @@ namespace G3SDK
         CoordinatesOutOfRange
     }
 
-    public enum DisableZoomState
+    public enum ZoomOffResult
     {
         Success,
         Unknown

@@ -7,13 +7,8 @@ using System.Net;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using RtspClientSharp;
-using RtspClientSharp.RawFrames.Audio;
-using RtspClientSharp.RawFrames.Video;
-using Unosquare.FFME;
 using Timer = System.Timers.Timer;
 
 namespace G3SDK
@@ -40,9 +35,55 @@ namespace G3SDK
         }
 
         [Test]
-        public async Task SceneCameraPropertiesCanBeRead()
+        public async Task SceneCameraZoomWorks()
         {
             await EnsureApi();
+
+            if (FwVersion.LessThan(G3Version.Version_1_32))
+                Assert.Ignore("Test only supports v1.32+ ");
+
+            SetAndVerifyZoom(true, 0.9f, 0.3f);
+            SetAndVerifyZoom(true, 0.2f, 0.7f);
+            SetAndVerifyZoom(false, 0.2f, 0.7f);
+        }
+
+        private async Task SetAndVerifyZoom(bool enabled, float x, float y)
+        {
+            var properties = new List<string>();
+
+            using (await G3Api.System.SceneCamera.Changed.SubscribeAsync(r => properties.Add(r)))
+            {
+                if (enabled)
+                    Assert.That(await G3Api.System.SceneCamera.ZoomOn(x, y), Is.True);
+                else
+                {
+                    Assert.That(await G3Api.System.SceneCamera.ZoomOff(), Is.True);
+                }
+                var actualX = await G3Api.System.SceneCamera.ZoomX;
+                var actualY = await G3Api.System.SceneCamera.ZoomY;
+                Assert.That(actualX, Is.EqualTo(x).Within(0.001f));
+                Assert.That(actualY, Is.EqualTo(y).Within(0.001f));
+                if (enabled)
+                {
+                    Assert.That(properties.Contains(SceneCamera.ZoomXName), Is.True.After(1000, 40));
+                    Assert.That(properties.Contains(SceneCamera.ZoomYName), Is.True.After(1000, 40));
+                    Assert.That(properties.Contains(SceneCamera.ZoomedName), Is.True.After(1000, 40));
+                }
+                else
+                {
+                    Assert.That(properties.Contains(SceneCamera.ZoomedName), Is.True.After(1000, 40));
+                }
+            }
+        }
+
+        [Test]
+        public async Task SceneCameraExposureWorks()
+        {
+            await EnsureApi();
+
+            if (FwVersion.LessThan(G3Version.Version_1_29_Sarek))
+                Assert.Ignore("Test only supports v1.29+ ");
+
             var changeSpeed = await G3Api.System.SceneCamera.AutoExposureChangeSpeed;
             var size = await G3Api.System.SceneCamera.AutoExposureGazeSpotSize;
             var weight = await G3Api.System.SceneCamera.AutoExposureGazeSpotWeight;
@@ -54,7 +95,7 @@ namespace G3SDK
                 Assert.That(weight, Is.GreaterThanOrEqualTo(0), "weight");
 
                 Assert.That(await G3Api.System.SceneCamera.SetAutoExposureChangeSpeed(1 - changeSpeed), Is.True);
-                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotSize(2* (float)Math.PI), Is.True);
+                Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotSize(2 * (float)Math.PI), Is.True);
                 Assert.That(await G3Api.System.SceneCamera.SetAutoExposureGazeSpotWeight(1 - weight), Is.True);
                 await Task.Delay(1000);
                 Assert.That(changedProps, Contains.Item(SceneCamera.AutoExposureChangeSpeedName));
@@ -69,43 +110,9 @@ namespace G3SDK
                 await Task.Delay(1000);
                 Assert.That(changedProps.Count, Is.EqualTo(3));
             }
-
-            SetAndVerifyZoom(true, 0.9f, 0.3f);
-            SetAndVerifyZoom(true, 0.2f, 0.7f);
-            SetAndVerifyZoom(false, 0.2f, 0.7f);
-
         }
 
-        private async Task SetAndVerifyZoom(bool enabled, float x, float y)
-        {
-            ZoomSetResult res = null;
-
-            using (await G3Api.System.SceneCamera.ZoomSet.SubscribeAsync(r => res = r))
-            {
-                if (enabled)
-                    Assert.That(await G3Api.System.SceneCamera.EnableZoom(x, y), Is.True);
-                else
-                {
-                    Assert.That(await G3Api.System.SceneCamera.DisableZoom(), Is.True);
-                }
-                var actualX = await G3Api.System.SceneCamera.ZoomX;
-                var actualY = await G3Api.System.SceneCamera.ZoomY;
-                Assert.That(actualX, Is.EqualTo(x).Within(0.001f));
-                Assert.That(actualY, Is.EqualTo(y).Within(0.001f));
-                if (enabled)
-                {
-                    Assert.That(res.X, Is.EqualTo(x).Within(0.001).After(1000, 40));
-                    Assert.That(res.Y, Is.EqualTo(y).Within(0.001).After(1000, 40));
-                }
-                else
-                {
-                    Assert.That(res.X, Is.EqualTo(0).Within(0.001).After(1000, 40));
-                    Assert.That(res.Y, Is.EqualTo(0).Within(0.001).After(1000, 40));
-
-                }
-                Assert.That(res.Enabled, Is.EqualTo(enabled).After(1000, 40));
-            }
-        }
+  
 
         [Test]
         public async Task UpgradePropertiesCanBeRead()

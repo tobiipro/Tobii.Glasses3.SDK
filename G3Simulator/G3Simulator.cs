@@ -378,7 +378,6 @@ namespace G3Simulator
         private float _speed;
         private float _size;
         private float _weight;
-        private readonly SignalSimulator<ZoomSetResult> _zoomSet;
         private bool _zoomEnabled;
         private float _zoomX;
         private float _zoomY;
@@ -386,17 +385,15 @@ namespace G3Simulator
         public SceneCameraSimulator(G3Simulator g3Simulator)
         {
             _g3Simulator = g3Simulator;
-            _zoomSet = new SignalSimulator<ZoomSetResult>();
         }
 
-        public IG3Observable<ZoomSetResult> ZoomSet => _zoomSet;
         public IG3Observable<string> Changed { get; }
         public Task<float> AutoExposureChangeSpeed => Task.FromResult(_speed);
         public Task<float> AutoExposureGazeSpotSize => Task.FromResult(_size);
         public Task<float> AutoExposureGazeSpotWeight => Task.FromResult(_weight);
-        public Task<bool> ZoomEnabled { get; }
-        public Task<float> ZoomX { get; }
-        public Task<float> ZoomY { get; }
+        public Task<bool> Zoomed => Task.FromResult(_zoomEnabled);
+        public Task<float> ZoomX => Task.FromResult(_zoomX);
+        public Task<float> ZoomY => Task.FromResult(_zoomY);
         public Task<bool> SetAutoExposureChangeSpeed(float value)
         {
             _speed = value;
@@ -415,22 +412,21 @@ namespace G3Simulator
             return Task.FromResult(true);
         }
 
-        public Task<DisableZoomState> DisableZoom()
+        public Task<ZoomOffResult> ZoomOff()
         {
             _zoomEnabled = false;
-            _zoomSet.Emit(new ZoomSetResult(false, 0, 0));
-            return Task.FromResult(DisableZoomState.Success);
+            return Task.FromResult(ZoomOffResult.Success);
 
         }
 
-        public Task<EnableZoomState> EnableZoom(float normalizedXCenter, float normalizedYCenter)
+        public Task<ZoomOnResult> ZoomOn(float normalizedXCenter, float normalizedYCenter)
         {
+            if (normalizedXCenter < 0 || normalizedXCenter > 1 || normalizedYCenter < 0 || normalizedYCenter > 1)
+                return Task.FromResult(ZoomOnResult.CoordinatesOutOfRange);
             _zoomEnabled = true;
             _zoomX = normalizedXCenter;
             _zoomY = normalizedYCenter;
-            _zoomSet.Emit(new ZoomSetResult(true, _zoomX, _zoomY));
-            return Task.FromResult(EnableZoomState.Success);
-
+            return Task.FromResult(ZoomOnResult.Success);
         }
     }
 

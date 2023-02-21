@@ -7,7 +7,7 @@ namespace G3SDK
     {
         private readonly List<int> _versionParts;
         private readonly string _versionString;
-
+        
         public G3Version(string versionString)
         {
             _versionString = versionString;
@@ -51,7 +51,9 @@ namespace G3SDK
             return new G3Version(v);
         }
 
-        public static G3Version Latest => Version_1_29_Sarek;
+        public static G3Version Latest => Version_1_32;
+
+        public static G3Version Version_1_32 { get; } = new G3Version("1.32");
         public static G3Version Version_1_29_Sarek { get; } = new G3Version("1.29+sarek");
         public static G3Version Version_1_28_Granskott { get; } = new G3Version("1.28+granskott");
         public static G3Version Version_1_26_cremla { get; } = new G3Version("1.26+cremla");
