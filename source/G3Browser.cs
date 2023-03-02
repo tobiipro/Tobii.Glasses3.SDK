@@ -92,7 +92,8 @@ namespace G3SDK
                         try
                         {
                             var api = new G3Api(ip.ToString(), false);
-                            var serial = api.System.RecordingUnitSerial.Result;
+
+                            var serial = await api.System.RecordingUnitSerial;
                             if (!string.IsNullOrEmpty(serial))
                             {
                                 res.Add(api);
