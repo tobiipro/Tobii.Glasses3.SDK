@@ -15,6 +15,8 @@ namespace G3SDK
             _g3 = g3;
         }
 
+        public bool DownloadSceneCamVideo { get; set; }
+
         public async Task<string> DownloadRecording(IRecording rec, string targetFolder, IProgress<double> progress)
         {
             var basePath = $"http://{_g3.IpAddress}{await rec.HttpPath}";
@@ -31,7 +33,8 @@ namespace G3SDK
                     AddToQueue(downloadQ, recG3.events.file);
 
                 AddToQueue(downloadQ, recG3.gaze.file);
-                AddToQueue(downloadQ, recG3.scenecamera.file);
+                if (DownloadSceneCamVideo)
+                    AddToQueue(downloadQ, recG3.scenecamera.file);
 
                 foreach (var s in recG3.scenecamera.snapshots)
                     AddToQueue(downloadQ, s.file);
