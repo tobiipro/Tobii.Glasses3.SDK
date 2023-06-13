@@ -26,11 +26,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
-    <PackageReference Include="OpenCvSharp4" Version="4.5.5.20211231" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.5.5.20211231" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.5.5.20211231" />
-    <PackageReference Include="OxyPlot.Contrib.Wpf" Version="2.1.0" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+    <PackageReference Include="OpenCvSharp4" Version="4.7.0.20230115" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.7.0.20230115" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.7.0.20230115" />
+    <PackageReference Include="OxyPlot.Contrib.Wpf" Version="2.1.2" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
     <PackageReference Include="ZeranoeSharedFFmpegBuild" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
