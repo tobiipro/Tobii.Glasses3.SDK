@@ -193,6 +193,32 @@ namespace G3SDK
             var result = await PostRequest($"{path}.{propertyName}", value, logLevel);
             return TryParse(result, out var boolres) && boolres;
         }
+
+        private async Task<byte[]> ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[32 * 1024];
+            var total = 0;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    total += read;
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        public async Task<byte[]> DownloadFwLogs()
+        {
+            var req = WebRequest.CreateHttp($"http://{IpAddress}/logs");
+            var resp = await req.GetResponseAsync();
+            var s = resp.GetResponseStream();
+         
+            var encryptedFile = await ReadFully(s);
+            return encryptedFile;
+        }
     }
 
     public interface IG3Api
