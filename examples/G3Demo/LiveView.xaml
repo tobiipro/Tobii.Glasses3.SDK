@@ -21,6 +21,7 @@
             <Button Command="{Binding StopRecording}">StopRec</Button>
             <Button Command="{Binding TakeSnapshot}">Snapshot</Button>
             <Button Command="{Binding ScanQRCode}">QR</Button>
+            <Button Command="{Binding ToggleZoom}">ToggleZoom</Button>
             <ComboBox ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"></ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal">

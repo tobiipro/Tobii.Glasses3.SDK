@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Timers;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -17,6 +17,7 @@ using OpenCvSharp;
 using OxyPlot;
 using Unosquare.FFME.Common;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
+using Timer = System.Timers.Timer;
 
 namespace G3Demo
 {
@@ -64,6 +65,7 @@ namespace G3Demo
             StopRecording = new DelegateCommand(DoStopRecording, () => IsRecording);
             TakeSnapshot = new DelegateCommand(DoTakeSnapshot, () => IsRecording);
             ScanQRCode = new DelegateCommand(DoScanQRCode, () => true);
+            ToggleZoom = new DelegateCommand(DoToggleZoom, () => true);
             CalibrateMagStart = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
             CalibrateMagStop = new DelegateCommand(o => _calibMag.StartCalibration(), () => true);
 
@@ -396,6 +398,7 @@ namespace G3Demo
         public DelegateCommand StopRecording { get; }
         public DelegateCommand TakeSnapshot { get; }
         public DelegateCommand ScanQRCode { get; }
+        public DelegateCommand ToggleZoom { get; }
 
         public bool IsCalibrated
         {
@@ -562,6 +565,9 @@ namespace G3Demo
         private readonly QRCodeDetector _qrCodeDetector = new QRCodeDetector();
         private readonly System.Windows.Forms.Timer _qrTimer = new System.Windows.Forms.Timer { Interval = 1000 };
         private string _qrData;
+        private bool _zoomEnabled = false;
+        private float _zoomy = 0.5f;
+        private float _zoomx = 0.5f;
 
         private async void QrDetect()
         {
@@ -637,6 +643,19 @@ namespace G3Demo
         private void DoScanQRCode(object obj)
         {
             _qrTimer.Enabled = true;
+        }
+        private async Task DoToggleZoom()
+        {
+            if (_zoomEnabled)
+            {
+                var res = await _g3.System.SceneCamera.ZoomOff();
+                _zoomEnabled = false;
+            }
+            else
+            {
+                var res = await _g3.System.SceneCamera.ZoomOn(_zoomx, _zoomy);
+                _zoomEnabled = true;
+            }
         }
     }
 }
