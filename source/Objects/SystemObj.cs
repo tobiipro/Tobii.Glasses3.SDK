@@ -77,7 +77,7 @@ namespace G3SDK
 
         public Task<bool> UseNtp(bool value)
         {
-            return G3Api.ExecuteCommandBool(Path, "use-ntp", LogLevel.info, value.ToString().ToLower());
+            return G3Api.ExecuteCommandBool(Path, "use-ntp", LogLevel.info, value);
         }
 
         public Task<bool> SetTimezone(string tz)
