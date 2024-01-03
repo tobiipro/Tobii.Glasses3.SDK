@@ -112,7 +112,7 @@ namespace G3SDK
             }
         }
 
-  
+
 
         [Test]
         public async Task UpgradePropertiesCanBeRead()
@@ -297,7 +297,7 @@ namespace G3SDK
             });
 
             var res = await G3Api.Rudimentary.SendEvent("tag1", new Payload() { Num = 123, Str = "abc" });
-            Assert.True(res, "send-event failed");
+            Assert.That(res, Is.True, "send-event failed");
 
             Thread.Sleep(500);
 
@@ -317,7 +317,7 @@ namespace G3SDK
             await G3Api.Rudimentary.Keepalive();
 
             var res = await G3Api.Rudimentary.SendEvent("tag1", new Payload() { Num = 123, Str = "abc" });
-            Assert.True(res, "send-event failed");
+            Assert.That(res, Is.True, "send-event failed");
 
             Thread.Sleep(1500);
 
@@ -354,7 +354,7 @@ namespace G3SDK
 
                 foreach (var w in warnings)
                     Console.WriteLine(w);
-                Assert.IsEmpty(warnings, $"Api warnings: " +
+                Assert.That(warnings, Is.Empty, $"Api warnings: " +
                                          Environment.NewLine + "=====" +
                                          Environment.NewLine + string.Join(Environment.NewLine, warnings) +
                                          Environment.NewLine + "=====");
@@ -407,21 +407,21 @@ namespace G3SDK
             await EnsureSDCard();
             var uniqueString = Guid.NewGuid().ToString();
             var res = await G3Api.Recorder.Start();
-            Assert.True(res, "Failed to start recording");
+            Assert.That(res, Is.True, "Failed to start recording");
             res = await G3Api.Recorder.MetaInsert("testKey", uniqueString);
-            Assert.True(res, "Failed to create metadata");
+            Assert.That(res, Is.True, "Failed to create metadata");
             var keys = await G3Api.Recorder.MetaKeys();
             Assert.That(keys, Has.Member("testKey"));
             var value = await G3Api.Recorder.MetaLookupString("testKey");
             Assert.That(value, Is.EqualTo(uniqueString), "Failed to read meta info");
             res = await G3Api.Recorder.MetaInsert("testKey", new byte[] { });
-            Assert.True(res, "Failed to delete metadata");
+            Assert.That(res, Is.True, "Failed to delete metadata");
             keys = await G3Api.Recorder.MetaKeys();
             Assert.That(keys, Has.No.Member("testKey"), "Failed to remove key");
 
             await G3Api.Recorder.Cancel();
             var inProgress = await G3Api.Recorder.RecordingInProgress();
-            Assert.False(inProgress, "Failed to cancel recording");
+            Assert.That(inProgress, Is.False, "Failed to cancel recording");
         }
 
         [Test]
@@ -438,21 +438,21 @@ namespace G3SDK
             var settingsChangedToken = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
 
             var res = await G3Api.Settings.SetGazeFrequency(50);
-            Assert.True(res, "unable to set gaze-frequency to 50");
+            Assert.That(res, Is.True, "unable to set gaze-frequency to 50");
             Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(50).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
             res = await G3Api.Settings.SetGazeFrequency(100);
-            Assert.True(res, "unable to set gaze-frequency to 100hz");
+            Assert.That(res, Is.True, "unable to set gaze-frequency to 100hz");
             Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(100).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
             signals.Clear();
 
             res = await G3Api.Settings.SetGazeFrequency(50);
-            Assert.True(res, "unable to set gaze-frequency to 50hz");
+            Assert.That(res, Is.True, "unable to set gaze-frequency to 50hz");
             Assert.That(await G3Api.Settings.GazeFrequency, Is.EqualTo(50).After(200, 50));
             if (settingsChangedToken != null)
                 Assert.That(signals, Has.Member("gaze-frequency").After(200, 50));
@@ -475,33 +475,33 @@ namespace G3SDK
 
             // make sure it is false;
             var res = await G3Api.Settings.SetGazeOverlay(false);
-            Assert.True(res, "unable to set gaze-overlay, to false");
+            Assert.That(res, Is.True, "unable to set gaze-overlay, to false");
             Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(false).After(200, 50));
             signals.Clear();
 
             // try to set it to true
             res = await G3Api.Settings.SetGazeOverlay(true);
-            Assert.True(res, "unable to set gaze-overlay, to true");
+            Assert.That(res, Is.True, "unable to set gaze-overlay, to true");
             Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(true).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
             signals.Clear();
 
             // make recording with gaze overlay
             await G3Api.Recorder.Start();
-            Assert.True(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            Assert.That(await G3Api.Recorder.GazeOverlay, Is.True, "recorder.gaze-overlay is wrong");
             await Task.Delay(1000);
             var rec1 = await G3Api.Recorder.UUID;
             await G3Api.Recorder.Stop();
 
             // try to set it to false
             res = await G3Api.Settings.SetGazeOverlay(false);
-            Assert.True(res, "unable to set gaze-overlay to off");
+            Assert.That(res, Is.True, "unable to set gaze-overlay to off");
             Assert.That(await G3Api.Settings.GazeOverlay, Is.EqualTo(false).After(200, 50));
             Assert.That(signals, Has.Member("gaze-overlay").After(200, 50));
 
             // make recording without gaze overlay
             await G3Api.Recorder.Start();
-            Assert.False(await G3Api.Recorder.GazeOverlay, "recorder.gaze-overlay is wrong");
+            Assert.That(await G3Api.Recorder.GazeOverlay, Is.False, "recorder.gaze-overlay is wrong");
             await Task.Delay(1000);
             var rec2 = await G3Api.Recorder.UUID;
             await G3Api.Recorder.Stop();
@@ -510,8 +510,8 @@ namespace G3SDK
 
             // check recordings
             var recs = await G3Api.Recordings.Children();
-            Assert.True(await recs.First(r => r.UUID == rec1).GazeOverlay);
-            Assert.False(await recs.First(r => r.UUID == rec2).GazeOverlay);
+            Assert.That(await recs.First(r => r.UUID == rec1).GazeOverlay, Is.True);
+            Assert.That(await recs.First(r => r.UUID == rec2).GazeOverlay, Is.False);
 
             token.Dispose();
         }
@@ -595,7 +595,7 @@ namespace G3SDK
 
             var start = await G3Api.Recorder.Start();
 
-            Assert.True(start, "Failed to start recording");
+            Assert.That(start, Is.True, "Failed to start recording");
             Assert.That(() => startedCount, Is.EqualTo(1).After(1000), "start signal not received");
             Thread.Sleep(1000);
 
@@ -618,19 +618,19 @@ namespace G3SDK
             var folder = await G3Api.Recorder.Folder;
             var visibleName = await G3Api.Recorder.VisibleName;
             var res = await G3Api.Recorder.SetVisibleName("MyRecording");
-            Assert.True(res, "Failed to set new name");
+            Assert.That(res, Is.True, "Failed to set new name");
             var visibleName2 = await G3Api.Recorder.VisibleName;
             Assert.That(visibleName2, Is.EqualTo("MyRecording"), "Failed to change name of recording");
 
             var stop = await G3Api.Recorder.Stop();
-            Assert.True(stop, "Failed to stop recording");
+            Assert.That(stop, Is.True, "Failed to stop recording");
 
             Assert.That(() => stoppedCount, Is.EqualTo(1).After(1000), "stopped signal not received");
             Assert.That(() => addedCount, Is.EqualTo(1).After(1000), "recording added signal not received");
 
             var recordings = await G3Api.Recordings.Children();
             var rec = recordings.FirstOrDefault(r => r.UUID == recGuid);
-            Assert.NotNull(rec, "recording not found after stop");
+            Assert.That(rec, Is.Not.Null, "recording not found after stop");
             var recFolder = await rec.Folder;
             Assert.That(recFolder, Is.EqualTo(folder), "unexpected folder name of recording");
 
@@ -640,12 +640,12 @@ namespace G3SDK
 
             var newFoldername = Guid.NewGuid().ToString();
             var move = await rec.Move(newFoldername);
-            Assert.True(move, "failed to move recording");
+            Assert.That(move, Is.True, "failed to move recording");
             recFolder = await rec.Folder;
             Assert.That(recFolder, Is.EqualTo(newFoldername), "unsuccessful move of recording");
 
             var delete = await G3Api.Recordings.Delete(recGuid);
-            Assert.True(delete, "failed to delete recording");
+            Assert.That(delete, Is.True, "failed to delete recording");
             Assert.That(() => removedCount, Is.EqualTo(1).After(1000), "recording removed signal not received");
             Assert.That(() => deletedCount, Is.EqualTo(1).After(1000), "recording deleted signal not received");
 
@@ -663,17 +663,17 @@ namespace G3SDK
                 await G3Api.Recorder.Cancel();
 
             var start = await G3Api.Recorder.Start();
-            Assert.True(start, "Failed to start recording");
+            Assert.That(start, Is.True, "Failed to start recording");
             Thread.Sleep(1000);
             await G3Api.Recorder.Cancel();
 
-            Assert.False(await G3Api.Recorder.RecordingInProgress(), "failed to cancel");
+            Assert.That(await G3Api.Recorder.RecordingInProgress(), Is.False, "failed to cancel");
             start = await G3Api.Recorder.Start();
-            Assert.True(start, "Failed to start recording 2");
+            Assert.That(start, Is.True, "Failed to start recording 2");
             Thread.Sleep(1000);
             await G3Api.Recorder.Cancel();
 
-            Assert.False(await G3Api.Recorder.RecordingInProgress(), "failed to cancel 2");
+            Assert.That(await G3Api.Recorder.RecordingInProgress(), Is.False, "failed to cancel 2");
         }
 
         private async Task EnsureSDCard()
@@ -750,17 +750,17 @@ namespace G3SDK
                 return;
             if (!await G3Api.Network.WifiEnable)
             {
-                Assert.True(await G3Api.Network.SetWifiEnable(true), "unable to enable wifi");
+                Assert.That(await G3Api.Network.SetWifiEnable(true), Is.True, "unable to enable wifi");
                 Thread.Sleep(2000);
                 Assert.That(await G3Api.Network.WifiEnable, "wifi not Enabled");
             }
             G3Api.Network.Wifi.Connected.Subscribe(n => Console.WriteLine("Connected"));
             G3Api.Network.Wifi.StateChange.Subscribe(n => Console.WriteLine($"ConnectionState: {n}"));
-            Assert.True(await G3Api.Network.SetWifiEnable(false), "unable to disable wifi");
-            Assert.False(await G3Api.Network.WifiEnable, "wifi not disabled");
-            Assert.True(await G3Api.Network.SetWifiEnable(true), "unable to enable wifi");
+            Assert.That(await G3Api.Network.SetWifiEnable(false), Is.True, "unable to disable wifi");
+            Assert.That(await G3Api.Network.WifiEnable, Is.False, "wifi not disabled");
+            Assert.That(await G3Api.Network.SetWifiEnable(true), Is.True, "unable to enable wifi");
             Thread.Sleep(2000);
-            Assert.True(await G3Api.Network.WifiEnable, "wifi not enabled");
+            Assert.That(await G3Api.Network.WifiEnable, Is.True, "wifi not enabled");
 
             var config = await G3Api.Network.Wifi.ActiveConfiguration;
             var activeNetwork = await G3Api.Network.Wifi.ConnectedNetwork;
