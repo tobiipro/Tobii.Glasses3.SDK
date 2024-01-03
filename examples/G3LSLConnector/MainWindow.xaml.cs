@@ -59,33 +59,36 @@ namespace G3LSLConnector
 
         public string InspectStream()
         {
-            var results = LSL.LSL.resolve_stream("name", G3LSL.GazeStreamName, timeout: 5);
-            if (!results.Any())
-            {
-                return "No inlet found";
-            }
-
             var sb = new StringBuilder();
-
-            foreach (var r in results)
+            foreach (var streamName in _connectors.First().AllStreamNames())
             {
-                using var inlet = new StreamInlet(r);
-
-                // get the full stream info (including custom meta-data) and dissect it
-                using var inf = inlet.info();
-                sb.AppendLine("The stream's XML meta-data is: ");
-                sb.AppendLine(inf.as_xml());
-                sb.AppendLine("The manufacturer is: " + inf.desc().child_value("manufacturer"));
-                sb.AppendLine("The channel labels are as follows:");
-                var ch = inf.desc().child("channels").child("channel");
-                for (int k = 0; k < inf.channel_count(); k++)
+                var results = LSL.LSL.resolve_stream("name", streamName, timeout: 5);
+                if (!results.Any())
                 {
-                    sb.AppendLine("* " + ch.child_value("label"));
-                    ch = ch.next_sibling();
+                    return "No streaminfo for stream " + streamName;
                 }
+
+                foreach (var r in results)
+                {
+                    using var inlet = new StreamInlet(r);
+
+                    // get the full stream info (including custom meta-data) and dissect it
+                    using var inf = inlet.info();
+                    sb.AppendLine("The stream's XML meta-data is: ");
+                    sb.AppendLine(inf.as_xml());
+                    sb.AppendLine("The manufacturer is: " + inf.desc().child_value("manufacturer"));
+                    sb.AppendLine("The channel labels are as follows:");
+                    var ch = inf.desc().child("channels").child("channel");
+                    for (int k = 0; k < inf.channel_count(); k++)
+                    {
+                        sb.AppendLine("* " + ch.child_value("label"));
+                        ch = ch.next_sibling();
+                    }
+                }
+
+                results.DisposeArray();
             }
 
-            results.DisposeArray();
             return sb.ToString();
         }
     }
