@@ -2,7 +2,7 @@
 
 ## License
 The source code for this SDK and its examples is licensed under the 
-[Tobii Pro Software Development License Agreement](https://www.tobiipro.com/siteassets/tobii-pro/license-agreements/tobii-pro-sdk-license-agreement.pdf).
+[Tobii Pro Software Development License Agreement](https://github.com/tobiipro/Tobii.Glasses3.SDK/tree/main/SDLA).
 
 ## Installation 
 
