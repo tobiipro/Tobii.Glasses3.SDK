@@ -48,23 +48,28 @@ namespace G3SDK
         public int version;
         public double duration;
         public string created;
+        [JsonIgnore]
+        public DateTime createdDate => DateTime.Parse(created);
+        public string timezone;
         public SceneCameraInfo scenecamera;
         public EyeCamerasInfo eyecameras;
         public GazeInfo gaze;
         public EventsInfo events;
         public ImuInfo imu;
 
-        public class FileInfo
+        public interface IFileInfo
         {
-            public string file;
+            string file { get; set; }
         }
 
-        public class SceneCameraInfo : FileInfo
+        public class SceneCameraInfo : IFileInfo
         {
+            public string file { get; set; }
             public SnapshotInfo[] snapshots;
-
             [JsonProperty(PropertyName = "camera-calibration")]
             public CameraCalibrationInfo cameracalibration;
+            [JsonProperty(PropertyName = "gaze-overlay")]
+            public bool gazeoverlay;
         }
 
         public class CameraCalibrationInfo
@@ -80,36 +85,36 @@ namespace G3SDK
             public double[] radialdistortion; // vector 3
             [JsonProperty(PropertyName = "tangential-distortion")]
             public double[] tangentialdistortion; // vector 2
-            public double[] resolution; // vector 2
+            public int[] resolution; // vector 2
         }
 
-        public class SnapshotInfo : FileInfo
+        public class SnapshotInfo : IFileInfo
         {
+            public string file { get; set; }
             public double time;
         }
 
-        public class GazeInfo : FileInfo
+        public class GazeInfo : IFileInfo
         {
+            public string file { get; set; }
             public int samples;
             [JsonProperty(PropertyName = "valid-samples")]
             public int validsamples;
         }
 
-        public class EyeCamerasInfo : FileInfo
+        public class EyeCamerasInfo : IFileInfo
         {
-
-        }
-        public class EventsInfo : FileInfo
-        {
-
-        }
-        public class ImuInfo : FileInfo
-        {
-
+            public string file { get; set; }
         }
 
-        public DateTime createdDate => DateTime.Parse(created);
+        public class EventsInfo : IFileInfo
+        {
+            public string file { get; set; }
+        }
+        public class ImuInfo : IFileInfo
+        {
+            public string file { get; set; }
+        }
     }
- 
 }
 
