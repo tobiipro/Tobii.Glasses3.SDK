@@ -517,6 +517,34 @@ namespace G3SDK
         }
 
         [Test]
+        public async Task CanManipulateMuteAudio()
+        {
+            await EnsureApi();
+            if (FwVersion.LessThan(G3Version.Version_2_2_4))
+                Assert.Ignore("Test only supports v2.2.4+");
+            await EnsureSDCard();
+            var signals = new List<string>();
+
+            // verify mute notifications
+            var token = await G3Api.Settings.Changed.SubscribeAsync(s => signals.Add(s));
+
+            // make sure it is false;
+            var res = await G3Api.Settings.SetMuteAudio(false);
+            Assert.That(res, Is.True, "unable to set mute-audio, to false");
+            Assert.That(await G3Api.Settings.MuteAudio, Is.EqualTo(false).After(200, 50));
+            signals.Clear();
+
+            // try to set it to true
+            res = await G3Api.Settings.SetMuteAudio(true);
+            Assert.That(res, Is.True, "unable to set mute-audio, to true");
+            Assert.That(await G3Api.Settings.MuteAudio, Is.EqualTo(true).After(200, 50));
+            Assert.That(signals, Has.Member("mute-audio").After(200, 50));
+            signals.Clear();
+
+            token.Dispose();
+        }
+
+        [Test]
         public async Task CheckRoundtripTimesForPropertyAccess()
         {
             await EnsureApi();

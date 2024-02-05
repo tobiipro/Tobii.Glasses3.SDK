@@ -863,6 +863,7 @@ namespace G3Simulator
     public class SettingsSimulator : ISettings
     {
         private bool _gazeOverlay;
+        private bool _muteAudio;
         private readonly SignalSimulator<string> _changed;
         private int _gazeFrequency;
 
@@ -874,11 +875,19 @@ namespace G3Simulator
 
         public IG3Observable<string> Changed => _changed;
         public Task<bool> GazeOverlay => Task.FromResult(_gazeOverlay);
+        public Task<bool> MuteAudio => Task.FromResult(_muteAudio);
         public Task<int> GazeFrequency => Task.FromResult(_gazeFrequency);
         public Task<bool> SetGazeOverlay(bool value)
         {
             _gazeOverlay = value;
             _changed.Emit("gaze-overlay");
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SetMuteAudio(bool value)
+        {
+            _muteAudio = value;
+            _changed.Emit("mute-audio");
             return Task.FromResult(true);
         }
 
