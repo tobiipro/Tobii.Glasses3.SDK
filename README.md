@@ -40,8 +40,8 @@ if (await g3.Calibrate.Run())
 
 ## Documentation
 
-There is a [Glasses 3 Developers Guide](https://www.tobiipro.com/product-listing/tobii-pro-glasses3-api/#ResourcesSpecifications) available for download from the Tobii website. Even though the SDK handles most of the communication with the glasses, it is still recommended to read the developers guide to get a better overview of how the API works.
-For more information on individual methods in the SDK, please refer to the API documentation in the WebUI on your glasses (http://<serialnumber>.local).
+There is a [Glasses 3 Developers Guide](https://go.tobii.com/tobii-pro-glasses-3-developer-guide) available from the Tobii website. Even though the SDK handles most of the communication with the glasses, it is still recommended to read the developers guide to get a better understanding of how the API works.
+For more information on individual methods in the SDK, please refer to the API documentation in the WebUI on your glasses (http://<serialnumber>.local/browse.html).
 
 ## Limitations
 
